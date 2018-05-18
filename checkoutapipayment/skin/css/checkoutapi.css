@@ -1,0 +1,126 @@
+.checkoutapi-wrapper { background-color: #ffffff }
+
+.checkoutapi-wrapper { color: #fff}
+
+.setting { background-color: #FFF; color: #041738;padding: 1% 4%; margin-top: 10px; width: 90%; border: 10px solid  #042454 }
+
+.setting-header {font-size: 16px}
+
+input.input-txt ,select.input-txt {
+
+    background: none repeat scroll 0 0 #fff;
+
+    border-color: #aaa #c8c8c8 #c8c8c8 #aaa;
+
+    border-style: solid;
+
+    border-width: 1px;
+
+    font: 12px arial,helvetica,sans-serif;
+
+    width:300px
+
+}
+
+select.input-txt { width: 310px}
+
+.setting .fields-set,.card-type-list { list-style: none;}
+
+.setting .field { display: block; padding: 5px 0; clear: both}
+
+.setting .field label{ text-align: left}
+
+.card-type-list li { float: left;padding: 2px 4px;cursor: pointer}
+
+.card-type-list li label{ width:auto;cursor: pointer}
+
+.card-type-list li span{ display:block;cursor: pointer}
+
+.card-txt {position: absolute; top:-999999px;}
+
+.CHECKOUTAPI_CARD_TYPE_VISA-class{width:51px; height: 17px }
+
+.CHECKOUTAPI_CARD_TYPE_MASTERCARD-class{width:32px; height: 19px }
+
+.CHECKOUTAPI_CARD_TYPE_AMEX-class{width:53px; height: 18px }
+
+.CHECKOUTAPI_CARD_TYPE_DISCOVER-class{width:92px; height: 15px }
+
+.CHECKOUTAPI_CARD_TYPE_DINERS-class{width:29px; height: 18px }
+
+.CHECKOUTAPI_CARD_TYPE_UNIONPAY-class{width:28px; height: 18px }
+
+.nobootstrap  .setting label{ color:#000}
+
+.nobootstrap  .setting em{ color: #e83212}
+
+.card-type-list li:hover .CHECKOUTAPI_CARD_TYPE_VISA-class{background-position:0 18px}
+
+.card-type-list li:hover .CHECKOUTAPI_CARD_TYPE_MASTERCARD-class {background-position:0 20px}
+
+.card-type-list li:hover .CHECKOUTAPI_CARD_TYPE_AMEX-class{ background-position:0 19px}
+
+.card-type-list li:hover .CHECKOUTAPI_CARD_TYPE_DISCOVER-class{ background-position:0 16px}
+
+.card-type-list li:hover .CHECKOUTAPI_CARD_TYPE_DINERS-class {background-position:0 19px}
+
+.card-type-list li:hover .CHECKOUTAPI_CARD_TYPE_UNIONPAY-class{background-position:0 19px}
+
+
+
+.card-type-list li .CHECKOUTAPI_CARD_TYPE_VISA-class.selected{background-position:0 18px}
+
+.card-type-list li .CHECKOUTAPI_CARD_TYPE_MASTERCARD-class.selected{background-position:0 20px}
+
+.card-type-list li .CHECKOUTAPI_CARD_TYPE_AMEX-class.selected{ background-position:0 19px}
+
+.card-type-list li .CHECKOUTAPI_CARD_TYPE_DISCOVER-class.selected{ background-position:0 16px}
+
+.card-type-list li .CHECKOUTAPI_CARD_TYPE_DINERS-class.selected{background-position:0 19px}
+
+.card-type-list li .CHECKOUTAPI_CARD_TYPE_UNIONPAY-class.selected{background-position:0 19px}
+
+
+
+.card-type-list li input:checked .CHECKOUTAPI_CARD_TYPE_VISA-class{background-position:0 18px}
+
+.card-type-list li input:checked .CHECKOUTAPI_CARD_TYPE_MASTERCARD-class {background-position:0 20px}
+
+.card-type-list li input:checked .CHECKOUTAPI_CARD_TYPE_AMEX-class{ background-position:0 19px}
+
+.card-type-list li input:checked .CHECKOUTAPI_CARD_TYPE_DISCOVER-class{ background-position:0 16px}
+
+.card-type-list li input:checked .CHECKOUTAPI_CARD_TYPE_DINERS-class {background-position:0 19px}
+
+.card-type-list li input:checked .CHECKOUTAPI_CARD_TYPE_UNIONPAY-class{background-position:0 19px}
+
+.action {margin-left: 464px}
+
+.checkoutapi-wrapper .message  {border: 1px solid;
+
+    margin: 10px 0px;
+
+    padding:15px 10px 15px 50px;
+
+    background-repeat: no-repeat;
+
+    background-position: 10px center; text-align: center; font-size: 16px}
+
+
+
+.message.state-success {color: #4F8A10;
+
+    background-color: #DFF2BF;}
+
+
+
+.message.state-error {color: #D8000C;
+
+    background-color: #FFBABA;}
+
+
+
+.message.state-warning {color: #9F6000;
+
+    background-color: #FEEFB3;}
+

@@ -1,0 +1,140 @@
+.checkoutapi-info {}
+
+#click_checkoutprestashop { display: inline-block; text-decoration: none; padding: 11px 11px 4px; width: 100%}
+
+#payment_form_creditcardpic { width: 70%}
+
+#payment_form_creditcardpic li {padding: 5px 0}
+
+#payment_form_creditcardpic div.selector span {}
+
+#payment_form_creditcardpic .input-text  { width: 236px}
+
+#payment_form_creditcardpic select  { width: 246px}
+
+#creditcardpic_cc_cidv {display: inline; width: 80px;}
+
+.cvv-what-is-this { color:#042454; width :50px; margin-left: 5px}
+
+#creditcardpic_cc_type_cvv_div label {display: block}
+
+.tool-tip-content { display: none}
+
+#payment_form_creditcardpic #creditcardpic_expiration { width: 120px;}
+
+#payment_form_creditcardpic #creditcardpic_expiration_yr {width: 90px}
+
+#creditcardpic_cc_type_exp_div .v-fix { float: left ; margin-right: 10px}
+
+#payment_form_creditcardpic #testlabel{ display: inline-block;  clear: both}
+#payment_form_creditcardpic label{ display: inline-block; width: 100%; clear: both}
+
+
+#payment_form_creditcardpic li {overflow: auto}
+
+#payment_form_creditcardpic .input-text.cvv {width: 80px}
+
+.CHECKOUTAPI_CARD_TYPE_VISA-class{width:51px; height: 17px }
+
+.CHECKOUTAPI_CARD_TYPE_MASTERCARD-class{width:32px; height: 19px }
+
+.CHECKOUTAPI_CARD_TYPE_AMEX-class{width:53px; height: 18px }
+
+.CHECKOUTAPI_CARD_TYPE_DISCOVER-class{width:92px; height: 15px }
+
+.CHECKOUTAPI_CARD_TYPE_DINERS-class{width:29px; height: 18px }
+
+.CHECKOUTAPI_CARD_TYPE_UNIONPAY-class{width:28px; height: 18px }
+
+div.checkoutapi-info{   border: 1px solid #d6d4d4;
+
+    border-radius: 4px;
+
+    color: #333333;
+
+    display: block;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    letter-spacing: -1px;
+
+    line-height: 23px;
+
+
+
+    position: relative;}
+
+.payment-select-txt { margin: 10px 0; clear: both}
+
+.span-desc { float:left; margin:2px 0 0;}
+
+.img-logo { float: left;}
+
+div#cko-widget { padding-top: 0 }
+
+.infoCKO {
+    color: #00529B;
+    border-color: #BDE5F8;
+}
+
+.successCKO {
+    color: #4F8A10;
+    border-color: #DFF2BF;
+}
+
+.warningCKO {
+    color: #9F6000;
+    border-color: #FEEFB3;
+}
+
+.errorCKO {
+    color: #D8000C;
+    border-color: #FFBABA;
+}
+
+.selector.errorCKO  { border:1px solid #D8000C;}
+.selector.successCKO  { border:1px solid  #4F8A10;}
+
+.out .checker {
+        position: absolute;
+}
+
+.out div.checker span{
+        display: unset;
+        position: initial;
+}
+
+.out div.checker label{
+    padding-left: 20px;
+} 
+
+ .save-card-pay-button{
+        background-color:#0091d6;
+        color:#fff;
+        outline:0;
+        border:0 none transparent;
+        text-transform:uppercase;
+        text-align:center;
+        font-size:14px;
+        font-family:'Open Sans',sans-serif;
+        font-style:normal;
+        letter-spacing:-0.2px;
+        font-weight:bold;
+        border-radius:2px;
+        margin:0;
+        padding:0 10px;
+        line-height:40px;
+        height:40px;
+        -webkit-box-shadow:inset 0 -1px 0 0 rgba(0,0,0,0.2);
+        box-shadow:inset 0 -1px 0 0 rgba(0,0,0,0.2);
+        -webkit-transition:background-color .2s;
+        transition:background-color .2s;
+        position:relative;
+        float:none;
+        left:0;
+        vertical-align:top;
+        min-width:110px;
+        transition:opacity .5s
+    }
