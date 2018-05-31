@@ -48,10 +48,10 @@
                     <div class="wrapper-field">
                         <div class="wrapper-field">
                             <select name="checkoutapi_integration_type" class="input-txt required" id="checkoutapi_integration_type" required>
-                               <!--  <option value="pci"  {if $CHECKOUTAPI_INTEGRATION_TYPE ==pci}selected{/if}>PCI</option> -->
+                                <!-- <option value="pci"  {if $CHECKOUTAPI_INTEGRATION_TYPE ==pci}selected{/if}>PCI</option> -->
                                 <option value="js" {if $CHECKOUTAPI_INTEGRATION_TYPE ==js}selected{/if}>Checkout Js</option>
-                                <!-- <option value="hosted" {if $CHECKOUTAPI_INTEGRATION_TYPE ==hosted}selected{/if}>Hosted</option>
-                                <option value="frames" {if $CHECKOUTAPI_INTEGRATION_TYPE ==frames}selected{/if}>Frames</option> -->
+                                <option value="hosted" {if $CHECKOUTAPI_INTEGRATION_TYPE ==hosted}selected{/if}>Hosted</option>
+                                <option value="frames" {if $CHECKOUTAPI_INTEGRATION_TYPE ==frames}selected{/if}>Frames</option>
                             </select>
                         </div>
                     </div>
@@ -160,7 +160,7 @@
                     </div>
                 </li>
 
-                <h3 class="setting-header"> {l s='Advanced setting for Hosted and Checkout Js solution' mod='checkoutAPI'}</h3>
+                <h3 class="setting-header"> {l s='Advanced setting for Checkout Js and Hosted solution' mod='checkoutAPI'}</h3>
                 <li class="field">
                     <label for="checkoutapi_payment_mode">
                         <span>Payment Mode</span>
@@ -232,7 +232,7 @@
                     </div>
                 </li>
 
-                <!-- <h3 class="setting-header"> {l s='Advanced setting for Frames Js' mod='checkoutAPI'}</h3>
+                <h3 class="setting-header"> {l s='Advanced setting for Frames Js' mod='checkoutAPI'}</h3>
                 <li class="field">
                     <label for="checkoutapi_theme">
                         <span>Theme</span>
@@ -247,14 +247,28 @@
                     </div>
                 </li>
 
-                <li class="field">
+                <!-- <li class="field">
                     <label for="checkoutapi_custom_css">
                         <span>Custom Css</span>
                     </label>
                     <div class="wrapper-field" >
-                        <p><textarea rows="5" cols="50" name="checkoutapi_custom_css" id="checkoutapi_custom_css" >{$CHECKOUTAPI_CUSTOM_CSS}</textarea></p>
+                        <p><textarea rows="5" cols="44" name="checkoutapi_custom_css" id="checkoutapi_custom_css" >{htmlentities($CHECKOUTAPI_CUSTOM_CSS)}</textarea></p>
                     </div>
                 </li> -->
+
+                <li class="field">
+                    <label for="checkoutapi_apm">
+                        <span>Include alternative payments</span>
+                    </label>
+                    <div class="wrapper-field">
+                        <div class="wrapper-field">
+                            <select name="checkoutapi_apm" class="input-txt required" id="checkoutapi_apm">
+                                <option value="no" {if $CHECKOUTAPI_APM ==no}selected{/if}>No</option>
+                                <option value="yes"  {if $CHECKOUTAPI_APM ==yes}selected{/if}>Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                </li>
 
                 <li class="action">
                     <div class="wrapper-field">

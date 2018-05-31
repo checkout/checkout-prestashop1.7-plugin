@@ -25,16 +25,16 @@ class models_methods_creditcardhosted extends models_methods_Abstract
     $cancelUrl = $this->context->link->getPageLink('index',true).'index.php?fc=module&module=checkoutapipayment&controller=failure';
     $hppUrl = 'https://secure1.checkout.com/sandbox/payment/';
     $saveCard = Configuration::get('CHECKOUTAPI_SAVE_CARD');
-    // $cardList = $this->getCustomerCardList($cart->id_customer);
-    // $cardLists = array();
+    $cardList = $this->getCustomerCardList($cart->id_customer);
+    $cardLists = array();
 
-    // if(!empty($cardList)){
-    //     foreach ($cardList as $key) {
-    //             $test[] = $key;
-    //     }
+    if(!empty($cardList)){
+        foreach ($cardList as $key) {
+                $test[] = $key;
+        }
 
-    //     $this->context->smarty->assign('cardLists', $test);
-    // }
+        $this->context->smarty->assign('cardLists', $test);
+    }
 
     if(Configuration::get('CHECKOUTAPI_TEST_MODE') == 'live'){
       $hppUrl = 'https://secure1.checkout.com/payment/';

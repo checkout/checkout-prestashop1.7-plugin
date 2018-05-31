@@ -60,23 +60,52 @@ class checkoutapipayment  extends models_Checkoutapi
         return false;
     }
 
-    public function getEmbeddedPaymentOption()
-    {
-        
-    }
-
     protected function generateForm()
     { 
-        return $this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/js/js.tpl');
+        // return $this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/js/js.tpl');
     }
 
     public function getIframePaymentOption($smartyParam)
     { 
-        $iframeOption = new PaymentOption();
-        $iframeOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true))
-                     ->setAdditionalInformation($this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/js/js.tpl'))
-                     ->setModuleName($smartyParam['methodType'])
-                     ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/CKO_Logo_Optical.png'));
+
+        switch ($smartyParam['integrationType']) {
+            case 'js':
+                $iframeOption = new PaymentOption();
+                $iframeOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true))
+                             ->setAdditionalInformation($this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/js/js.tpl'))
+                             ->setModuleName($smartyParam['methodType'])
+                             ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/CKO_Logo_Optical.png'));
+                break;
+
+            case 'frames':
+                $iframeOption = new PaymentOption();
+                $iframeOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true))
+                             ->setAdditionalInformation($this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/methods/creditcardframes.tpl'))
+                             ->setModuleName($smartyParam['methodType'])
+                             ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/CKO_Logo_Optical.png'));
+                break;
+
+             case 'hosted':
+                $iframeOption = new PaymentOption();
+                $iframeOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true))
+                             ->setAdditionalInformation($this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/methods/creditcardhosted.tpl'))
+                             ->setModuleName($smartyParam['methodType'])
+                             ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/CKO_Logo_Optical.png'));
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+
+
+        
+
+        // $iframeOption = new PaymentOption();
+        // $iframeOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true))
+        //              ->setAdditionalInformation($this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/js/js.tpl'))
+        //              ->setModuleName($smartyParam['methodType'])
+        //              ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/CKO_Logo_Optical.png'));
                      // ->setCallToActionText($this->l('Checkout.com'))
 
         return $iframeOption;
