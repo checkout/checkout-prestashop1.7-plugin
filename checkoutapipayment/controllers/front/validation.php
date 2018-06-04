@@ -62,7 +62,7 @@ class CheckoutapipaymentValidationModuleFrontController extends ModuleFrontContr
                 }
 
 
-                $message = 'Your payment was sucessful using Checkout.com with transaction Id '.$respondCharge->getId();
+                $message = 'Your payment was successful using Checkout.com with transaction Id '.$respondCharge->getId();
 
                 if(!$validateRequest['status']){
                   foreach($validateRequest['message'] as $errormessage){
