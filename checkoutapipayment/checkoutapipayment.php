@@ -31,14 +31,7 @@ class checkoutapipayment  extends models_Checkoutapi
         $smartyParam = parent::hookPaymentOptions($params);
         $this->context->smarty->assign($smartyParam);
 
-        // if (!$this->checkCurrency($params['cart'])) { 
-        //    return;
-        // }
-
         $payment_options = [
-           //$this->getOfflinePaymentOption(),
-           //$this->getExternalPaymentOption(),
-           //$this->getEmbeddedPaymentOption(),
            $this->getIframePaymentOption($smartyParam),
         ];
 
@@ -94,19 +87,13 @@ class checkoutapipayment  extends models_Checkoutapi
                 break;
             
             default:
-                # code...
+                $iframeOption = new PaymentOption();
+                $iframeOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true))
+                             ->setAdditionalInformation($this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/methods/creditcardframes.tpl'))
+                             ->setModuleName($smartyParam['methodType'])
+                             ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/CKO_Logo_Optical.png'));
                 break;
         }
-
-
-        
-
-        // $iframeOption = new PaymentOption();
-        // $iframeOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true))
-        //              ->setAdditionalInformation($this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/js/js.tpl'))
-        //              ->setModuleName($smartyParam['methodType'])
-        //              ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/CKO_Logo_Optical.png'));
-                     // ->setCallToActionText($this->l('Checkout.com'))
 
         return $iframeOption;
     }
