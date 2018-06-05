@@ -76,6 +76,7 @@ abstract class models_Checkoutapi extends PaymentModule  implements models_Inter
         Configuration::deleteByName('CHECKOUTAPI_THEME');
         Configuration::deleteByName('CHECKOUTAPI_CUSTOM_CSS');
         Configuration::deleteByName('CHECKOUTAPI_HOLD_REVIEW_OS');
+        Configuration::deleteByName('CHECKOUTAPI_APM');
 
         $cards = helper_Card::getCardType($this);
         foreach($cards as $cardInfo) {
@@ -146,7 +147,9 @@ abstract class models_Checkoutapi extends PaymentModule  implements models_Inter
             'CHECKOUTAPI_HOLD_REVIEW_OS'      => Tools::getValue('checkoutapi_hold_review_os',
                 Configuration::get('CHECKOUTAPI_HOLD_REVIEW_OS')),
             'CHECKOUTAPI_SAVE_CARD'      => Tools::getValue('checkoutapi_save_card',
-                Configuration::get('CHECKOUTAPI_SAVE_CARD'))
+                Configuration::get('CHECKOUTAPI_SAVE_CARD')),
+            'CHECKOUTAPI_APM'              => Tools::getValue('checkoutapi_apm',
+                Configuration::get('CHECKOUTAPI_APM')),
         ));
         return $this->context->smarty->fetch($this->local_path.'views/templates/admin/configuration.tpl');
     }
@@ -251,6 +254,7 @@ abstract class models_Checkoutapi extends PaymentModule  implements models_Inter
     public function hookHeader()
     {
         $this->context->controller->addCSS($this->_path.'skin/css/payment.css');
+        $this->context->controller->addCSS($this->_path.'skin/css/checkout_frames.css');
         $this->context->controller->addJquery();
         $this->context->controller->addJs($this->_path.'skin/js/jquery-v1.front.js');
         $this->context->controller->addJs($this->_path.'skin/js/functions.js');

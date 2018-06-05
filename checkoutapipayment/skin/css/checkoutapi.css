@@ -34,7 +34,7 @@ select.input-txt { width: 310px}
 
 .card-type-list li label{ width:auto;cursor: pointer}
 
-.card-type-list li span{ display:block;cursor: pointer}
+/*.card-type-list li span{ display:block;cursor: pointer}*/
 
 .card-txt {position: absolute; top:-999999px;}
 

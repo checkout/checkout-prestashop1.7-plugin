@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
     <name>checkoutapipayment</name>
-    <displayName><![CDATA[Checkout.com]]></displayName>
-    <version><![CDATA[1.0.0]]></version>
-    <description><![CDATA[Description of Payment Example]]></description>
+    <displayName><![CDATA[Checkout.com  (Gateway 3.0)]]></displayName>
+    <version><![CDATA[1.1.0]]></version>
+    <description><![CDATA[Receive payment with gateway 3.0]]></description>
     <author><![CDATA[Checkout.com]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
     <is_configurable>1</is_configurable>
