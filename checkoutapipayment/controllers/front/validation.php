@@ -50,9 +50,19 @@ class CheckoutapipaymentValidationModuleFrontController extends ModuleFrontContr
         $validateRequest = $Api::validateRequest($toValidate,$respondCharge);
 
         if( $respondCharge->isValid()) {
+
             if (preg_match('/^1[0-9]+$/', $respondCharge->getResponseCode())) {
               if( $respondCharge->getChargeMode() != 2) {
-              $message = 'Your payment was sucessfull with Checkout.com with transaction Id '.$respondCharge->getId();
+
+                if($respondCharge->getChargeMode() == 3){
+                    $localPayment = $respondCharge->getLocalPayment();
+
+                    $lpRedirectUrl = $localPayment->getPaymentUrl();
+                    Tools::redirectLink($lpRedirectUrl);
+                }
+
+
+                $message = 'Your payment was successful using Checkout.com with transaction Id '.$respondCharge->getId();
 
                 if(!$validateRequest['status']){
                   foreach($validateRequest['message'] as $errormessage){
@@ -105,6 +115,7 @@ class CheckoutapipaymentValidationModuleFrontController extends ModuleFrontContr
               }
             } else {
 
+                
                 $this->module->validateOrder((int)$cart->id, Configuration::get('PS_OS_ERROR'),
                     $total, $this->module->displayName, 'An error has occcur while processing this transaction ('.$respondCharge->getResponseMessage().')',
                     array ('transaction_id'=>$respondCharge->getId()), (int)$currency->id, false, $customer->secure_key);
@@ -113,6 +124,8 @@ class CheckoutapipaymentValidationModuleFrontController extends ModuleFrontContr
             // $dbLog->logCharge($this->module->currentOrder,$respondCharge->getId(),$respondCharge);
 
         } else  {
+
+
             $this->module->validateOrder((int)$cart->id, Configuration::get('PS_OS_ERROR'),
                 $total, $this->module->displayName, $respondCharge->getExceptionState()->getErrorMessage(), NULL, (int)$currency->id,
                 false, $customer->secure_key);

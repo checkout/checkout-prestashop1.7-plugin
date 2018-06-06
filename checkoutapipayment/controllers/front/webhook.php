@@ -51,7 +51,7 @@ class CheckoutapipaymentWebhookModuleFrontController extends ModuleFrontControll
 						echo  sprintf ( Tools::displayError ( 'Order #%d has  been captured.' ) ,
 							$id_order);
 						$message = 'Order has been captured . captured ChargeId - '.$objectCharge->getId();
-					$this->_addNewPrivateMessage((int) $id_order, $message);
+						$this->_addNewPrivateMessage((int) $id_order, $message);
 						return $http_response_code_200;
 					}
 				}

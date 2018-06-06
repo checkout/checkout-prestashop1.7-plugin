@@ -434,8 +434,8 @@ final class CheckoutApi_Client_Validation_GW3 extends CheckoutApi_Lib_Object
 	{
 		$isValid = false;
 
-		if(isset($param['token'])){
-			$isTokenEmpty = CheckoutApi_Lib_Validator::isEmpty($param['token']);
+		if(isset($param['paymentToken'])){
+			$isTokenEmpty = CheckoutApi_Lib_Validator::isEmpty($param['paymentToken']);
 
 			if(!$isTokenEmpty) {
 				$isValid = true;
@@ -537,13 +537,13 @@ final class CheckoutApi_Client_Validation_GW3 extends CheckoutApi_Lib_Object
 		$isCustomerPlanIdEmpty = true;
 		$isValidCustomerPlanId = false;
 
-		if(isset($postedParam['customerPlanIdValid'])) {
-			$isCustomerPlanIdEmpty = CheckoutApi_Lib_Validator::isEmpty($postedParam['customerPlanIdValid']);
+		if(isset($postedParam['customerPlanId'])) {
+			$isCustomerPlanIdEmpty = CheckoutApi_Lib_Validator::isEmpty($postedParam['customerPlanId']);
 		}
 
 		if(!$isCustomerPlanIdEmpty) {
 
-			$isValidCustomerPlanId = CheckoutApi_Lib_Validator::isString($postedParam['customerPlanIdValid']);
+			$isValidCustomerPlanId = CheckoutApi_Lib_Validator::isString($postedParam['customerPlanId']);
 		}
 
 		return !$isCustomerPlanIdEmpty && $isValidCustomerPlanId;

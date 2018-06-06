@@ -664,7 +664,7 @@ class CheckoutApi_Client_ClientGW3 extends CheckoutApi_Client_Client
         $param['postedParam']['type'] = CheckoutApi_Client_Constant::LOCALPAYMENT_CHARGE_TYPE;
         $postedParam = $param['postedParam'];
         $this->flushState();
-        $uri = $this->getUriCharge();
+        $uri = $this->getUriCharge().'/localpayment';
         $isValidEmail = CheckoutApi_Client_Validation_GW3::isEmailValid($postedParam);
         $isValidSessionToken = CheckoutApi_Client_Validation_GW3::isSessionToken($postedParam);
         $isValidLocalPaymentHash = CheckoutApi_Client_Validation_GW3::isLocalPyamentHashValid($postedParam);
@@ -685,7 +685,7 @@ class CheckoutApi_Client_ClientGW3 extends CheckoutApi_Client_Client
         }
 
         if(!isset($param['postedParam']['localPayment']['userData']) ) {
-            $param['postedParam']['localPayment']['userData'] = '{}';
+            $param['postedParam']['localPayment']['userData'] = new stdClass;
         }
         return $this->request( $uri ,$param,!$hasError);
     }
@@ -1196,6 +1196,27 @@ class CheckoutApi_Client_ClientGW3 extends CheckoutApi_Client_Client
         return $this->request( $uri ,$param,!$hasError);
     }
 
+    public  function getLocalPaymentProviderByPayTok($param)
+    {
+        $this->flushState();
+        $uri = $this->getUriProvider();
+        $hasError = false;
+        $isPaymentTokenValid = CheckoutApi_Client_Validation_GW3::isPaymentToken($param);
+        $param['method'] = CheckoutApi_Client_Adapter_Constant::API_GET;
+        $delimiter = '/localpayments/';
+
+        if(!$isPaymentTokenValid) {
+            $hasError = true;
+            $this->throwException('Please provide a valid payment token',array('param'=>$param));
+        }
+
+        if(!$hasError){
+            $uri = "{$uri}{$delimiter}?paymentToken={$param['paymentToken']}";
+        }
+
+        return $this->request( $uri ,$param,!$hasError);
+    }
+
     /**
      * Get Card Provider list
      * @param array $param payload param
@@ -1277,7 +1298,7 @@ class CheckoutApi_Client_ClientGW3 extends CheckoutApi_Client_Client
             $uri = "$uri/{$param['planId']}";
         }
 
-        return $this->_responseUpdateStatus($this->request( $uri ,$param,!$hasError));
+        return $this->request( $uri ,$param,!$hasError);
     }
 
     /**
@@ -1828,6 +1849,7 @@ class CheckoutApi_Client_ClientGW3 extends CheckoutApi_Client_Client
          $value = floor ($amount);   
          
       } else {
+
         $value = round($amount * 100);
         
       }
@@ -1855,5 +1877,91 @@ class CheckoutApi_Client_ClientGW3 extends CheckoutApi_Client_Client
       
       return $value;
       
+    }
+	
+	/**
+     * Check charge response
+	 * If response is approve or has error, return boolean
+    */
+	public function isAuthorise($response){
+        $result = false;
+        $hasError = $this->isError($response);
+        $isApprove = $this->isApprove($response);
+
+        if(!$hasError && $isApprove){
+            $result = true;
+        }
+
+        return $result;
+    }
+
+	/**
+	 * Check if response contain error code
+	 * return boolean
+    */
+    protected function isError($response){
+        $hasError = false;
+
+        if($response->getErrorCode()){
+            $hasError =  true;
+        }
+
+        return $hasError;
+    }
+
+	/**
+	 * Check if response is approve
+	 * return boolean
+    */
+    protected function isApprove($response){
+        $result = false;
+
+        if($response->getResponseCode() == CheckoutApi_Client_Constant::RESPONSE_CODE_APPROVED
+            || $response->getResponseCode()== CheckoutApi_Client_Constant::RESPONSE_CODE_APPROVED_RISK ){
+            $result = true;
+        }
+
+        return $result;
+    }
+
+	/**
+	 * return eventId if charge has error.
+	 * return chargeID if charge is decline
+    */
+    public function getResponseId($response){
+        $isError = $this->isError($response);
+
+        if($isError){
+            $result = array (
+                'message' => $response->getMessage(),
+                'eventId' => $response->getEventId()
+            );
+
+            return $result;
+
+        } else {
+            $result = array (
+                'responseMessage' => $response->getResponseMessage(),
+                'id' => $response->getId()
+            );
+
+            return $result;
+        }
+    }
+
+	/**
+	 * Check if response is flag
+	 * return response message
+    */
+    public function isFlagResponse($response){
+        $result = false;
+
+        if($response->getResponseCode() == CheckoutApi_Client_Constant::RESPONSE_CODE_APPROVED_RISK){
+            $result = array(
+                'responseMessage' => $response->getResponseMessage(),
+            );
+        }
+
+        return $result;
     }
 }
