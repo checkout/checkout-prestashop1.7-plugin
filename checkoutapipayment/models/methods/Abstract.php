@@ -5,7 +5,7 @@ abstract class models_methods_Abstract extends PaymentModule  implements models_
     public function __construct()
     {
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.0';
+        $this->version = '1.1.1';
         $this->author = 'Checkout.com';
         $this->displayName = 'Checkout.com  (Gateway 3.0)';
         $this->description = $this->l('Receive payment with gateway 3.0');
