@@ -1,4 +1,4 @@
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 <form name="checkoutapipayment_form" id="checkoutapipayment_form" action="{$link->getModuleLink('checkoutapipayment', 'validation', [], true)|escape:'html'}" method="post">
 <ul class="payment_methods">
 {if $isGuest == 0 && $saveCard== 'yes'}
@@ -236,7 +236,7 @@
         $( document ).ready(function() {
             jQuery('input:radio[name="payment-option"]').change(function(){
                 if($(this).attr('data-module-name') == 'creditcardframes'){
-                    jQuery('button.btn.btn-primary.center-block').click(function(event){
+                    jQuery('div.ps-shown-by-js').find('button').click(function(event){
                         if(jQuery("input:radio[name='payment-option']:checked").attr('data-module-name') == "creditcardframes"){
                             event.stopPropagation();
                             if(jQuery('.checkoutapipayment-saved-card').length > 0 &&
