@@ -25,7 +25,7 @@
 
                      <li>
                         <label>
-                        <input id="checkoutapipayment-new-card" class= "checkoutapipayment-new-card" type="radio" name="checkoutapipayment-new-card"  value="new_card"/>Use New card</label>
+                        <input id="checkoutapipayment-new-card" class= "checkoutapipayment-new-card" type="radio" name="checkoutapipayment-new-card"  value="new_card"/> {l s='Use new card' mod='checkoutapipayment'}</label>
                     </li>
                 {/if}
             {/if}
@@ -37,7 +37,7 @@
     {if $saveCard == 'yes' }
         <div class="save-card-checkbox"  style="display:none">
             <div class="out">
-                <label for="save-card-checkbox" style="padding-left: 20px;">Save card for future payment
+                <label for="save-card-checkbox" style="padding-left: 20px;">{l s='Save card for future payment' mod='checkoutapipayment'}
                     <input type="checkbox" name="save-card-checkbox" id="save-card-checkbox" value="1"></input>
                 </label>
             </div>
