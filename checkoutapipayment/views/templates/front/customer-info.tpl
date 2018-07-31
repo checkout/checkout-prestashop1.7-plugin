@@ -1,7 +1,7 @@
 {extends 'customer/page.tpl'}
 
 {block name='page_title'}
-  {l s='My Saved Card' d='Shop.Theme.Customeraccount'}
+  {l s='My Saved Card' mod='checkoutapipayment'}
 {/block}
 
 {block name='page_content'}
@@ -32,10 +32,10 @@
 					    </li>
 					</div>
 				{/foreach}
+				<button class="save-card-pay-button" type="button" >Remove Card</button>
 			{/if}
 		</ul>
 	</form>
-	<button class="save-card-pay-button" type="button" >Remove Card</button>
 
 	<script type="text/javascript">
 		var submitButton = document.getElementsByClassName('save-card-pay-button')[0];

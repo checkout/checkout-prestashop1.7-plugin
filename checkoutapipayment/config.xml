@@ -2,7 +2,7 @@
 <module>
     <name>checkoutapipayment</name>
     <displayName><![CDATA[Checkout.com  (Gateway 3.0)]]></displayName>
-    <version><![CDATA[1.1.1]]></version>
+    <version><![CDATA[1.1.2]]></version>
     <description><![CDATA[Receive payment with gateway 3.0]]></description>
     <author><![CDATA[Checkout.com]]></author>
     <tab><![CDATA[payments_gateways]]></tab>

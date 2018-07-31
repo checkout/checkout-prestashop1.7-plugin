@@ -263,7 +263,7 @@ abstract class models_Checkoutapi extends PaymentModule  implements models_Inter
     public function HookDisplayCustomerAccount(){
         
 
-        return $this->context->smarty->fetch($this->local_path.'views/templates/frontend/hookpayment/js/customerAccount.tpl');
+        return $this->context->smarty->fetch($this->local_path.'views/templates/front/customer-account.tpl');
     }
 
     public function getCode()
