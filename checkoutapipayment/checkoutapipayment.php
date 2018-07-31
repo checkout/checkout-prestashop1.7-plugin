@@ -65,7 +65,7 @@ class checkoutapipayment  extends models_Checkoutapi
             case 'js':
                 $iframeOption = new PaymentOption();
                 $iframeOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true))
-                             ->setAdditionalInformation($this->context->smarty->fetch('module:checkoutapipayment/views/templates/frontend/hookpayment/js/js.tpl'))
+                             ->setAdditionalInformation($this->context->smarty->fetch('module:checkoutapipayment/views/templates/front/js.tpl'))
                              ->setModuleName($smartyParam['methodType'])
                              ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/CKO_Logo_Optical.png'));
                 break;
