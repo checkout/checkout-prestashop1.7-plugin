@@ -32,7 +32,11 @@
 					    </li>
 					</div>
 				{/foreach}
-				<button class="save-card-pay-button" type="button" >Remove Card</button>
+				<button class="save-card-pay-button" type="button">{l s='Remove Card' mod='checkoutapipayment'}</button>
+				{else}
+					<div class="out">
+						{l s='You do not have any saved card' mod='checkoutapipayment'}
+					</div>
 			{/if}
 		</ul>
 	</form>
