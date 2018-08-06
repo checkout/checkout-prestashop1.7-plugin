@@ -26,19 +26,19 @@
         {/foreach}
              <li>
                 <label>
-                <input id="checkoutapipayment-new-card" class= "checkoutapipayment-new-card" type="radio" name="checkoutapipayment-new-card"  value="new_card"/> Use New card</label>
+                <input id="checkoutapipayment-new-card" class= "checkoutapipayment-new-card" type="radio" name="checkoutapipayment-new-card"  value="new_card"/> {l s='Use new card' mod='checkoutapipayment'}</label>
             </li>
 
         {else}
             <li>
                 <label>
-                <input id="checkoutapipayment-new-card" class= "checkoutapipayment-new-card" type="radio" name="checkoutapipayment-new-card"  value="new_card"/> Use New card</label>
+                <input id="checkoutapipayment-new-card" class= "checkoutapipayment-new-card" type="radio" name="checkoutapipayment-new-card"  value="new_card"/> {l s='Use new card' mod='checkoutapipayment'}</label>
             </li>
     {/if}
 {/if}
 {if $saveCard == 'no' and $altPayment == 'yes'}
         <label>
-        <input id="checkoutapipayment-new-card" class= "checkoutapipayment-new-card" type="radio" name="checkoutapipayment-new-card"  value="new_card"/> Use New card</label>
+        <input id="checkoutapipayment-new-card" class= "checkoutapipayment-new-card" type="radio" name="checkoutapipayment-new-card"  value="new_card"/> {l s='Use new card' mod='checkoutapipayment'}</label>
 {/if}
 </ul>
 
@@ -85,7 +85,7 @@
 {if $saveCard == 'yes' }
     <div class="save-card-checkbox"  style="display:none">
         <div class="out">
-            <label for="save-card-checkbox" style="padding-top: 10px;">Save card for future payment
+            <label for="save-card-checkbox" style="padding-top: 10px;">{l s='Save card for future payment' mod='checkoutapipayment'}
                 <input type="checkbox" name="save-card-checkbox" id="save-card-checkbox" value="1"></input>
             </label>
             <br>
@@ -97,7 +97,7 @@
 {if $altPayment == 'yes'}
     <div class="altPayment">
         <br>
-        <label for="alternative-payment">Alternative Payment</label>
+        <label for="alternative-payment">{l s='Alternative Payment' mod='checkoutapipayment'}</label>
         <br>
         <div style="display: flex;">
             {foreach key=key item=item from=$localPayment}
