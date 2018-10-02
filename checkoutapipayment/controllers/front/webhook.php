@@ -93,7 +93,7 @@ class CheckoutapipaymentWebhookModuleFrontController extends ModuleFrontControll
 			if ($current_order_state->id == $order_state->id ) {
 				echo  sprintf ( Tools::displayError ( 'Order #%d has already been '.$objectCharge->getStatus() ) , $id_order );
 				return $http_response_code_200;
-			}elseif(!$objectCharge->getAuthorised ()){
+			}else{
 				$history->changeIdOrderState ( Configuration::get ( 'PS_OS_CANCELED' ) , (int)$id_order );
 				$history->addWithemail ();
 				echo  sprintf ( Tools::displayError ( 'Order #%d has  been '.$objectCharge->getStatus() ) , $id_order );
