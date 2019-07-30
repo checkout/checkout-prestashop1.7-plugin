@@ -36,7 +36,7 @@
 	</div>
 
 	<hr />
-
+	
 	<div class="checkoutcom-content">
 		<div class="row">
 			<div class="col-md-5">
@@ -46,24 +46,24 @@
 						<strong>{l s='It is fast and easy' mod='checkoutcom'}:</strong>
 						{l s='It is pre-integrated with PrestaShop, so you can configure it with a few clicks.' mod='checkoutcom'}
 					</li>
-
+					
 					<li>
 						<strong>{l s='It is global' mod='checkoutcom'}:</strong>
 						{l s='Accept payments in XX currencies from XXX markets around the world.' mod='checkoutcom'}
 					</li>
-
+					
 					<li>
 						<strong>{l s='It is trusted' mod='checkoutcom'}:</strong>
 						{l s='Industry-leading fraud an buyer protections keep you and your customers safe.' mod='checkoutcom'}
 					</li>
-
+					
 					<li>
 						<strong>{l s='It is cost-effective' mod='checkoutcom'}:</strong>
 						{l s='There are no setup fees or long-term contracts. You only pay a low transaction fee.' mod='checkoutcom'}
 					</li>
 				</ul>
 			</div>
-
+			
 			<div class="col-md-2">
 				<h5>{l s='Pricing' mod='checkoutcom'}</h5>
 				<dl class="list-unstyled">
@@ -76,7 +76,7 @@
 				</dl>
 				<a href="#" onclick="javascript:return false;">(Detailed pricing here)</a>
 			</div>
-
+			
 			<div class="col-md-5">
 				<h5>{l s='How does it work?' mod='checkoutcom'}</h5>
 				<iframe src="//player.vimeo.com/video/75405291" width="335" height="188" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
@@ -84,11 +84,11 @@
 		</div>
 
 		<hr />
-
+		
 		<div class="row">
 			<div class="col-md-12">
 				<p class="text-muted">{l s='My Payment Module accepts more than 80 localized payment methods around the world' mod='checkoutcom'}</p>
-
+				
 				<div class="row">
 					<img src="{$module_dir|escape:'html':'UTF-8'}views/img/template_2_cards.png" class="col-md-3" id="payment-logo" />
 					<div class="col-md-9 text-center">

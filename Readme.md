@@ -1,1 +1,1 @@
-# Read me
+# Payment Gateway by Checkout.com

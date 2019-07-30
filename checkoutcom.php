@@ -28,8 +28,24 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class checkoutcom extends PaymentModule
+/**
+ * Define module constants
+ */
+define('CHECKOUTCOM_ROOT', __DIR__);
+
+
+/**
+ * Include necessary scripts
+ */
+require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'Utilities.php');
+require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'Debug.php');
+require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'CheckoutcomHelperForm.php');
+
+class Checkoutcom extends PaymentModule
 {
+
+    const QUALIFIED_NAME = __CLASS__;
+
     protected $config_form = false;
 
     public function __construct()
@@ -50,7 +66,9 @@ class checkoutcom extends PaymentModule
         $this->displayName = $this->l('Payment Gateway');
         $this->description = $this->l('Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.');
 
-        $this->confirmUninstall = $this->l('');
+        $this->confirmUninstall = $this->l('Are you sure you want to stop accepting payments?');
+
+
 
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
     }
@@ -67,6 +85,7 @@ class checkoutcom extends PaymentModule
             return false;
         }
 
+        $iso_code = Country::getIsoById(Configuration::get('PS_COUNTRY_DEFAULT'));
 
         Configuration::updateValue('CHECKOUTCOM_LIVE_MODE', false);
 
@@ -106,10 +125,38 @@ class checkoutcom extends PaymentModule
         }
 
         $this->context->smarty->assign('module_dir', $this->_path);
+        $this->checkoutcomSettings($this->context->smarty);
 
-        $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
+        $output = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
 
-        return $output.$this->renderForm();
+        return $output;
+
+    }
+
+    protected function checkoutcomSettings(&$smarty) {
+
+        $helper = new CheckoutcomHelperForm($smarty);
+
+        $helper->show_toolbar = false;
+        $helper->table = $this->table;
+        $helper->module = $this;
+        $helper->default_form_language = $this->context->language->id;
+        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
+
+        $helper->identifier = $this->identifier;
+        $helper->submit_action = 'submitCheckoutcomModule';
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+            .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+
+        $helper->tpl_vars = array(
+            'fields_value' => $helper->getConfigFormValues(),
+            'languages' => $this->context->controller->getLanguages(),
+            'id_language' => $this->context->language->id,
+        );
+
+        $helper->addToSmarty($smarty);
+
     }
 
     /**
@@ -145,6 +192,24 @@ class checkoutcom extends PaymentModule
      */
     protected function getConfigForm()
     {
+
+
+
+        Debug::write(Utilities::getConfig('configuration'));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         return array(
             'form' => array(
                 'legend' => array(
@@ -244,7 +309,6 @@ class checkoutcom extends PaymentModule
     {
         $currency_id = $params['cart']->id_currency;
         $currency = new Currency((int)$currency_id);
-
 
         $this->smarty->assign('module_dir', $this->_path);
 

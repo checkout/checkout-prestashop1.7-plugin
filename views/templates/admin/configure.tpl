@@ -32,7 +32,6 @@
 
 <!-- Tab panes -->
 <div class="tab-content">
-	<div class="tab-pane active" id="template_1">{include file='./template_1.tpl'}</div>
-	<div class="tab-pane" id="template_2">{include file='./template_2.tpl'}</div>
-	<div class="tab-pane" id="template_3">{include file='./template_3.tpl'}</div>
+	<div class="tab-pane active" id="template_1">{$config_configuration}</div>
+	<div class="tab-pane" id="template_2">{$config_keys}</div>
 </div>
