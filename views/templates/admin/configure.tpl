@@ -25,13 +25,14 @@
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs" role="tablist">
-	<li class="active"><a href="#template_1" role="tab" data-toggle="tab">Template 1</a></li>
-	<li><a href="#template_2" role="tab" data-toggle="tab">Template 2</a></li>
-	<li><a href="#template_3" role="tab" data-toggle="tab">Template 3</a></li>
+	<li class="active"><a href="#template_1" role="tab" data-toggle="tab">{l s='Configuration' mod='checkoutcom'}</a></li>
+	<li><a href="#template_2" role="tab" data-toggle="tab">{l s='Card Payments' mod='checkoutcom'}</a></li>
+	<li><a href="#template_3" role="tab" data-toggle="tab">{l s='Alternative Payments' mod='checkoutcom'}</a></li>
 </ul>
 
 <!-- Tab panes -->
 <div class="tab-content">
 	<div class="tab-pane active" id="template_1">{$config_configuration}</div>
-	<div class="tab-pane" id="template_2">{$config_keys}</div>
+	<div class="tab-pane" id="template_2">{$config_card}</div>
+	<div class="tab-pane" id="template_3">{$config_alternatives}</div>
 </div>

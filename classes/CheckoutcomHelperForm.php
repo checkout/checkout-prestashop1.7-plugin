@@ -155,18 +155,22 @@ class CheckoutcomHelperForm extends HelperForm
         foreach ($files as $file) {
 
             if(strpos($file, '.json') !== false) {
-                $this->settings []= json_decode(Utilities::getFile(static::CHECKOUTCOM_CONFIGS . DIRECTORY_SEPARATOR . $file), true);
+                $this->settings [strtolower(str_replace(' ', '', basename($file, '.json')))] = json_decode(Utilities::getFile(static::CHECKOUTCOM_CONFIGS . DIRECTORY_SEPARATOR . $file), true);
             }
 
         }
 
     }
 
-
+    /**
+     * Add to smarty template variable.
+     *
+     * @param      mixed  $smarty  The smarty
+     */
     public function addToSmarty(&$smarty) {
 
-        foreach ($this->settings as $s) {
-            $smarty->assign(static::CHECKOUTCOM_CONFIGS_PREFIX . strtolower(str_replace(' ', '', $s[static::FIELD_TITLE])), $this->generateForm($s));
+        foreach ($this->settings as $key => $s) {
+            $smarty->assign(static::CHECKOUTCOM_CONFIGS_PREFIX . $key, $this->generateForm($s));
         }
 
     }
@@ -175,24 +179,31 @@ class CheckoutcomHelperForm extends HelperForm
      * Generate HTML for form.
      *
      * @overriden
-     * @param      array  $s
+     * @param      array  $forms
      * @return     string
      */
-    public function generateForm($s) {
+    public function generateForm($forms) {
 
+        $list = array();
 
-        $form = array('legend' => array(static::FIELD_TITLE => $this->l($s[static::FIELD_TITLE]),
-                                        static::FIELD_ICON => Utilities::getValueFromArray($s, static::FIELD_ICON)),
-                    'input' => array(),
-                    'submit' => array(static::FIELD_TITLE => $this->l('Save')));
+        foreach ($forms as $form) {
 
-        $inputs = array();
+            $current = array('legend' => array(static::FIELD_TITLE => $this->l($form[static::FIELD_TITLE]),
+                                            static::FIELD_ICON => Utilities::getValueFromArray($form, static::FIELD_ICON)),
+                            'input' => array(),
+                            'submit' => array(static::FIELD_TITLE => $this->l('Save')));
 
-        foreach ($s[static::FIELD_FIELDS] as $field) {
-            $form['input'] []= $this->{$field[static::FIELD_TYPE]}($field);
+            $inputs = array();
+
+            foreach ($form[static::FIELD_FIELDS] as $field) {
+                $current['input'] []= $this->{$field[static::FIELD_TYPE]}($field);
+            }
+
+            $list []= array('form' => $current);
+
         }
 
-        return parent::generateForm(array(array('form' => $form)));
+        return parent::generateForm($list);
 
     }
 
@@ -211,10 +222,14 @@ class CheckoutcomHelperForm extends HelperForm
 
         $values = array();
 
-        foreach($this->settings as $s) {
+        foreach ($this->settings as $form) {
 
-            foreach($s[static::FIELD_FIELDS] as $field) {
-                $values[$field[static::FIELD_NAME]] = Configuration::get(static::FIELD_NAME, $field[static::FIELD_DEFAULT]);
+            foreach($form as $s) {
+
+                foreach($s[static::FIELD_FIELDS] as $field) {
+                    $values[$field[static::FIELD_NAME]] = Configuration::get(static::FIELD_NAME, $field[static::FIELD_DEFAULT]);
+                }
+
             }
 
         }
@@ -290,8 +305,9 @@ class CheckoutcomHelperForm extends HelperForm
                 static::FIELD_LABEL => $this->l($field[static::FIELD_LABEL]),
                 static::FIELD_NAME => $field[static::FIELD_NAME],
                 static::FIELD_REQUIRED => Utilities::getValueFromArray($field, static::FIELD_REQUIRED, false),
+                'multiple' => Utilities::getValueFromArray($field, 'multiple', false),
                 static::FIELD_DESC => $this->l(Utilities::getValueFromArray($field, static::FIELD_DESC)),
-                'options' => $select($field['options']),
+                'options' => $select($field['options'])
             );
 
     }
@@ -330,6 +346,55 @@ class CheckoutcomHelperForm extends HelperForm
                 static::FIELD_REQUIRED => Utilities::getValueFromArray($field, static::FIELD_REQUIRED, false),
                 static::FIELD_DESC => $this->l(Utilities::getValueFromArray($field, static::FIELD_DESC)),
             );
+
+    }
+
+    /**
+     * Generate prestashop password from configuration.
+     * @param      array $field
+     * @return     array
+     */
+    protected function dynamic(array &$field) {
+
+        if(strpos($field[static::FIELD_NAME], 'ORDER_STATUS') !== false) {
+            $this->loadOrderStatuses($field);
+        }
+
+        $obj = array(
+                static::FIELD_COL => Utilities::getValueFromArray($field, static::FIELD_COL, 3),
+                static::FIELD_TYPE => $field[static::FIELD_TYPE],
+                static::FIELD_LABEL => $this->l($field[static::FIELD_LABEL]),
+                static::FIELD_NAME => $field[static::FIELD_NAME],
+                static::FIELD_REQUIRED => Utilities::getValueFromArray($field, static::FIELD_REQUIRED, false),
+                static::FIELD_DESC => $this->l(Utilities::getValueFromArray($field, static::FIELD_DESC)),
+                'options' => $field['options']
+            );
+
+        return $obj;
+
+    }
+
+    /**
+     * Dynamicaly load order status.
+     *
+     * @param      array  $field  The field
+     * @return     void
+     */
+    protected function loadOrderStatuses(array &$field) {
+
+        $field[static::FIELD_TYPE] = 'select';
+        $field['options'] = array(
+            'query' => array(),
+            static::FIELD_ID  => 'id_option',
+            static::FIELD_NAME => static::FIELD_NAME
+        );
+
+        foreach (OrderState::getOrderStates($this->context->language->id) as $state) {
+            $field['options']['query'][]= array(
+                'id_option' => $state['id_order_state'],
+                static::FIELD_NAME => $this->l($state[static::FIELD_NAME])
+            );
+        }
 
     }
 

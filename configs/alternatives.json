@@ -1,0 +1,93 @@
+[{
+  "title": "",
+  "fields": [
+  	{
+      "name": "CHECKOUTCOM_ALTERNATIVE_TITLE",
+      "label": "Payment Option Title",
+      "description": "",
+      "type": "text",
+      "icon":"",
+      "default": "Alternative Payments with Checkout.com",
+      "required": 1
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_ENABLED",
+      "label": "Enable Card Payments",
+      "description": "",
+      "type": "select",
+      "default": 1,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Yes"
+        },
+        {
+          "id": "id_option",
+          "value": 0,
+          "label": "No"
+        }
+      ]
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_METHODS[]",
+      "label": "Alternative Payments",
+      "description": "",
+      "type": "select",
+      "multiple": 1,
+      "default": "",
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": "giropay",
+          "label": "Giropay"
+        },
+        {
+          "id": "id_option",
+          "value": "ideal",
+          "label": "iDEAL"
+        },
+        {
+          "id": "id_option",
+          "value": "poli",
+          "label": "Poli"
+        },
+        {
+          "id": "id_option",
+          "value": "sepa",
+          "label": "SEPA"
+        },
+        {
+          "id": "id_option",
+          "value": "sofort",
+          "label": "Sofort"
+        },
+        {
+          "id": "id_option",
+          "value": "klarna",
+          "label": "Klarna"
+        },
+        {
+          "id": "id_option",
+          "value": "eps",
+          "label": "EPS"
+        },
+        {
+          "id": "id_option",
+          "value": "fawry",
+          "label": "Fawry"
+        },
+        {
+          "id": "id_option",
+          "value": "bancontact",
+          "label": "Bancontact"
+        },
+        {
+          "id": "id_option",
+          "value": "knet",
+          "label": "KNet"
+        }
+      ]
+    }
+  ]
+}]

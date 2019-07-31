@@ -1,21 +1,20 @@
-{
-  "title": "Configuration",
-  "icon": "icon-cogs",
+[{
+  "title": "Global Settings",
   "fields": [{
       "name": "CHECKOUTCOM_ENABLE",
       "label": "Enable Module",
       "desc": "",
       "type": "switch",
-      "default": true,
-      "required": true,
+      "default": 1,
+      "required": 0,
       "options": [{
-          "id": "active_on",
-          "value": true,
+          "id": "id_option",
+          "value": 1,
           "label": "Enabled"
         },
         {
-          "id": "active_false",
-          "value": false,
+          "id": "id_option",
+          "value": 0,
           "label": "Disabled"
         }
       ]
@@ -25,16 +24,16 @@
       "label": "Environment",
       "desc": "Use this module in live mode.",
       "type": "select",
-      "default": false,
-      "required": true,
+      "default": 0,
+      "required": 0,
       "options": [{
-          "id": "env",
-          "value": true,
+          "id": "id_option",
+          "value": 1,
           "label": "Live"
         },
         {
-          "id": "env",
-          "value": false,
+          "id": "id_option",
+          "value": 0,
           "label": "Sandbox"
         }
       ]
@@ -45,14 +44,14 @@
       "desc": "",
       "type": "select",
       "default": 0,
-      "required": true,
+      "required": 0,
       "options": [{
-          "id": "op_0",
+          "id": "id_option",
           "value": 0,
           "label": "Authorize"
         },
         {
-          "id": "op_1",
+          "id": "id_option",
           "value": 1,
           "label": "Authorize + Capture"
         }
@@ -63,8 +62,8 @@
       "label": "Capture Time",
       "desc": "Specify the number of hours before capture. Ex: 1.5 for capture after 1h30.",
       "type": "text",
-      "default": 0,
-      "required": true,
+      "default": "",
+      "required": 0,
       "col": 2
     },
     {
@@ -73,19 +72,19 @@
       "desc": "Determines when the invoice should be generated.",
       "type": "select",
       "default": 0,
-      "required": true,
+      "required": 0,
       "options": [{
-          "id": "op_0",
+          "id": "id_option",
           "value": 0,
           "label": "Disabled"
         },
         {
-          "id": "op_1",
+          "id": "id_option",
           "value": 1,
           "label": "Payment authorized"
         },
         {
-          "id": "op_2",
+          "id": "id_option",
           "value": 2,
           "label": "Payment captured"
         }
@@ -96,16 +95,16 @@
       "label": "Enable Dynamic Descriptor",
       "desc": "",
       "type": "switch",
-      "default": false,
-      "required": true,
+      "default": 0,
+      "required": 0,
       "options": [{
-          "id": "active_on",
-          "value": true,
+          "id": "id_option",
+          "value": 1,
           "label": "Enabled"
         },
         {
-          "id": "active_false",
-          "value": false,
+          "id": "id_option",
+          "value": 0,
           "label": "Disabled"
         }
       ]
@@ -116,7 +115,7 @@
       "desc": "",
       "type": "text",
       "default": "",
-      "required": false,
+      "required": 0,
       "col": 2
     },
     {
@@ -125,8 +124,109 @@
       "desc": "",
       "type": "text",
       "default": "",
-      "required": false,
+      "required": 0,
       "col": 2
     }
   ]
-}
+},
+{
+  "title": "Order Management Settings",
+  "icon": "icon-cogs",
+  "fields": [{
+      "name": "CHECKOUTCOM_AUTH_ORDER_STATUS",
+      "label": "Authorization order status",
+      "desc": "Select the status that should be used for orders with successful payment authorisation.",
+      "type": "dynamic",
+      "default": 0,
+      "required": 0
+    },
+    {
+      "name": "CHECKOUTCOM_CAPTURE_ORDER_STATUS",
+      "label": "Capture order status",
+      "desc": "Select the status that should be used for orders with successful payment capture.",
+      "type": "dynamic",
+      "default": 0,
+      "required": 0
+    },
+    {
+      "name": "CHECKOUTCOM_VOID_ORDER_STATUS",
+      "label": "Void order status",
+      "desc": "Select the status that should be used for orders with successful payment capture.",
+      "type": "dynamic",
+      "default": 0,
+      "required": 0
+    },
+    {
+      "name": "CHECKOUTCOM_REFUND_ORDER_STATUS",
+      "label": "Refund order status",
+      "desc": "Select the status that should be used for orders with successful payment refund.",
+      "type": "dynamic",
+      "default": 0,
+      "required": 0
+    },
+    {
+      "name": "CHECKOUTCOM_FLAGGED_ORDER_STATUS",
+      "label": "Flagged order status",
+      "desc": "Select the status that should be used for flagged orders.",
+      "type": "dynamic",
+      "default": 0,
+      "required": 0
+    }]
+},
+{
+  "title": "Account Settings",
+  "fields": [{
+      "name": "CHECKOUTCOM_SECRET_KEY",
+      "label": "Secret Key",
+      "description": "",
+      "type": "password",
+      "icon":"",
+      "default": "",
+      "required": 1,
+      "col": 2
+    },
+    {
+      "name": "CHECKOUTCOM_PUBLIC_KEY",
+      "label": "Public Key",
+      "description": "",
+      "type": "password",
+      "icon":"",
+      "default": "",
+      "required": 1,
+      "col": 2
+    },
+    {
+      "name": "CHECKOUTCOM_SHARED_KEY",
+      "label": "Shared Key",
+      "description": "",
+      "type": "password",
+      "icon":"",
+      "default": "",
+      "required": 1,
+      "col": 2
+    }
+  ]
+},
+{
+  "title": "Debug Settings",
+  "fields": [{
+      "name": "CHECKOUTCOM_DEBUG_ENABLED",
+      "label": "Debug mode enabled",
+      "description": "",
+      "type": "select",
+      "default": 1,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Yes"
+        },
+        {
+          "id": "id_option",
+          "value": 0,
+          "label": "No"
+        }
+      ]
+    }
+  ]
+}]
