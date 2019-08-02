@@ -217,7 +217,7 @@ class CheckoutcomHelperForm extends HelperForm
      *
      * @return     array  The configuration form values.
      */
-    public function getConfigFormValues()
+    public function getConfigFormValues($defaults = false)
     {
 
         $values = array();
@@ -227,7 +227,13 @@ class CheckoutcomHelperForm extends HelperForm
             foreach($form as $s) {
 
                 foreach($s[static::FIELD_FIELDS] as $field) {
-                    $values[$field[static::FIELD_NAME]] = Configuration::get(static::FIELD_NAME, $field[static::FIELD_DEFAULT]);
+                    if ($defaults) {
+                        $values[$field[static::FIELD_NAME]] = Utilities::getValueFromArray($field, static::FIELD_DEFAULT);
+Debug::write('getConfigFormValues(true) -> ' . static::FIELD_NAME . ' : ' . Utilities::getValueFromArray($field, static::FIELD_DEFAULT));
+                    } else {
+                        $values[$field[static::FIELD_NAME]] = Configuration::get(static::FIELD_NAME, $field[static::FIELD_DEFAULT]);
+Debug::write('getConfigFormValues(false) -> ' . static::FIELD_NAME . ' : ' . Configuration::get(static::FIELD_NAME, $field[static::FIELD_DEFAULT]));
+                    }
                 }
 
             }
@@ -300,12 +306,14 @@ class CheckoutcomHelperForm extends HelperForm
 
         };
 
+        $multiple = Utilities::getValueFromArray($field, 'multiple', false);
+
         return array(
                 static::FIELD_TYPE => $field[static::FIELD_TYPE],
                 static::FIELD_LABEL => $this->l($field[static::FIELD_LABEL]),
                 static::FIELD_NAME => $field[static::FIELD_NAME],
                 static::FIELD_REQUIRED => Utilities::getValueFromArray($field, static::FIELD_REQUIRED, false),
-                'multiple' => Utilities::getValueFromArray($field, 'multiple', false),
+                'multiple' => $multiple,
                 static::FIELD_DESC => $this->l(Utilities::getValueFromArray($field, static::FIELD_DESC)),
                 'options' => $select($field['options'])
             );

@@ -81,13 +81,17 @@ class Checkoutcom extends PaymentModule
     {
         if (extension_loaded('curl') == false)
         {
-            $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module');
+            $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module.');
             return false;
         }
 
         $iso_code = Country::getIsoById(Configuration::get('PS_COUNTRY_DEFAULT'));
 
-        Configuration::updateValue('CHECKOUTCOM_LIVE_MODE', false);
+        $helper = new CheckoutcomHelperForm();
+        foreach ($helper->getConfigFormValues(true) as $key => $value) {
+Debug::write('install -> ' . $key . ':' . $value);
+            Configuration::updateValue($key, $value);
+        }
 
         include(dirname(__FILE__).'/sql/install.php');
 
@@ -105,9 +109,13 @@ class Checkoutcom extends PaymentModule
 
     public function uninstall()
     {
-        Configuration::deleteByName('CHECKOUTCOM_LIVE_MODE');
+        $helper = new CheckoutcomHelperForm();
+        foreach ($helper->getConfigFormValues() as $key => $value) {
+Debug::write('uninstall -> ' . $key);
+            Configuration::deleteByName($key);
+        }
 
-        include(dirname(__FILE__).'/sql/uninstall.php');
+        include(dirname(__FILE__).'/sql/uninstall.php'); //@todo
 
         return parent::uninstall();
     }
@@ -135,7 +143,7 @@ class Checkoutcom extends PaymentModule
 
     protected function checkoutcomSettings(&$smarty) {
 
-        $helper = new CheckoutcomHelperForm($smarty);
+        $helper = new CheckoutcomHelperForm();
 
         $helper->show_toolbar = false;
         $helper->table = $this->table;
@@ -160,126 +168,22 @@ class Checkoutcom extends PaymentModule
     }
 
     /**
-     * Create the form that will be displayed in the configuration of your module.
-     */
-    protected function renderForm()
-    {
-        $helper = new HelperForm();
-
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->module = $this;
-        $helper->default_form_language = $this->context->language->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
-        $helper->identifier = $this->identifier;
-        $helper->submit_action = 'submitCheckoutcomModule';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-
-        $helper->tpl_vars = array(
-            'fields_value' => $this->getConfigFormValues(), /* Add values for your inputs */
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-        );
-
-        return $helper->generateForm(array($this->getConfigForm()));
-    }
-
-    /**
-     * Create the structure of your form.
-     */
-    protected function getConfigForm()
-    {
-
-
-
-        Debug::write(Utilities::getConfig('configuration'));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        return array(
-            'form' => array(
-                'legend' => array(
-                'title' => $this->l('Settings'),
-                'icon' => 'icon-cogs',
-                ),
-                'input' => array(
-                    array(
-                        'type' => 'switch',
-                        'label' => $this->l('Live mode'),
-                        'name' => 'CHECKOUTCOM_LIVE_MODE',
-                        'is_bool' => true,
-                        'desc' => $this->l('Use this module in live mode'),
-                        'values' => array(
-                            array(
-                                'id' => 'active_on',
-                                'value' => true,
-                                'label' => $this->l('Enabled')
-                            ),
-                            array(
-                                'id' => 'active_off',
-                                'value' => false,
-                                'label' => $this->l('Disabled')
-                            )
-                        ),
-                    ),
-                    array(
-                        'col' => 3,
-                        'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'CHECKOUTCOM_ACCOUNT_EMAIL',
-                        'label' => $this->l('Email'),
-                    ),
-                    array(
-                        'type' => 'password',
-                        'name' => 'CHECKOUTCOM_ACCOUNT_PASSWORD',
-                        'label' => $this->l('Password'),
-                    ),
-                ),
-                'submit' => array(
-                    'title' => $this->l('Save'),
-                ),
-            ),
-        );
-    }
-
-    /**
-     * Set values for the inputs.
-     */
-    protected function getConfigFormValues()
-    {
-        return array(
-            'CHECKOUTCOM_LIVE_MODE' => Configuration::get('CHECKOUTCOM_LIVE_MODE', true),
-            'CHECKOUTCOM_ACCOUNT_EMAIL' => Configuration::get('CHECKOUTCOM_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'CHECKOUTCOM_ACCOUNT_PASSWORD' => Configuration::get('CHECKOUTCOM_ACCOUNT_PASSWORD', null),
-        );
-    }
-
-    /**
      * Save form data.
      */
     protected function postProcess()
     {
-        $form_values = $this->getConfigFormValues();
+        $helper = new CheckoutcomHelperForm();
+        $form_values = $helper->getConfigFormValues();
 
         foreach (array_keys($form_values) as $key) {
             Configuration::updateValue($key, Tools::getValue($key));
         }
     }
+
+
+    /**
+     * Hooks
+     */
 
     /**
     * Add the CSS & JavaScript files you want to be loaded in the BO.
