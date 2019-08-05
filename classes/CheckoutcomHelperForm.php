@@ -228,11 +228,9 @@ class CheckoutcomHelperForm extends HelperForm
 
                 foreach($s[static::FIELD_FIELDS] as $field) {
                     if ($defaults) {
-                        $values[$field[static::FIELD_NAME]] = Utilities::getValueFromArray($field, static::FIELD_DEFAULT);
-Debug::write('getConfigFormValues(true) -> ' . static::FIELD_NAME . ' : ' . Utilities::getValueFromArray($field, static::FIELD_DEFAULT));
+                        $values[rtrim($field[static::FIELD_NAME], '[]')] = Utilities::getValueFromArray($field, static::FIELD_DEFAULT);
                     } else {
-                        $values[$field[static::FIELD_NAME]] = Configuration::get(static::FIELD_NAME, $field[static::FIELD_DEFAULT]);
-Debug::write('getConfigFormValues(false) -> ' . static::FIELD_NAME . ' : ' . Configuration::get(static::FIELD_NAME, $field[static::FIELD_DEFAULT]));
+                        $values[rtrim($field[static::FIELD_NAME], '[]')] = Configuration::get($field[static::FIELD_NAME]);
                     }
                 }
 
@@ -306,14 +304,12 @@ Debug::write('getConfigFormValues(false) -> ' . static::FIELD_NAME . ' : ' . Con
 
         };
 
-        $multiple = Utilities::getValueFromArray($field, 'multiple', false);
-
         return array(
                 static::FIELD_TYPE => $field[static::FIELD_TYPE],
                 static::FIELD_LABEL => $this->l($field[static::FIELD_LABEL]),
                 static::FIELD_NAME => $field[static::FIELD_NAME],
                 static::FIELD_REQUIRED => Utilities::getValueFromArray($field, static::FIELD_REQUIRED, false),
-                'multiple' => $multiple,
+                'multiple' => Utilities::getValueFromArray($field, 'multiple', false),
                 static::FIELD_DESC => $this->l(Utilities::getValueFromArray($field, static::FIELD_DESC)),
                 'options' => $select($field['options'])
             );

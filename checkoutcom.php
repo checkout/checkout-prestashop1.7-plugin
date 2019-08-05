@@ -89,7 +89,6 @@ class Checkoutcom extends PaymentModule
 
         $helper = new CheckoutcomHelperForm();
         foreach ($helper->getConfigFormValues(true) as $key => $value) {
-Debug::write('install -> ' . $key . ':' . $value);
             Configuration::updateValue($key, $value);
         }
 
@@ -111,7 +110,6 @@ Debug::write('install -> ' . $key . ':' . $value);
     {
         $helper = new CheckoutcomHelperForm();
         foreach ($helper->getConfigFormValues() as $key => $value) {
-Debug::write('uninstall -> ' . $key);
             Configuration::deleteByName($key);
         }
 
@@ -167,7 +165,7 @@ Debug::write('uninstall -> ' . $key);
 
     }
 
-    /**
+    /**What
      * Save form data.
      */
     protected function postProcess()
