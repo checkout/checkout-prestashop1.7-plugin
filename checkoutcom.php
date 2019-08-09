@@ -40,6 +40,7 @@ define('CHECKOUTCOM_ROOT', __DIR__);
 require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'Utilities.php');
 require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'Debug.php');
 require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'CheckoutcomHelperForm.php');
+require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'CheckoutcomPaymentOption.php');
 
 class Checkoutcom extends PaymentModule
 {
@@ -67,9 +68,6 @@ class Checkoutcom extends PaymentModule
         $this->description = $this->l('Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.');
 
         $this->confirmUninstall = $this->l('Are you sure you want to stop accepting payments?');
-
-
-
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
     }
 
@@ -95,6 +93,7 @@ class Checkoutcom extends PaymentModule
         include(dirname(__FILE__).'/sql/install.php');
 
         return parent::install() &&
+            $this->registerHook('paymentOptions') &&
             $this->registerHook('header') &&
             $this->registerHook('backOfficeHeader') &&
             $this->registerHook('payment') &&
@@ -165,7 +164,7 @@ class Checkoutcom extends PaymentModule
 
     }
 
-    /**What
+    /**
      * Save form data.
      */
     protected function postProcess()
@@ -174,7 +173,10 @@ class Checkoutcom extends PaymentModule
         $form_values = $helper->getConfigFormValues();
 
         foreach (array_keys($form_values) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
+            $value = Tools::getValue($key);
+            if($value !== false) {
+                Configuration::updateValue($key, $value);
+            }
         }
     }
 
@@ -184,10 +186,33 @@ class Checkoutcom extends PaymentModule
      */
 
     /**
+     * Display payment options.
+     *
+     * @return     array
+     */
+    public function hookPaymentOptions($params) {
+Debug::write('#hookPaymentOptions');
+        if (!$this->active) {
+            return;
+        }
+
+        $methods = array(
+            CheckoutcomPaymentOption::getCard($this, $params),
+            CheckoutcomPaymentOption::getAlternatives($this, $params)
+        );
+
+        return array_filter($methods); // Remove nulls
+
+    }
+
+
+
+    /**
     * Add the CSS & JavaScript files you want to be loaded in the BO.
     */
     public function hookBackOfficeHeader()
     {
+Debug::write('#hookBackOfficeHeader');
         if (Tools::getValue('module_name') == $this->name) {
             $this->context->controller->addJS($this->_path.'views/js/back.js');
             $this->context->controller->addCSS($this->_path.'views/css/back.css');
@@ -199,6 +224,7 @@ class Checkoutcom extends PaymentModule
      */
     public function hookHeader()
     {
+Debug::write('#hookHeader');
         $this->context->controller->addJS($this->_path.'/views/js/front.js');
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
     }
@@ -209,6 +235,7 @@ class Checkoutcom extends PaymentModule
      */
     public function hookPayment($params)
     {
+Debug::write('#hookPayment');
         $currency_id = $params['cart']->id_currency;
         $currency = new Currency((int)$currency_id);
 
@@ -222,8 +249,9 @@ class Checkoutcom extends PaymentModule
      */
     public function hookPaymentReturn($params)
     {
-        if ($this->active == false)
-            return;
+Debug::write('#hookPaymentReturn');
+        // if ($this->active == false)
+        //     return;
 
         $order = $params['objOrder'];
 
@@ -242,26 +270,32 @@ class Checkoutcom extends PaymentModule
 
     public function hookActionPaymentCCAdd()
     {
+Debug::write('#hookActionPaymentCCAdd');
         /* Place your code here. */
     }
 
     public function hookActionPaymentConfirmation()
     {
+Debug::write('#hookActionPaymentConfirmation');
         /* Place your code here. */
     }
 
     public function hookDisplayPayment()
     {
+Debug::write('#hookDisplayPayment');
         /* Place your code here. */
     }
 
     public function hookDisplayPaymentReturn()
     {
+
+Debug::write('#hookDisplayPaymentReturn');
         /* Place your code here. */
     }
 
     public function hookDisplayPaymentTop()
     {
+        // I don't think this will be needed.
         /* Place your code here. */
     }
 }

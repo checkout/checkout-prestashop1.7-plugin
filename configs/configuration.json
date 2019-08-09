@@ -1,25 +1,6 @@
 [{
   "title": "Global Settings",
   "fields": [{
-      "name": "CHECKOUTCOM_ENABLE",
-      "label": "Enable Module",
-      "desc": "",
-      "type": "switch",
-      "default": 1,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
       "name": "CHECKOUTCOM_LIVE_MODE",
       "label": "Environment",
       "desc": "Use this module in live mode.",
@@ -137,7 +118,7 @@
       "label": "Authorization order status",
       "desc": "Select the status that should be used for orders with successful payment authorisation.",
       "type": "dynamic",
-      "default": 0,
+      "default": 3,
       "required": 0
     },
     {
@@ -145,7 +126,7 @@
       "label": "Capture order status",
       "desc": "Select the status that should be used for orders with successful payment capture.",
       "type": "dynamic",
-      "default": 0,
+      "default": 2,
       "required": 0
     },
     {
@@ -153,7 +134,7 @@
       "label": "Void order status",
       "desc": "Select the status that should be used for orders with successful payment capture.",
       "type": "dynamic",
-      "default": 0,
+      "default": 6,
       "required": 0
     },
     {
@@ -161,7 +142,7 @@
       "label": "Refund order status",
       "desc": "Select the status that should be used for orders with successful payment refund.",
       "type": "dynamic",
-      "default": 0,
+      "default": 7,
       "required": 0
     },
     {
@@ -169,7 +150,7 @@
       "label": "Flagged order status",
       "desc": "Select the status that should be used for flagged orders.",
       "type": "dynamic",
-      "default": 0,
+      "default": 2,
       "required": 0
     }]
 },

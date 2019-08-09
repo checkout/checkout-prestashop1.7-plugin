@@ -134,10 +134,8 @@ class CheckoutcomHelperForm extends HelperForm
      * Setup HelperForm.
      */
     public function __construct() {
-
         parent::__construct();
         $this->loadSettings();
-
     }
 
 
@@ -228,9 +226,9 @@ class CheckoutcomHelperForm extends HelperForm
 
                 foreach($s[static::FIELD_FIELDS] as $field) {
                     if ($defaults) {
-                        $values[rtrim($field[static::FIELD_NAME], '[]')] = Utilities::getValueFromArray($field, static::FIELD_DEFAULT);
+                        $values[$field[static::FIELD_NAME]] = Utilities::getValueFromArray($field, static::FIELD_DEFAULT);
                     } else {
-                        $values[rtrim($field[static::FIELD_NAME], '[]')] = Configuration::get($field[static::FIELD_NAME]);
+                        $values[$field[static::FIELD_NAME]] = Configuration::get($field[static::FIELD_NAME]);
                     }
                 }
 

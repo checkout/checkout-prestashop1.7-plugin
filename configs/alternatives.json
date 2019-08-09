@@ -14,23 +14,23 @@
       "name": "CHECKOUTCOM_ALTERNATIVE_ENABLED",
       "label": "Enable Card Payments",
       "description": "",
-      "type": "select",
+      "type": "switch",
       "default": 1,
       "required": 0,
       "options": [{
           "id": "id_option",
           "value": 1,
-          "label": "Yes"
+          "label": "Enabled"
         },
         {
           "id": "id_option",
           "value": 0,
-          "label": "No"
+          "label": "Disabled"
         }
       ]
     },
     {
-      "name": "CHECKOUTCOM_ALTERNATIVE_METHODS[]",
+      "name": "CHECKOUTCOM_ALTERNATIVE_METHODS",
       "label": "Alternative Payments",
       "description": "",
       "type": "select",

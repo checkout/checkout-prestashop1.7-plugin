@@ -14,18 +14,18 @@
       "name": "CHECKOUTCOM_CARD_ENABLED",
       "label": "Enable Card Payments",
       "description": "",
-      "type": "select",
+      "type": "switch",
       "default": 1,
       "required": 0,
       "options": [{
           "id": "id_option",
           "value": 1,
-          "label": "Yes"
+          "label": "Enabled"
         },
         {
           "id": "id_option",
           "value": 0,
-          "label": "No"
+          "label": "Disabled"
         }
       ]
     },
@@ -78,7 +78,7 @@
       "label": "Form Theme",
       "description": "Select the theme to use for the payment form.",
       "type": "select",
-      "default": "",
+      "default": "standard",
       "required": 0,
       "options": [{
           "id": "id_option",
