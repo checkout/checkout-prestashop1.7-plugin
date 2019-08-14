@@ -1,21 +1,87 @@
 [{
   "title": "",
-  "fields": [
-  	{
-      "name": "CHECKOUTCOM_ALTERNATIVE_TITLE",
-      "label": "Payment Option Title",
-      "description": "",
-      "type": "text",
-      "icon":"",
-      "default": "Alternative Payments with Checkout.com",
-      "required": 1
+  "fields": [{
+      "name": "CHECKOUTCOM_ALTERNATIVE_METHODS",
+      "type": "dictionary",
+      "ignore":1,
+      "options": [{
+          "key":"CHECKOUTCOM_ALTERNATIVE_GIROPAY",
+          "value": {
+            "id": "giropay",
+            "label": "Giropay"
+          },
+        },
+        {
+          "key":"CHECKOUTCOM_ALTERNATIVE_IDEAL",
+          "value": {
+            "id": "ideal",
+            "label": "iDEAL"
+          },
+        },
+        {
+          "key":"CHECKOUTCOM_ALTERNATIVE_POLI",
+          "value": {
+            "id": "poli",
+            "label": "Poli"
+          },
+        },
+        {
+          "key":"CHECKOUTCOM_ALTERNATIVE_SEPA",
+          "value": {
+            "id": "sepa",
+            "label": "SEPA"
+          },
+        },
+        {
+          "key":"CHECKOUTCOM_ALTERNATIVE_SOFORT",
+          "value": {
+            "id": "sofort",
+            "label": "Sofort"
+          },
+        },
+        {
+          "key":"CHECKOUTCOM_ALTERNATIVE_KLARNA",
+          "value": {
+            "id": "klarna",
+            "label": "Klarna"
+          },
+        },
+        {
+          "key":"CHECKOUTCOM_ALTERNATIVE_EPS",
+          "value": {
+            "id": "eps",
+            "label": "EPS"
+          },
+        },
+        {
+          "key":"CHECKOUTCOM_ALTERNATIVE_FAWRY",
+          "value": {
+            "id": "fawry",
+            "label": "Fawry"
+          },
+        },
+        {
+          "key":"CHECKOUTCOM_ALTERNATIVE_BANCONTACT",
+          "value": {
+            "id": "bancontact",
+            "label": "Bancontact"
+          },
+        },
+        {
+          "key":"CHECKOUTCOM_ALTERNATIVE_KNET",
+          "value": {
+            "id": "knet",
+            "label": "KNet"
+          },
+        }
+      ]
     },
     {
-      "name": "CHECKOUTCOM_ALTERNATIVE_ENABLED",
-      "label": "Enable Card Payments",
+      "name": "CHECKOUTCOM_ALTERNATIVE_GIROPAY",
+      "label": "Enable Giropay",
       "description": "",
       "type": "switch",
-      "default": 1,
+      "default": 0,
       "required": 0,
       "options": [{
           "id": "id_option",
@@ -30,62 +96,173 @@
       ]
     },
     {
-      "name": "CHECKOUTCOM_ALTERNATIVE_METHODS",
-      "label": "Alternative Payments",
+      "name": "CHECKOUTCOM_ALTERNATIVE_IDEAL",
+      "label": "Enable iDEAL",
       "description": "",
-      "type": "select",
-      "multiple": 1,
-      "default": "",
+      "type": "switch",
+      "default": 0,
       "required": 0,
       "options": [{
           "id": "id_option",
-          "value": "giropay",
-          "label": "Giropay"
+          "value": 1,
+          "label": "Enabled"
         },
         {
           "id": "id_option",
-          "value": "ideal",
-          "label": "iDEAL"
+          "value": 0,
+          "label": "Disabled"
+        }
+      ]
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_POLI",
+      "label": "Enable POLi",
+      "description": "",
+      "type": "switch",
+      "default": 0,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Enabled"
         },
         {
           "id": "id_option",
-          "value": "poli",
-          "label": "Poli"
+          "value": 0,
+          "label": "Disabled"
+        }
+      ]
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_SEPA",
+      "label": "Enable SEPA",
+      "description": "",
+      "type": "switch",
+      "default": 0,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Enabled"
         },
         {
           "id": "id_option",
-          "value": "sepa",
-          "label": "SEPA"
+          "value": 0,
+          "label": "Disabled"
+        }
+      ]
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_SOFORT",
+      "label": "Enable Sofort",
+      "description": "",
+      "type": "switch",
+      "default": 0,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Enabled"
         },
         {
           "id": "id_option",
-          "value": "sofort",
-          "label": "Sofort"
+          "value": 0,
+          "label": "Disabled"
+        }
+      ]
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_KLARNA",
+      "label": "Enable Klarna",
+      "description": "",
+      "type": "switch",
+      "default": 0,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Enabled"
         },
         {
           "id": "id_option",
-          "value": "klarna",
-          "label": "Klarna"
+          "value": 0,
+          "label": "Disabled"
+        }
+      ]
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_EPS",
+      "label": "Enable EPS",
+      "description": "",
+      "type": "switch",
+      "default": 0,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Enabled"
         },
         {
           "id": "id_option",
-          "value": "eps",
-          "label": "EPS"
+          "value": 0,
+          "label": "Disabled"
+        }
+      ]
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_FAWRY",
+      "label": "Enable Fawry",
+      "description": "",
+      "type": "switch",
+      "default": 0,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Enabled"
         },
         {
           "id": "id_option",
-          "value": "fawry",
-          "label": "Fawry"
+          "value": 0,
+          "label": "Disabled"
+        }
+      ]
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_BANCONTACT",
+      "label": "Enable Bancontact",
+      "description": "",
+      "type": "switch",
+      "default": 0,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Enabled"
         },
         {
           "id": "id_option",
-          "value": "bancontact",
-          "label": "Bancontact"
+          "value": 0,
+          "label": "Disabled"
+        }
+      ]
+    },
+    {
+      "name": "CHECKOUTCOM_ALTERNATIVE_KNET",
+      "label": "Enable KNet",
+      "description": "",
+      "type": "switch",
+      "default": 0,
+      "required": 0,
+      "options": [{
+          "id": "id_option",
+          "value": 1,
+          "label": "Enabled"
         },
         {
           "id": "id_option",
-          "value": "knet",
-          "label": "KNet"
+          "value": 0,
+          "label": "Disabled"
         }
       ]
     }

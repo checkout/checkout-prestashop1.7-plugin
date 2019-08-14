@@ -83,8 +83,6 @@ class Checkoutcom extends PaymentModule
             return false;
         }
 
-        $iso_code = Country::getIsoById(Configuration::get('PS_COUNTRY_DEFAULT'));
-
         $helper = new CheckoutcomHelperForm();
         foreach ($helper->getConfigFormValues(true) as $key => $value) {
             Configuration::updateValue($key, $value);

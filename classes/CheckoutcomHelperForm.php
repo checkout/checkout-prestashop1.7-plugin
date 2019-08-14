@@ -131,6 +131,13 @@ class CheckoutcomHelperForm extends HelperForm
     protected $settings = array();
 
     /**
+     * List of references.
+     *
+     * @var        array
+     */
+    protected $dictionary = array();
+
+    /**
      * Setup HelperForm.
      */
     public function __construct() {
@@ -194,7 +201,12 @@ class CheckoutcomHelperForm extends HelperForm
             $inputs = array();
 
             foreach ($form[static::FIELD_FIELDS] as $field) {
-                $current['input'] []= $this->{$field[static::FIELD_TYPE]}($field);
+
+                $input = $this->{$field[static::FIELD_TYPE]}($field);
+                if($input) {
+                    $current['input'] []= $input;
+                }
+
             }
 
             $list []= array('form' => $current);
@@ -225,11 +237,17 @@ class CheckoutcomHelperForm extends HelperForm
             foreach($form as $s) {
 
                 foreach($s[static::FIELD_FIELDS] as $field) {
-                    if ($defaults) {
-                        $values[$field[static::FIELD_NAME]] = Utilities::getValueFromArray($field, static::FIELD_DEFAULT);
-                    } else {
-                        $values[$field[static::FIELD_NAME]] = Configuration::get($field[static::FIELD_NAME]);
+
+                    if(!Utilities::getValueFromArray($field, 'ignore', false)) {
+
+                        if ($defaults) {
+                            $values[$field[static::FIELD_NAME]] = Utilities::getValueFromArray($field, static::FIELD_DEFAULT);
+                        } else {
+                            $values[$field[static::FIELD_NAME]] = Configuration::get($field[static::FIELD_NAME]);
+                        }
+
                     }
+
                 }
 
             }
@@ -307,7 +325,6 @@ class CheckoutcomHelperForm extends HelperForm
                 static::FIELD_LABEL => $this->l($field[static::FIELD_LABEL]),
                 static::FIELD_NAME => $field[static::FIELD_NAME],
                 static::FIELD_REQUIRED => Utilities::getValueFromArray($field, static::FIELD_REQUIRED, false),
-                'multiple' => Utilities::getValueFromArray($field, 'multiple', false),
                 static::FIELD_DESC => $this->l(Utilities::getValueFromArray($field, static::FIELD_DESC)),
                 'options' => $select($field['options'])
             );
@@ -397,6 +414,21 @@ class CheckoutcomHelperForm extends HelperForm
                 static::FIELD_NAME => $this->l($state[static::FIELD_NAME])
             );
         }
+
+    }
+
+    /**
+     * Generate list for dictionary.
+     * @param      array $field
+     * @return     array
+     */
+    protected function dictionary(array &$field) {
+
+        foreach ($field['options'] as $value) {
+            $this->dictionary[$value['key']] = $value['value'];
+        }
+
+        return null;
 
     }
 

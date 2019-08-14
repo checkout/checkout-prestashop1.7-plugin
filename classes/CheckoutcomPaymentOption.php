@@ -20,21 +20,23 @@ Debug::write('#getCard');
            return;
         }
 
+        // Load Context
         $context = Context::getContext();
-        Debug::write($context);
+
+        // Load language
+        $lang = Language::getLanguage($context->cart->id_lang);
+
         $context->smarty->assign([
+            'module' => $module->name,
             'CHECKOUTCOM_PUBLIC_KEY' => Configuration::get('CHECKOUTCOM_PUBLIC_KEY'),
             'CHECKOUTCOM_CARD_FORM_THEME' => Configuration::get('CHECKOUTCOM_CARD_FORM_THEME'),
-         //
-
-            'lang' => $context->card->id_lang, //Configuration::get('CHECKOUTCOM_CARD_LANG_FALLBACK'), // $context->card-id_lang
+            'lang' => $lang ? $lang['language_code'] : Configuration::get('CHECKOUTCOM_CARD_LANG_FALLBACK'),
             'debug' => DebugMode::isDebugModeEnabled()
         ]);
 
 		$option = new PaymentOption();
-        $option->setAction($context->link->getModuleLink($module->name, 'payment', array(), true))
-                ->setAdditionalInformation($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/card.tpl'))
-                ->setModuleName($module->name)
+        $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/forms/card.tpl'))
+                ->setModuleName($module->name . '_card')
                 ->setCallToActionText($module->l(Configuration::get('CHECKOUTCOM_CARD_TITLE')));
 
         return $option;
@@ -50,7 +52,12 @@ Debug::write('#getCard');
      * @return     PaymentOption  The alternatives.
      */
 	public static function getAlternatives($module, array $params) {
+
+        AlternativePayment::getKeys();
+
+        return;
 Debug::write('#getAlternatives');
+Debug::write(Configuration::get('CHECKOUTCOM_ALTERNATIVE_METHODS'));
         if(!Configuration::get('CHECKOUTCOM_ALTERNATIVE_ENABLED')) {
             return;
         }
@@ -60,29 +67,11 @@ Debug::write('#getAlternatives');
     	$option = new PaymentOption();
         $option->setAction($context->link->getModuleLink($module->name, 'payment', array(), true))
                 ->setAdditionalInformation($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/alternative.tpl'))
-                ->setModuleName($module->name)
+                ->setModuleName($module->name . '_alternative')
                 ->setCallToActionText($module->l(Configuration::get('CHECKOUTCOM_ALTERNATIVE_TITLE')));
 
         return $option;
 
 	}
-
-     protected function generateForm()
-    {
-        $months = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $months[] = sprintf("%02d", $i);
-        }
-        $years = [];
-        for ($i = 0; $i <= 10; $i++) {
-            $years[] = date('Y', strtotime('+'.$i.' years'));
-        }
-        $this->context->smarty->assign([
-            'action' => $this->context->link->getModuleLink($this->name, 'validation', array(), true),
-            'months' => $months,
-            'years' => $years,
-        ]);
-        return $this->context->smarty->fetch('module:paymentexample/views/templates/front/payment_form.tpl');
-    }
 
 }

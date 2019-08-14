@@ -28,22 +28,17 @@
   <br>
 </section>
 
-
 <script type="text/javascript" src="https://cdn.checkout.com/js/frames.js" asyc></script>
-{literal}
+
 <script type="text/javascript">
 
-
   const $frames = document.getElementById('frames');
-
-  console.log($frames.dataset);
-
 	Frames.init({
       publicKey: $frames.dataset.key || 'pk_test_10b309b8-904c-4db3-b79d-fb114ab15620', // @todo remove my key
       containerSelector: '.frames-container',
       theme: $frames.dataset.theme,
       debugMode: $frames.dataset.debug,
-      //localisation:"{$config_configuration}",
+      localisation: $frames.dataset.lang,
 
       // customerName:'',
       // billingDetails:{},
@@ -69,6 +64,4 @@
       }
     });
 
-
 </script>
-{/literal}
