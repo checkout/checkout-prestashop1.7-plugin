@@ -1,0 +1,1 @@
+# Payment Gateway by Checkout.com

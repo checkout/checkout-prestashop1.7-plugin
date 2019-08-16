@@ -1,270 +1,191 @@
 [{
-  "title": "",
-  "fields": [{
-      "name": "CHECKOUTCOM_ALTERNATIVE_METHODS",
-      "type": "dictionary",
-      "ignore":1,
-      "options": [{
-          "key":"CHECKOUTCOM_ALTERNATIVE_GIROPAY",
-          "value": {
-            "id": "giropay",
-            "label": "Giropay"
-          },
-        },
-        {
-          "key":"CHECKOUTCOM_ALTERNATIVE_IDEAL",
-          "value": {
-            "id": "ideal",
-            "label": "iDEAL"
-          },
-        },
-        {
-          "key":"CHECKOUTCOM_ALTERNATIVE_POLI",
-          "value": {
-            "id": "poli",
-            "label": "Poli"
-          },
-        },
-        {
-          "key":"CHECKOUTCOM_ALTERNATIVE_SEPA",
-          "value": {
-            "id": "sepa",
-            "label": "SEPA"
-          },
-        },
-        {
-          "key":"CHECKOUTCOM_ALTERNATIVE_SOFORT",
-          "value": {
-            "id": "sofort",
-            "label": "Sofort"
-          },
-        },
-        {
-          "key":"CHECKOUTCOM_ALTERNATIVE_KLARNA",
-          "value": {
-            "id": "klarna",
-            "label": "Klarna"
-          },
-        },
-        {
-          "key":"CHECKOUTCOM_ALTERNATIVE_EPS",
-          "value": {
-            "id": "eps",
-            "label": "EPS"
-          },
-        },
-        {
-          "key":"CHECKOUTCOM_ALTERNATIVE_FAWRY",
-          "value": {
-            "id": "fawry",
-            "label": "Fawry"
-          },
-        },
-        {
-          "key":"CHECKOUTCOM_ALTERNATIVE_BANCONTACT",
-          "value": {
-            "id": "bancontact",
-            "label": "Bancontact"
-          },
-        },
-        {
-          "key":"CHECKOUTCOM_ALTERNATIVE_KNET",
-          "value": {
-            "id": "knet",
-            "label": "KNet"
-          },
-        }
-      ]
+  "name": "CHECKOUTCOM_ALTERNATIVE_GIROPAY",
+  "label": "Enable Giropay",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
     },
     {
-      "name": "CHECKOUTCOM_ALTERNATIVE_GIROPAY",
-      "label": "Enable Giropay",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
-      "name": "CHECKOUTCOM_ALTERNATIVE_IDEAL",
-      "label": "Enable iDEAL",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
-      "name": "CHECKOUTCOM_ALTERNATIVE_POLI",
-      "label": "Enable POLi",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
-      "name": "CHECKOUTCOM_ALTERNATIVE_SEPA",
-      "label": "Enable SEPA",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
-      "name": "CHECKOUTCOM_ALTERNATIVE_SOFORT",
-      "label": "Enable Sofort",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
-      "name": "CHECKOUTCOM_ALTERNATIVE_KLARNA",
-      "label": "Enable Klarna",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
-      "name": "CHECKOUTCOM_ALTERNATIVE_EPS",
-      "label": "Enable EPS",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
-      "name": "CHECKOUTCOM_ALTERNATIVE_FAWRY",
-      "label": "Enable Fawry",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
-      "name": "CHECKOUTCOM_ALTERNATIVE_BANCONTACT",
-      "label": "Enable Bancontact",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
-    },
-    {
-      "name": "CHECKOUTCOM_ALTERNATIVE_KNET",
-      "label": "Enable KNet",
-      "description": "",
-      "type": "switch",
-      "default": 0,
-      "required": 0,
-      "options": [{
-          "id": "id_option",
-          "value": 1,
-          "label": "Enabled"
-        },
-        {
-          "id": "id_option",
-          "value": 0,
-          "label": "Disabled"
-        }
-      ]
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
     }
   ]
-}]
+},
+{
+  "name": "CHECKOUTCOM_ALTERNATIVE_IDEAL",
+  "label": "Enable iDEAL",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
+    },
+    {
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
+    }
+  ]
+},
+{
+  "name": "CHECKOUTCOM_ALTERNATIVE_POLI",
+  "label": "Enable POLi",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
+    },
+    {
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
+    }
+  ]
+},
+{
+  "name": "CHECKOUTCOM_ALTERNATIVE_SEPA",
+  "label": "Enable SEPA",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
+    },
+    {
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
+    }
+  ]
+},
+{
+  "name": "CHECKOUTCOM_ALTERNATIVE_SOFORT",
+  "label": "Enable Sofort",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
+    },
+    {
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
+    }
+  ]
+},
+{
+  "name": "CHECKOUTCOM_ALTERNATIVE_KLARNA",
+  "label": "Enable Klarna",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
+    },
+    {
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
+    }
+  ]
+},
+{
+  "name": "CHECKOUTCOM_ALTERNATIVE_EPS",
+  "label": "Enable EPS",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
+    },
+    {
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
+    }
+  ]
+},
+{
+  "name": "CHECKOUTCOM_ALTERNATIVE_FAWRY",
+  "label": "Enable Fawry",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
+    },
+    {
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
+    }
+  ]
+},
+{
+  "name": "CHECKOUTCOM_ALTERNATIVE_BANCONTACT",
+  "label": "Enable Bancontact",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
+    },
+    {
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
+    }
+  ]
+},
+{
+  "name": "CHECKOUTCOM_ALTERNATIVE_KNET",
+  "label": "Enable KNet",
+  "description": "",
+  "type": "switch",
+  "default": 0,
+  "required": 0,
+  "options": [{
+      "id": "id_option",
+      "value": 1,
+      "label": "Enabled"
+    },
+    {
+      "id": "id_option",
+      "value": 0,
+      "label": "Disabled"
+    }
+  ]
+}
+]

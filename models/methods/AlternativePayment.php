@@ -6,21 +6,14 @@ class AlternativePayment {
 
 	const FILENAME = 'alternatives';
 
-
+	protected static $index = array();
 	protected static $definition = array();
 
 
 	public static function getKeys() {
 
-		if(!static::$definition) {
-			static::$definition = static::load();
-		}
-
-
-		foreach ($variable as $key => $value) {
-			# code...
-		}
-
+		static::load();
+		return array_keys(static::$index);
 
 	}
 
@@ -28,10 +21,18 @@ class AlternativePayment {
 
 	protected static function load() {
 
-		return json_decode(Utilities::getConfig(static::FILENAME), true);
+		if(!static::$definition) {
+
+			$data = json_decode(Utilities::getConfig(static::FILENAME), true);
+			static::$definition = $data ? $data : array();
+
+			static::$index = array();
+			for($i = 0; $i < sizeof(static::$definition); $i++) {
+				static::$index[static::$definition['name']] = $i;
+			}
+
+		}
 
 	}
-
-
 
 }
