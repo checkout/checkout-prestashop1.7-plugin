@@ -1,67 +1,57 @@
-{*
-* 2007-2019 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2019 PrestaShop SA
-*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*}
+<form name="{$module}" id="{$module}-card-form" action="{$link->getModuleLink($module, 'payment', [], true)|escape:'html'}" method="POST">
+	<div id="{$module}-card-frame" class="{$module}-frames-container" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-debug="{$debug}" data-theme="{$CHECKOUTCOM_CARD_FORM_THEME}" data-lang="{$lang}" data-module="{$module}"></div>
+  <input id="{$module}-card-source" type="hidden" name="source" value="card" required>
+	<input id="{$module}-card-token" type="hidden" name="token" value="" required>
+</form>
 
-<section>
-  <div id="frames" class="frames-container" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-debug="{$debug}" data-theme="{$CHECKOUTCOM_CARD_FORM_THEME}" data-lang="{$lang}"></div>
-  <br>
-</section>
-
-<script type="text/javascript" src="https://cdn.checkout.com/js/frames.js" asyc></script>
-
+{literal}
+<script type="text/javascript" src="https://cdn.checkout.com/js/frames.js"></script>
 <script type="text/javascript">
 
-  const $frames = document.getElementById('frames');
-	Frames.init({
-      publicKey: $frames.dataset.key || 'pk_test_10b309b8-904c-4db3-b79d-fb114ab15620', // @todo remove my key
-      containerSelector: '.frames-container',
-      theme: $frames.dataset.theme,
-      debugMode: $frames.dataset.debug,
-      localisation: $frames.dataset.lang,
+  if(typeof Frames !== 'undefined') {
 
-      // customerName:'',
-      // billingDetails:{},
+    Frames.removeAllEventHandlers(Frames.Events.CARD_VALIDATION_CHANGED);
+    Frames.removeAllEventHandlers(Frames.Events.CARD_TOKENISED);
+    Frames.removeAllEventHandlers(Frames.Events.FRAME_ACTIVATED);
 
-      cardValidationChanged: function() {
-        // if all fields contain valid information, the Pay now
-        // button will be enabled and the form can be submitted
-        // payNowButton.disabled = !Frames.isCardValid();
-      },
-      cardSubmitted: function() {
+    const $cForm = document.getElementById('checkoutcom-card-form');
+    const $frames = document.getElementById('checkoutcom-card-frame');
+    const $input = document.getElementById('checkoutcom-card-token');
 
-        // payNowButton.disabled = true;
-        // display loader
-        //
-      },
-      cardTokenised: function(event) {
-        // var cardToken = event.data.cardToken;
-        // Frames.addCardToken(paymentForm, cardToken)
-        // paymentForm.submit()
-      },
-      cardTokenisationFailed: function(event) {
-        // catch the error
+    Frames.init({
+        publicKey: $frames.dataset.key || 'pk_test_10b309b8-904c-4db3-b79d-fb114ab15620', // @todo: remove my key
+        containerSelector: '.' + $frames.dataset.module + '-frames-container',
+        theme: $frames.dataset.theme,
+        debugMode: $frames.dataset.debug,
+        localisation: $frames.dataset.lang,
+
+        // customerName:'',
+        // billingDetails:{},
+
+        cardValidationChanged: function() {$input.value = '';},
+        cardSubmitted: function() {},
+        cardTokenised: function(event) {$input.value = event.data.cardToken; $cForm.submit();},
+        cardTokenisationFailed: function(event) {
+          // Display error message @todo: display error
+          $input.value = '';
+        }
+      });
+
+    $cForm.onsubmit = function(e) {
+      e.preventDefault();
+
+      if(Frames.isCardValid()) {
+        Frames.submitCard();
       }
-    });
+
+      Frames.unblockFields();
+
+    };
+
+  } else {
+    // Hide pay by card option
+  }
 
 </script>
+{/literal}
+<br>

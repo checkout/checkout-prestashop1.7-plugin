@@ -24,31 +24,40 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
-
 /**
  * Define module constants
  */
 define('CHECKOUTCOM_ROOT', __DIR__);
 
+if (!defined('_PS_VERSION_') || !is_readable(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php')) {
+    exit;
+}
 
 /**
- * Include necessary scripts
+ * Fix missing namespace at install
  */
-require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'Utilities.php');
-require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'Debug.php');
-require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'CheckoutcomHelperForm.php');
-require_once(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'CheckoutcomPaymentOption.php');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
 
-class Checkoutcom extends PaymentModule
+use CheckoutCom\PrestaShop\Helpers\Debug;
+use CheckoutCom\PrestaShop\Models\Config;
+use CheckoutCom\PrestaShop\Classes\CheckoutcomHelperForm;
+use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
+
+class CheckoutCom extends PaymentModule
 {
 
     const QUALIFIED_NAME = __CLASS__;
 
+    /**
+     * @todo: what is this?
+     *
+     * @var        boolean
+     */
     protected $config_form = false;
 
+    /**
+     * Define module.
+     */
     public function __construct()
     {
         $this->name = 'checkoutcom';
@@ -77,23 +86,18 @@ class Checkoutcom extends PaymentModule
      */
     public function install()
     {
+Debug::write('# checkoutcom.install');
         if (extension_loaded('curl') == false)
         {
             $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module.');
             return false;
         }
 
-        $helper = new CheckoutcomHelperForm();
-        foreach ($helper->getConfigFormValues(true) as $key => $value) {
-            Configuration::updateValue($key, $value);
-        }
-
-        include(dirname(__FILE__).'/sql/install.php');
+        Config::install();
 
         return parent::install() &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('header') &&
-            $this->registerHook('backOfficeHeader') &&
             $this->registerHook('payment') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('actionPaymentCCAdd') &&
@@ -103,15 +107,15 @@ class Checkoutcom extends PaymentModule
             $this->registerHook('displayPaymentTop');
     }
 
+    /**
+     * Uninstall module.
+     *
+     * @return     <type>  ( description_of_the_return_value )
+     */
     public function uninstall()
     {
-        $helper = new CheckoutcomHelperForm();
-        foreach ($helper->getConfigFormValues() as $key => $value) {
-            Configuration::deleteByName($key);
-        }
-
-        include(dirname(__FILE__).'/sql/uninstall.php'); //@todo
-
+Debug::write('# checkoutcom.uninstall');
+        Config::uninstall();
         return parent::uninstall();
     }
 
@@ -120,22 +124,26 @@ class Checkoutcom extends PaymentModule
      */
     public function getContent()
     {
+Debug::write('# checkoutcom.getContent');
         /**
          * If values have been submitted in the form, process.
          */
-        if (((bool)Tools::isSubmit('submitCheckoutcomModule')) == true) {
+        if (((bool)Tools::isSubmit('submitCheckoutComModule')) == true) {
             $this->postProcess();
         }
 
         $this->context->smarty->assign('module_dir', $this->_path);
         $this->checkoutcomSettings($this->context->smarty);
 
-        $output = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
-
-        return $output;
+        return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
 
     }
 
+    /**
+     * Prepare configuration page.
+     *
+     * @param      <type>  $smarty  The smarty
+     */
     protected function checkoutcomSettings(&$smarty) {
 
         $helper = new CheckoutcomHelperForm();
@@ -147,13 +155,12 @@ class Checkoutcom extends PaymentModule
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
 
         $helper->identifier = $this->identifier;
-        $helper->submit_action = 'submitCheckoutcomModule';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
+        $helper->submit_action = 'submitCheckoutComModule';
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false).'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
         $helper->tpl_vars = array(
-            'fields_value' => $helper->getConfigFormValues(),
+            'fields_value' => Config::values(),
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
         );
@@ -167,10 +174,7 @@ class Checkoutcom extends PaymentModule
      */
     protected function postProcess()
     {
-        $helper = new CheckoutcomHelperForm();
-        $form_values = $helper->getConfigFormValues();
-
-        foreach (array_keys($form_values) as $key) {
+        foreach (Config::keys() as $key) {
             $value = Tools::getValue($key);
             if($value !== false) {
                 Configuration::updateValue($key, $value);
@@ -196,25 +200,17 @@ Debug::write('#hookPaymentOptions');
 
         $methods = array(
             CheckoutcomPaymentOption::getCard($this, $params),
-            CheckoutcomPaymentOption::getAlternatives($this, $params)
+            // CheckoutcomPaymentOption::getApple($this, $params),
+            // CheckoutcomPaymentOption::getGoogle($this, $params)
         );
+
+        $alternatives = CheckoutcomPaymentOption::getAlternatives($this, $params);
+        foreach ($alternatives as $method) {
+            array_push($methods, $method);
+        }
 
         return array_filter($methods); // Remove nulls
 
-    }
-
-
-
-    /**
-    * Add the CSS & JavaScript files you want to be loaded in the BO.
-    */
-    public function hookBackOfficeHeader()
-    {
-Debug::write('#hookBackOfficeHeader');
-        if (Tools::getValue('module_name') == $this->name) {
-            $this->context->controller->addJS($this->_path.'views/js/back.js');
-            $this->context->controller->addCSS($this->_path.'views/css/back.css');
-        }
     }
 
     /**
@@ -222,9 +218,13 @@ Debug::write('#hookBackOfficeHeader');
      */
     public function hookHeader()
     {
-Debug::write('#hookHeader');
-        $this->context->controller->addJS($this->_path.'/views/js/front.js');
-        $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+
+        if(Tools::getValue() === 'order') {
+            $this->context->controller->addJquery();
+            $this->context->controller->addJS($this->_path.'/views/js/front.js');
+            $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+        }
+
     }
 
     /**

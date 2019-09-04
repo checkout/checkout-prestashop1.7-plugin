@@ -32,7 +32,7 @@
 
 <!-- Tab panes -->
 <div class="tab-content">
-	<div class="tab-pane active" id="template_1">{$config_configuration}</div>
+	<div class="tab-pane active" id="template_1">{$config_main}</div>
 	<div class="tab-pane" id="template_2">{$config_card}</div>
 	<div class="tab-pane" id="template_3">{$config_alternatives}</div>
 </div>
