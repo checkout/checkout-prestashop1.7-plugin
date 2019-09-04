@@ -219,7 +219,7 @@ Debug::write('#hookPaymentOptions');
     public function hookHeader()
     {
 
-        if(Tools::getValue() === 'order') {
+        if(Tools::getValue('controller') === 'order') {
             $this->context->controller->addJquery();
             $this->context->controller->addJS($this->_path.'/views/js/front.js');
             $this->context->controller->addCSS($this->_path.'/views/css/front.css');
