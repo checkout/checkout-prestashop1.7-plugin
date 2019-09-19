@@ -75,26 +75,6 @@
          ]
       },
       {
-         "name":"CHECKOUTCOM_CARD_FORM_THEME",
-         "label":"Form Theme",
-         "description":"Select the theme to use for the payment form.",
-         "type":"select",
-         "default":"standard",
-         "required":0,
-         "options":[
-            {
-               "id":"id_option",
-               "value":"standard",
-               "label":"Standard"
-            },
-            {
-               "id":"id_option",
-               "value":"simple",
-               "label":"Simple"
-            }
-         ]
-      },
-      {
          "name":"CHECKOUTCOM_CARD_USE_3DS",
          "label":"Use 3D Secure",
          "description":"",

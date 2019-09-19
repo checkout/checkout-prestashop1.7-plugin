@@ -6,7 +6,7 @@ use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use Checkout\Models\Payments\TokenSource;
 
-class Card extends Method {
+class Google extends Method {
 
 	/**
 	 * Process payment.
@@ -21,23 +21,6 @@ class Card extends Method {
 		$payment = static::makePayment($source);
 
 		return static::request($payment);
-
-	}
-
-	/**
-	 * Get Meta information.
-	 *
-	 * @param      \Context  $context  The context
-	 *
-	 * @return     Metadata  The metadata.
-	 */
-	protected static function getMetadata(\Context $context) {
-
-		$metadata = parent::getMetadata($context);
-
-		//@todo add mada
-
-		return $metadata;
 
 	}
 

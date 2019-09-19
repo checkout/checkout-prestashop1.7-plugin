@@ -2,13 +2,16 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments;
 
-use Checkout\Models\Payments\Method as MethodSource;
+use Checkout\CheckoutApi;
+use Checkout\Models\Response;
 use Checkout\Models\Payments\Payment;
 use Checkout\Models\Payments\ThreeDs;
 use Checkout\Models\Payments\IdSource;
+use Checkout\Models\Payments\Metadata;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use Checkout\Models\Payments\BillingDescriptor;
+use Checkout\Models\Payments\Method as MethodSource;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
 
@@ -45,12 +48,17 @@ abstract class Method {
 		$payment = new Payment($source, $context->currency->iso_code);
 		$payment->amount = (int)('' . ($context->cart->getOrderTotal() * 100)); //@todo: improve this
 
-		//$payment->metadata = ['methodId' => $methodId];
+		$payment->metadata = static::getMetadata($context);
 		//$payment->reference = $order->getUniqReferenceOf();
+
+		$cart_id = $context->cart->id;
+        $secure_key = $context->customer->secure_key;
+
+        // @todo: add customer
 
         // Set the payment specifications
         $payment->capture = Config::needsAutoCapture();
-        $payment->success_url = $context->link->getModuleLink('checkoutcom', 'verify', [], true);
+        $payment->success_url = $context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
         $payment->failure_url = $context->link->getModuleLink('checkoutcom', 'fail', [], true);
         $payment->description = Config::get('PS_SHOP_NAME') . ' Order';
         $payment->payment_type = 'Regular';
@@ -69,6 +77,27 @@ abstract class Method {
 	}
 
 	/**
+	 * Get Meta information.
+	 *
+	 * @param      \Context  $context  The context
+	 *
+	 * @return     Metadata  The metadata.
+	 */
+	protected static function getMetadata(\Context $context) {
+
+		$metadata = new Metadata();
+
+		$module = \Module::getInstanceByName('checkoutcom');
+		$metadata->server_url = \Tools::getHttpHost(true);
+		$metadata->sdk_data = 'PHP SDK ' . CheckoutApi::VERSION;
+		$metadata->integration_data = 'Checkout.com PrestaShop Plugin ' . $module->version;
+		$metadata->platform_data = 'PrestaShop ' . _PS_VERSION_;
+
+		return $metadata;
+
+	}
+
+	/**
 	 * Make API request.
 	 *
 	 * @param      \Checkout\Models\Payments\Payment  $payment  The payment
@@ -77,11 +106,14 @@ abstract class Method {
 	 */
 	protected static function request(Payment $payment) {
 
-		$response = null;
+		$response = new Response();
 
 		try{
 			$response = CheckoutApiHandler::api()->payments()->request($payment);
 		} catch(CheckoutHttpException $ex) {
+			$response->http_code = $ex->getCode();
+			$response->message = $ex->getMessage();
+			$response->errors = $ex->getErrors();
 			Debug::write($ex->getBody());
 		}
 

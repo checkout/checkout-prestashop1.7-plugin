@@ -35,7 +35,6 @@ Debug::write('CheckoutCheckoutcomPaymentOption.getCard');
         $context->smarty->assign([
             'module' => $module->name,
             'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
-            'CHECKOUTCOM_CARD_FORM_THEME' => Config::get('CHECKOUTCOM_CARD_FORM_THEME'),
             'lang' => $lang ? $lang['language_code'] : Config::get('CHECKOUTCOM_CARD_LANG_FALLBACK'),
             'debug' => DebugMode::isDebugModeEnabled()
         ]);
@@ -43,6 +42,7 @@ Debug::write('CheckoutCheckoutcomPaymentOption.getCard');
         $option = new PaymentOption();
         $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/card.tpl'))
                 ->setModuleName($module->name . '-card-form')
+                ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/supported.svg'))
                 ->setCallToActionText($module->l(Config::get('CHECKOUTCOM_CARD_TITLE')));
 
         return $option;
@@ -83,7 +83,8 @@ Debug::write('CheckoutCheckoutcomPaymentOption.getCard');
 
         		$option = new PaymentOption();
         		$option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/alternatives/'.$field['key'].'.tpl'))
-                        ->setModuleName($module->name . '-' .$field['key'] . '-form')
+                        ->setModuleName($module->name . '-' . $field['key'] . '-form')
+                        ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/' . $field['key'] . '.svg'))
                         ->setCallToActionText($field['title']);
 
 		        $list []= $option;
@@ -96,6 +97,41 @@ Debug::write('CheckoutCheckoutcomPaymentOption.getCard');
 
     }
 
+    /**
+     * Generate payment option.
+     *
+     * @param      <type>         $module  The module
+     * @param      <type>         $params  The parameters
+     *
+     * @return     PaymentOption  The card.
+     */
+    public static function getGoogle(&$module, &$params) {
+Debug::write('CheckoutCheckoutcomPaymentOption.getGoogle');
+        if(!Config::get('CHECKOUTCOM_GOOGLE_ENABLED')) {
+           return;
+        }
 
+        // Load Context
+        $context = \Context::getContext();
+
+        // Load language
+        $lang = \Language::getLanguage($context->cart->id_lang);
+
+        $context->smarty->assign([
+            'module' => $module->name,
+            'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
+            'lang' => $lang ? $lang['language_code'] : Config::get('CHECKOUTCOM_CARD_LANG_FALLBACK'),
+            'debug' => DebugMode::isDebugModeEnabled()
+        ]);
+
+        $option = new PaymentOption();
+        $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/google.tpl'))
+                ->setModuleName($module->name . '-google-form')
+                ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/googlepay.svg'))
+                ->setCallToActionText($module->l(Config::get('CHECKOUTCOM_GOOGLE_TITLE')));
+
+        return $option;
+
+    }
 
 }

@@ -28,14 +28,14 @@
 	<ul class="alert alert-info">
 			<li>{l s='This action should be used to redirect your customer to the website of your payment processor' mod='checkoutcom'}.</li>
 	</ul>
-	
+
 	<div class="alert alert-warning">
 		{l s='You can redirect your customer with an error message' mod='checkoutcom'}:
-		<a href="{$link->getModuleLink('checkoutcom', 'redirect', ['action' => 'error'], true)|escape:'htmlall':'UTF-8'}" title="{l s='Look at the error' mod='checkoutcom'}">
+		<a href="{$link->getModuleLink('checkoutcom', 'payment', ['action' => 'error'], true)|escape:'htmlall':'UTF-8'}" title="{l s='Look at the error' mod='checkoutcom'}">
 			<strong>{l s='Look at the error message' mod='checkoutcom'}</strong>
 		</a>
 	</div>
-	
+
 	<div class="alert alert-success">
 		{l s='You can also redirect your customer to the confirmation page' mod='checkoutcom'}:
 		<a href="{$link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true)|escape:'htmlall':'UTF-8'}" title="{l s='Confirm' mod='checkoutcom'}">

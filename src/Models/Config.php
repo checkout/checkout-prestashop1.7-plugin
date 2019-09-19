@@ -20,7 +20,7 @@ class Config extends \Configuration{
      *
      * @var        array
      */
-	static $configs = array();
+	protected static $configs = array();
 
 	/**
 	 * Setup module variables.
@@ -64,7 +64,7 @@ Debug::write('Config.loadConfigs().$configs is empty');
 			foreach ($files as $file) {
 	            if(strpos($file, '.json') !== false) {
 	            	$filename = basename($file, '.json');
-					Config::$configs[$filename] = Utilities::getConfig($filename);
+					self::$configs[$filename] = Utilities::getConfig($filename);
 	            }
 	        }
 
@@ -159,7 +159,7 @@ Debug::write('Config.defaults('.$name.')');
 Debug::write('Config.keys().' . $name);
 			$forms = static::$configs[$name];
 		} else {
-Debug::write('Config.keus().null');
+Debug::write('Config.keys().null');
 			foreach (static::$configs as $key => $configuration) {
 				$forms = array_merge($forms, $configuration);
 			}

@@ -5,21 +5,6 @@ use CheckoutCom\PrestaShop\Models\Config;
 
 class CheckoutcomPaymentModuleFrontController extends ModuleFrontController
 {
-    /**
-     * Layout
-     *
-     * @var        boolean
-     */
-    public $display_column_left = false;
-
-    /**
-     * Initialize the page.
-     */
-    public function init()
-    {
-        header('Content-Type: text/plain; charset=utf-8');
-        parent::init();
-    }
 
     /**
      * Most used methods.
@@ -41,6 +26,16 @@ class CheckoutcomPaymentModuleFrontController extends ModuleFrontController
         )
     );
 
+
+    /**
+     * Initialize the page.
+     */
+    public function init()
+    {
+        header('Content-Type: text/plain; charset=utf-8');
+        parent::init();
+    }
+
     /**
      * Initiate content display.
      */
@@ -61,7 +56,8 @@ class CheckoutcomPaymentModuleFrontController extends ModuleFrontController
             }
         }
 
-        die(''); // Payment method not supported.
+        // @redirect to error.
+        die('Payment method not supported.');
 
     }
 
@@ -73,12 +69,24 @@ class CheckoutcomPaymentModuleFrontController extends ModuleFrontController
     protected function pay($class) {
 
         $response = $class::pay(Tools::getAllValues());
-        if(!$response || !$response->isSuccessful()) {
-            // redirect to error page
+
+        // Failed for varies reasons
+        if(!$response->isSuccessful()) {
+            // @todo: if token expired return to checkout
+            print_r($response);
+            die('falid could not make the payment');
         }
 
-print_r($response);
-die();
+        // Requires more action
+        if($response->isPending()) {
+            // todo refirect
+            Tools::redirectLink($response->getRedirection());
+        }
+
+        // No problems, redirect to confirmation
+        $cart_id = $this->context->cart->id;
+        $secure_key = $this->context->customer->secure_key;
+        Tools::redirectLink($this->context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true));
 
     }
 

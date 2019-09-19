@@ -46,8 +46,6 @@ use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
 class CheckoutCom extends PaymentModule
 {
 
-    const QUALIFIED_NAME = __CLASS__;
-
     /**
      * @todo: what is this?
      *
@@ -201,7 +199,7 @@ Debug::write('#hookPaymentOptions');
         $methods = array(
             CheckoutcomPaymentOption::getCard($this, $params),
             // CheckoutcomPaymentOption::getApple($this, $params),
-            // CheckoutcomPaymentOption::getGoogle($this, $params)
+             CheckoutcomPaymentOption::getGoogle($this, $params)
         );
 
         $alternatives = CheckoutcomPaymentOption::getAlternatives($this, $params);

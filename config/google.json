@@ -1,0 +1,42 @@
+[
+   [
+      {
+         "name":"CHECKOUTCOM_GOOGLE_TITLE",
+         "label":"Payment Option Title",
+         "description":"",
+         "type":"text",
+         "icon":"",
+         "default":"Pay by Google Pay with Checkout.com",
+         "required":1
+      },
+      {
+         "name":"CHECKOUTCOM_GOOGLE_ENABLED",
+         "label":"Enable Google Pay",
+         "description":"",
+         "type":"switch",
+         "default":0,
+         "required":1,
+         "options":[
+            {
+               "id":"id_option",
+               "value":1,
+               "label":"Enabled"
+            },
+            {
+               "id":"id_option",
+               "value":0,
+               "label":"Disabled"
+            }
+         ]
+      },
+      {
+         "name":"CHECKOUTCOM_GOOGLE_ID",
+         "label":"Merchant ID",
+         "desc":"Provide your Google Merchant ID.",
+         "type":"text",
+         "default":"",
+         "required":1,
+         "col":2
+      }
+   ]
+]
