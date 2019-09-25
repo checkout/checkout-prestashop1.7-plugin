@@ -4,6 +4,7 @@ namespace CheckoutCom\PrestaShop\Models\Payments;
 
 use Checkout\CheckoutApi;
 use Checkout\Models\Response;
+use Checkout\Models\Customer;
 use Checkout\Models\Payments\Payment;
 use Checkout\Models\Payments\ThreeDs;
 use Checkout\Models\Payments\IdSource;
@@ -54,7 +55,7 @@ abstract class Method {
 		$cart_id = $context->cart->id;
         $secure_key = $context->customer->secure_key;
 
-        // @todo: add customer
+        $payment->customer = static::getCustomer($context);
 
         // Set the payment specifications
         $payment->capture = Config::needsAutoCapture();
@@ -98,6 +99,22 @@ abstract class Method {
 	}
 
 	/**
+	 * Get Customer information.
+	 *
+	 * @param      \Context  $context  The context
+	 *
+	 * @return     Customer  The metadata.
+	 */
+	protected static function getCustomer(\Context $context) {
+
+		$customer = new Customer();
+		$customer->email = $context->customer->email;
+		$customer->name = $context->customer->firstname . ' ' . $context->customer->lastname;
+		return $customer;
+
+	}
+
+	/**
 	 * Make API request.
 	 *
 	 * @param      \Checkout\Models\Payments\Payment  $payment  The payment
@@ -136,5 +153,7 @@ abstract class Method {
 		}
 
 	}
+
+
 
 }

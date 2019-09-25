@@ -51,7 +51,7 @@ class CheckoutCom extends PaymentModule
      *
      * @var        boolean
      */
-    protected $config_form = false;
+    //protected $config_form = false;
 
     /**
      * Define module.
@@ -71,7 +71,7 @@ class CheckoutCom extends PaymentModule
 
         parent::__construct();
 
-        $this->displayName = $this->l('Payment Gateway');
+        $this->displayName = $this->l('Checkout.com Payment Gateway');
         $this->description = $this->l('Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.');
 
         $this->confirmUninstall = $this->l('Are you sure you want to stop accepting payments?');
@@ -112,7 +112,6 @@ Debug::write('# checkoutcom.install');
      */
     public function uninstall()
     {
-Debug::write('# checkoutcom.uninstall');
         Config::uninstall();
         return parent::uninstall();
     }
@@ -122,7 +121,6 @@ Debug::write('# checkoutcom.uninstall');
      */
     public function getContent()
     {
-Debug::write('# checkoutcom.getContent');
         /**
          * If values have been submitted in the form, process.
          */
@@ -134,7 +132,6 @@ Debug::write('# checkoutcom.getContent');
         $this->checkoutcomSettings($this->context->smarty);
 
         return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
-
     }
 
     /**
@@ -216,7 +213,7 @@ Debug::write('#hookPaymentOptions');
      */
     public function hookHeader()
     {
-
+Debug::write('#hookHeader');
         if(Tools::getValue('controller') === 'order') {
             $this->context->controller->addJquery();
             $this->context->controller->addJS($this->_path.'/views/js/front.js');
@@ -291,6 +288,7 @@ Debug::write('#hookDisplayPaymentReturn');
 
     public function hookDisplayPaymentTop()
     {
+Debug::write('#hookDisplayPaymentTop');
         // I don't think this will be needed.
         /* Place your code here. */
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
 	<name>checkoutcom</name>
-	<displayName><![CDATA[Payment Gateway]]></displayName>
+	<displayName><![CDATA[Checkout.com Payment Gateway]]></displayName>
 	<version><![CDATA[1.0.0]]></version>
 	<description><![CDATA[Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.]]></description>
 	<author><![CDATA[Checkout.com]]></author>
