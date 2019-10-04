@@ -116,7 +116,7 @@ Debug::write($field['name'] . ' -> ' . \Configuration::get($field['name'], Utili
 	 */
 	public static function defaults($name = '') {
 		static::load();
-Debug::write('Config.defaults('.$name.')');
+//Debug::write('Config.defaults('.$name.')');
 
 		$forms = array();
 		$fields = array();
@@ -150,16 +150,16 @@ Debug::write('Config.defaults().null');
 	 */
 	public static function keys($name = '') {
 		static::load();
-Debug::write('Config.defaults('.$name.')');
+//Debug::write('Config.defaults('.$name.')');
 
 		$forms = array();
 		$keys = array();
 
 		if($name) {
-Debug::write('Config.keys().' . $name);
+//Debug::write('Config.keys().' . $name);
 			$forms = static::$configs[$name];
 		} else {
-Debug::write('Config.keys().null');
+//Debug::write('Config.keys().null');
 			foreach (static::$configs as $key => $configuration) {
 				$forms = array_merge($forms, $configuration);
 			}
@@ -193,19 +193,5 @@ Debug::write('Config.definition().null');
 
 	}
 
-
-	/**
-	 * Helper methods.
-	 */
-
-	/**
-     * Determines if the payment method needs auto capture.
-     *
-     * @return bool
-     */
-    public static function needsAutoCapture()
-    {
-    	return (static::get('CHECKOUTCOM_PAYMENT_ACTION') || static::get('CHECKOUTCOM_CARD_MADA_CHECK_ENABLED'));
-    }
 
 }

@@ -1,9 +1,11 @@
 <?php
 
 use Checkout\Models\Product;
+use Checkout\Models\Response;
 use Checkout\Models\Sources\Klarna;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
+use Checkout\Library\Exceptions\CheckoutHttpException;
 use CheckoutCom\PrestaShop\Models\Payments\Alternatives\Klarna as KlarnaModel;
 
 
@@ -47,10 +49,9 @@ class CheckoutcomKlarnaModuleFrontController extends ModuleFrontController {
                 $tax,
                 KlarnaModel::getProducts($this->context)
             );
-Debug::write($klarna);
-        $result = CheckoutApiHandler::api()->sources()->add($klarna);
 
-        if($result->isSuccessful()) {
+        $result = $this->requestSource($klarna);
+        if($result && $result->isSuccessful()) {
 
             $response = array(
                 'success' => true,
@@ -65,6 +66,27 @@ Debug::write($klarna);
         }
 
         die(json_encode($response));
+    }
+
+    /**
+     * Safely request source.
+     *
+     * @param      \Checkout\Models\Sources\Klarna  $klarna  The klarna
+     *
+     * @return     Response
+     */
+    protected function requestSource(Klarna $klarna) {
+
+        $result = null;
+
+        try {
+            $result = CheckoutApiHandler::api()->sources()->add($klarna);
+        } catch (CheckoutHttpException $e) {
+            //@todo: handle errors
+        }
+
+        return $result;
+
     }
 
 

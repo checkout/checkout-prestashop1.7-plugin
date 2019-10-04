@@ -23,34 +23,28 @@ class Card extends Method {
 		$source = new TokenSource($params['token']);
 		$payment = static::makePayment($source);
 
-		static::setMada($payment, Utilities::getValueFromArray($params, 'bin', 0));
-
-		print_r(static::request($payment));
-		die();
-
+		static::addMada($payment, Utilities::getValueFromArray($params, 'bin', 0));
 		return static::request($payment);
 
 	}
 
 	/**
-	 * Set MADA to card payments.
+	 * Add MADA to card payments.
 	 *
 	 * @param      Payment  $payment  The payment
 	 * @param      integer                            $bin      The bin
 	 */
-	protected static function setMada(Payment $payment, $bin = 0) {
-Debug::write('Card.setMada');
-Debug::write($bin);
+	protected static function addMada(Payment $payment, $bin = 0) {
 
 		if ($bin && Config::get('CHECKOUTCOM_CARD_MADA_CHECK_ENABLED')) {
+
 			$environment = Config::get('CHECKOUTCOM_LIVE_MODE') ? 'production' : 'sandbox';
-Debug::write($environment);
-			$list = json_decode(Utilities::getFile(__DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . $environment . 'json'), true);
-Debug::write($list);
+			$list = json_decode(Utilities::getFile(__DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . $environment . '.json'), true);
+
 			foreach ($list as $value) {
-Debug::write($value);
-				if($value['bin'] === $bin) {
-Debug::write($value['bin']);
+
+				if($value['bin'] == $bin) {
+
 					$payment->threeDs = new ThreeDs(true);
 					$payment->metadata->udf1 = 'mada';
 					unset($payment->capture);

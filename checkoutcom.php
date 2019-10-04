@@ -47,13 +47,6 @@ class CheckoutCom extends PaymentModule
 {
 
     /**
-     * @todo: what is this?
-     *
-     * @var        boolean
-     */
-    //protected $config_form = false;
-
-    /**
      * Define module.
      */
     public function __construct()
@@ -169,8 +162,19 @@ Debug::write('# checkoutcom.install');
      */
     protected function postProcess()
     {
+ Debug::write('checkoutcom.postProcess-> ' . Tools::isSubmit('CHECKOUTCOM_SECRET_KEY'));
         foreach (Config::keys() as $key) {
             $value = Tools::getValue($key);
+
+            if($key === 'CHECKOUTCOM_SECRET_KEY') {
+
+            }
+
+
+Debug::write('----');
+Debug::write($key);
+Debug::write($value);
+Debug::write('----');
             if($value !== false) {
                 Configuration::updateValue($key, $value);
             }

@@ -47,4 +47,16 @@ class Utilities {
 
 	}
 
+	/**
+	 * Format timestamp to gateway-like format.
+	 *
+	 * @param      integer  $timestamp  The timestamp
+	 *
+	 * @return     string
+	 */
+    public function formatDate($timestamp)
+    {
+        return gmdate("Y-m-d\TH:i:s\Z", $timestamp);
+    }
+
 }

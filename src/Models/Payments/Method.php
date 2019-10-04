@@ -3,14 +3,15 @@
 namespace CheckoutCom\PrestaShop\Models\Payments;
 
 use Checkout\CheckoutApi;
-use Checkout\Models\Response;
 use Checkout\Models\Customer;
+use Checkout\Models\Response;
 use Checkout\Models\Payments\Payment;
 use Checkout\Models\Payments\ThreeDs;
 use Checkout\Models\Payments\IdSource;
 use Checkout\Models\Payments\Metadata;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
+use CheckoutCom\PrestaShop\Helpers\Utilities;
 use Checkout\Models\Payments\BillingDescriptor;
 use Checkout\Models\Payments\Method as MethodSource;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
@@ -58,20 +59,16 @@ abstract class Method {
         $payment->customer = static::getCustomer($context);
 
         // Set the payment specifications
-        $payment->capture = Config::needsAutoCapture();
+        $payment->capture = (bool) Config::get('CHECKOUTCOM_PAYMENT_ACTION');
         $payment->success_url = $context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
         $payment->failure_url = $context->link->getModuleLink('checkoutcom', 'fail', [], true);
         $payment->description = Config::get('PS_SHOP_NAME') . ' Order';
         $payment->payment_type = 'Regular';
 
-        // Security
-        $payment->threeDs = new ThreeDs((bool) Config::get('CHECKOUTCOM_CARD_USE_3DS'));
-        $payment->threeDs->attempt_n3d = (bool) Config::get('CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D');
-        $payment->payment_ip = \Tools::getRemoteAddr();
 
-        if (Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE')) {
-        	$payment->billing_descriptor = new BillingDescriptor(Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_NAME'), Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY'));
-        }
+        static::addThreeDs($payment);
+        static::addDynamicDescriptor($payment);
+        static::addCaptureOn($payment);
 
 		return $payment;
 
@@ -153,6 +150,63 @@ abstract class Method {
 		}
 
 	}
+
+
+	/**
+	 * Helper methods.
+	 */
+
+	/**
+	 * Adds a capture on.
+	 *
+	 * @param      \Checkout\Models\Payments\Payment  $payment  The payment
+	 */
+    public static function addCaptureOn(Payment $payment)
+    {
+
+    	$time = (float) Config::get('CHECKOUTCOM_CAPTURE_TIME');
+    	if($time && Config::get('CHECKOUTCOM_PAYMENT_ACTION')) {
+    		$payment->capture_on = Utilities::formatDate(time() + ($time >= 0.0027 ? $time : 0.0027) * 3600);
+    	}
+Debug::write($payment->capture_on);
+    }
+
+    /**
+     * Adds a dynamic descriptor.
+     *
+     * @param      \Checkout\Models\Payments\Payment  $payment  The payment
+     */
+    public static function addDynamicDescriptor(Payment $payment)
+    {
+
+		if (Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE')) {
+
+        	$payment->billing_descriptor = new BillingDescriptor(
+        		Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_NAME'),
+        		Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY')
+        	);
+
+        }
+
+    }
+
+    /**
+     * Adds a 3DS and IP.
+     *
+     * @param      \Checkout\Models\Payments\Payment  $payment  The payment
+     */
+    public static function addThreeDs(Payment $payment)
+    {
+
+		// Security
+    	$payment->payment_ip = \Tools::getRemoteAddr();
+        $payment->threeDs = new ThreeDs((bool) Config::get('CHECKOUTCOM_CARD_USE_3DS'));
+
+        if($payment->threeDs->enabled) {
+        	$payment->threeDs->attempt_n3d = (bool) Config::get('CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D');
+        }
+
+    }
 
 
 
