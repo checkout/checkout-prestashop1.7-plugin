@@ -48,8 +48,7 @@ abstract class Method {
 		$context = \Context::getContext();
 
 		$payment = new Payment($source, $context->currency->iso_code);
-		$payment->amount = (int)('' . ($context->cart->getOrderTotal() * 100)); //@todo: improve this
-
+		$payment->amount = static::fixAmount($context->cart->getOrderTotal(), $context->currency->iso_code);
 		$payment->metadata = static::getMetadata($context);
 		//$payment->reference = $order->getUniqReferenceOf();
 
@@ -71,6 +70,36 @@ abstract class Method {
         static::addCaptureOn($payment);
 
 		return $payment;
+
+	}
+
+	/**
+	 * Turn amount into integer according to currency.
+	 *
+	 * @param      float  $amount    The amount
+	 * @param      string  $currency  The currency
+	 * @return     integer
+	 */
+	protected static function fixAmount($amount, $currency = '') {
+
+		$multiplier = 100;
+		$full = array('BYN', 'BIF', 'DJF', 'GNF', 'ISK', 'KMF', 'XAF', 'CLF', 'XPF', 'JPY', 'PYG', 'RWF', 'KRW', 'VUV', 'VND', 'XOF');
+		$thousands = array('BHD', 'LYD', 'JOD', 'KWD', 'OMR', 'TND');
+
+		if (in_array($currency, $thousands)) {
+			$multiplier = 1000;
+		} elseif (in_array($currency, $full)) {
+			$multiplier = 1;
+		}
+
+		$price = (int)('' . ($amount * $multiplier)); //@todo: Waiting on SDK precision fix. (#41)
+
+		if($currency === 'CLP') {
+			//@todo: fix this.
+		}
+
+		return ;
+
 
 	}
 
