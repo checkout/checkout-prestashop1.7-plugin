@@ -9,35 +9,17 @@ class CheckoutcomFailureModuleFrontController extends ModuleFrontController
    */
 
   public function initContent() {
-    $this->display_column_left = false;
-    parent::initContent();
+    if ((Tools::isSubmit('cart_id') == false) || (Tools::isSubmit('secure_key') == false)) {
+          return false;
+      }
 
-    $cart = $this->context->cart;
-    $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
-    $currency = $this->context->currency;
-    $customer = new Customer((int) $cart->id_customer);
-    $paymentToken = $_REQUEST['cko-payment-token'];
+      $cart_id = Tools::getValue('cart_id');
+      $secure_key = Tools::getValue('secure_key');
 
-    if($paymentToken){
-		$config['authorization'] = Configuration::get('CHECKOUTAPI_SECRET_KEY');
-		    $config['paymentToken'] = $paymentToken;
-
-		    $Api = CheckoutApi_Api::getApi(array('mode' => Configuration::get('CHECKOUTAPI_TEST_MODE')));
-		    $respondCharge = $Api->verifyChargePaymentToken($config);
-
-		    $this->module->validateOrder((int) $cart->id, Configuration::get('PS_OS_ERROR'), $total, $this->module->displayName, $respondCharge->getStatus() . ' by Checkout.com. (' . $respondCharge->getResponseMessage() . ')', array
-
-		          ('transaction_id' => $respondCharge->getId()), (int) $currency->id, false, $customer->secure_key);
-
-		    $dbLog = models_FactoryInstance::getInstance('models_DataLayer');
-		    $dbLog->logCharge($this->module->currentOrder, $respondCharge->getId(), $respondCharge);
-
-		    Tools::redirectLink(__PS_BASE_URI__.'order-confirmation.php?key='.$customer->secure_key.'&id_cart='
-		            .(int)$this->context->cart->id.'&id_module='.(int)$this->module->id.'&id_order='
-		            .(int)$this->module->currentOrder);
-
-    } else {
-    	Tools::redirect('index.php?controller=order');
-    }
+      // Set error message
+      $this->context->controller->errors[] = $this->trans('An error has occured while processing your transaction.', array(), 'Shop.Notifications.Error');
+      // Redirect to cart
+      $this->redirectWithNotifications(__PS_BASE_URI__.'index.php?controller=order&step=1&key='.$secure_key.'&id_cart='
+          .(int)$cart_id);
   }
 }

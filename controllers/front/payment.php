@@ -70,11 +70,18 @@ class CheckoutcomPaymentModuleFrontController extends ModuleFrontController
 
         $response = $class::pay(Tools::getAllValues());
 
+        $cart_id = $this->context->cart->id;
+        $secure_key = $this->context->customer->secure_key;
+
         // Failed for varies reasons
         if(!$response->isSuccessful()) {
             // @todo: if token expired return to checkout
-            print_r($response);
-            die('falid could not make the payment');
+
+            // Set error message
+            $this->context->controller->errors[] = $this->trans('An error has occured while processing your transaction.', array(), 'Shop.Notifications.Error');
+            // Redirect to cart
+            $this->redirectWithNotifications(__PS_BASE_URI__.'index.php?controller=order&step=1&key='.$secure_key.'&id_cart='
+                .(int)$cart_id);
         }
 
         // Requires more action
@@ -84,8 +91,6 @@ class CheckoutcomPaymentModuleFrontController extends ModuleFrontController
         }
 
         // No problems, redirect to confirmation
-        $cart_id = $this->context->cart->id;
-        $secure_key = $this->context->customer->secure_key;
         Tools::redirectLink($this->context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true));
 
     }
