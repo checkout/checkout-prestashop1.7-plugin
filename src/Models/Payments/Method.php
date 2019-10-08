@@ -43,7 +43,8 @@ abstract class Method {
 	 *
 	 * @return     Payment                             ( description_of_the_return_value )
 	 */
-	public static function makePayment(MethodSource $source) {
+	public static function makePayment(MethodSource $source)
+	{
 
 		$context = \Context::getContext();
 
@@ -63,7 +64,6 @@ abstract class Method {
         $payment->failure_url = $context->link->getModuleLink('checkoutcom', 'failure', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
         $payment->description = Config::get('PS_SHOP_NAME') . ' Order';
         $payment->payment_type = 'Regular';
-
 
         static::addThreeDs($payment);
         static::addDynamicDescriptor($payment);
@@ -197,7 +197,7 @@ abstract class Method {
     	if($time && Config::get('CHECKOUTCOM_PAYMENT_ACTION')) {
     		$payment->capture_on = Utilities::formatDate(time() + ($time >= 0.0027 ? $time : 0.0027) * 3600);
     	}
-Debug::write($payment->capture_on);
+
     }
 
     /**

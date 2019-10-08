@@ -26,8 +26,9 @@
 
 use Checkout\CheckoutApi;
 use Checkout\Models\Response;
-use Checkout\Library\Exceptions\CheckoutHttpException;
 use CheckoutCom\PrestaShop\Helpers\Debug;
+use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
+use Checkout\Library\Exceptions\CheckoutHttpException;
 
 class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 {
@@ -111,16 +112,12 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
     private function _verifySession($session_id)
     {
-        $environment = Configuration::get('CHECKOUTCOM_LIVE_MODE') ? 'production' : 'sandbox';
-        $secret_key  = Configuration::get('CHECKOUTCOM_SECRET_KEY');
 
-        // Initialize the Checkout Api
-        $checkout = new CheckoutApi($secret_key, $environment);
         $response = new Response();
 
         try {
             // Get payment response
-            $response = $checkout->payments()->details($session_id);
+            $response = CheckoutApiHandler::api()->payments()->details($session_id);
 
         } catch (CheckoutHttpException $ex) {
             $response->http_code = $ex->getCode();

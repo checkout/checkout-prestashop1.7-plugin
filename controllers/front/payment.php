@@ -56,8 +56,10 @@ class CheckoutcomPaymentModuleFrontController extends ModuleFrontController
             }
         }
 
-        // @redirect to error.
-        die('Payment method not supported.');
+        // Set error message
+        $this->context->controller->errors[] = $this->trans('Payment method not supported.', array(), 'Shop.Notifications.Error');
+        // Redirect to cart
+        $this->redirectWithNotifications(__PS_BASE_URI__ . 'index.php?controller=order&step=1&key=' . $this->context->customer->secure_key . '&id_cart=' . (int) $cart_id);
 
     }
 

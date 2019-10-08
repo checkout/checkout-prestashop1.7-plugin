@@ -50,31 +50,6 @@
          "col":2
       },
       {
-         "name":"CHECKOUTCOM_INVOICE_GENERATION",
-         "label":"Invoice Generation",
-         "desc":"Determines when the invoice should be generated.",
-         "type":"select",
-         "default":0,
-         "required":0,
-         "options":[
-            {
-               "id":"id_option",
-               "value":0,
-               "label":"Disabled"
-            },
-            {
-               "id":"id_option",
-               "value":1,
-               "label":"Payment authorized"
-            },
-            {
-               "id":"id_option",
-               "value":2,
-               "label":"Payment captured"
-            }
-         ]
-      },
-      {
          "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE",
          "label":"Enable Dynamic Descriptor",
          "desc":"",
