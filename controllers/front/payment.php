@@ -91,7 +91,17 @@ class CheckoutcomPaymentModuleFrontController extends ModuleFrontController
         }
 
         // No problems, redirect to confirmation
-        Tools::redirectLink($this->context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true));
+        Tools::redirectLink($this->context->link->getModuleLink(
+            'checkoutcom',
+            'confirmation',
+            [
+                'cart_id' => $cart_id,
+                'secure_key' => $secure_key,
+                'payment_flagged' => $response->isFlagged(),
+                'action_id' => $response->action_id
+            ],
+            true)
+        );
 
     }
 
