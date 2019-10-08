@@ -23,6 +23,12 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
+
+use Checkout\CheckoutApi;
+use Checkout\Models\Response;
+use Checkout\Library\Exceptions\CheckoutHttpException;
+use CheckoutCom\PrestaShop\Helpers\Debug;
+
 class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 {
     public function postProcess()
@@ -31,17 +37,37 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             return false;
         }
 
+
         $cart_id = Tools::getValue('cart_id');
         $secure_key = Tools::getValue('secure_key');
+        $payment_flagged = Tools::getValue('payment_flagged');
+        $transaction_id = Tools::getValue('action_id');
 
         $cart = new Cart((int) $cart_id);
         $customer = new Customer((int) $cart->id_customer);
+
+        if(Tools::isSubmit('cko-session-id')){
+            $response = $this->_verifySession($_REQUEST['cko-session-id']);
+
+            if($response->isSuccessful()) {
+                $payment_flagged = $response->isFlagged();
+                $actions = $response->actions;
+                $action_id = $actions[0]['id'];
+                $transaction_id = $action_id;
+            } else {
+                // Set error message
+                $this->context->controller->errors[] = $this->trans('An error has occured while processing your transaction.', array(), 'Shop.Notifications.Error');
+                // Redirect to cart
+                $this->redirectWithNotifications(__PS_BASE_URI__.'index.php?controller=order&step=1&key='.$secure_key.'&id_cart='
+                    .(int)$cart_id);
+            }
+        }
 
         /**
          * Since it's an example we are validating the order right here,
          * You should not do it this way in your own module.
          */
-        $payment_status = Configuration::get('PS_OS_PAYMENT'); // Default value for a payment that succeed.
+        $payment_status = $payment_flagged == true ? Configuration::get('CHECKOUTCOM_FLAGGED_ORDER_STATUS') : Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
         $message = null; // You can add a comment directly into the order so the merchant will see it in the BO.
 
         /**
@@ -50,7 +76,17 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
         $module_name = $this->module->displayName;
         $currency_id = (int) Context::getContext()->currency->id;
 
-        $this->module->validateOrder($cart_id, $payment_status, $cart->getOrderTotal(), $module_name, $message, array(), $currency_id, false, $secure_key);
+        $this->module->validateOrder(
+            $cart_id,
+            $payment_status,
+            $cart->getOrderTotal(),
+            $module_name,
+            $message,
+            array( 'transaction_id' => $transaction_id),
+            $currency_id,
+            false,
+            $secure_key
+        );
 
         /**
          * If the order has been validated we try to retrieve it
@@ -71,5 +107,28 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
             return $this->setTemplate('error.tpl');
         }
+    }
+
+    private function _verifySession($session_id)
+    {
+        $environment = Configuration::get('CHECKOUTCOM_LIVE_MODE') ? 'production' : 'sandbox';
+        $secret_key  = Configuration::get('CHECKOUTCOM_SECRET_KEY');
+
+        // Initialize the Checkout Api
+        $checkout = new CheckoutApi($secret_key, $environment);
+        $response = new Response();
+
+        try {
+            // Get payment response
+            $response = $checkout->payments()->details($session_id);
+
+        } catch (CheckoutHttpException $ex) {
+            $response->http_code = $ex->getCode();
+            $response->message = $ex->getMessage();
+            $response->errors = $ex->getErrors();
+            Debug::write($ex->getBody());
+        }
+
+        return $response;
     }
 }

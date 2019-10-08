@@ -98,7 +98,7 @@ abstract class Method {
 			//@todo: fix this.
 		}
 
-		return ;
+		return $price ;
 
 
 	}
