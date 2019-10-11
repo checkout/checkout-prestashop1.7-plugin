@@ -1,4 +1,4 @@
-<form name="{$module}" id="{$module}-card-form" action="{$link->getModuleLink($module, 'payment', [], true)|escape:'html'}" method="POST">
+<form name="{$module}" id="{$module}-card-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" method="POST">
 	<div id="{$module}-card-frame" class="card-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-debug="{$debug}" data-lang="{$lang}" data-module="{$module}"></div>
   <input id="{$module}-card-source" type="hidden" name="source" value="card" required>
 	<input id="{$module}-card-token" type="hidden" name="token" value="" required>

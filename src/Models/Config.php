@@ -64,7 +64,7 @@ Debug::write('Config.loadConfigs().$configs is empty');
 			foreach ($files as $file) {
 	            if(strpos($file, '.json') !== false) {
 	            	$filename = basename($file, '.json');
-					self::$configs[$filename] = Utilities::getConfig($filename);
+					Config::$configs[$filename] = Utilities::getConfig($filename);
 	            }
 	        }
 

@@ -15,13 +15,6 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController {
 
     protected $data = array();
 
-	/**
-     * If set to true, page content and messages will be encoded to JSON before responding to AJAX request.
-     *
-     * @var bool
-     */
-    protected $json = true;
-
     /**
      * Initialize the page.
      */
@@ -36,7 +29,6 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController {
      */
     public function initContent()
     {
-Debug::write('CheckoutcomSepaModuleFrontController.initContent');
 
         $iban = Utilities::getValueFromArray($this->data, 'iban');
         $bic = Utilities::getValueFromArray($this->data, 'bic');
@@ -83,7 +75,7 @@ Debug::write('CheckoutcomSepaModuleFrontController.initContent');
      * @return     integer  The addresses.
      */
     protected function getAddresses() {
-Debug::write('sepa.getAddresses');
+
         $billing = new Address((int) $this->context->cart->id_address_invoice);
         $country = Country::getIsoById($billing->id_country);
 
@@ -120,14 +112,13 @@ Debug::write('sepa.getAddresses');
      * @return     array   The mandate.
      */
     protected function getMandate($iban, $bic, &$address) {
-Debug::write($iban);
-Debug::write($bic);
+
         $mandate = array();
         $sAddress = new SepaAddress($address['customer_address1'], $address['customer_city'], $address['customer_postcode'], $address['customer_country']);
         $data = new SepaData($address['customer_address1'], $address['customer_address1'], $iban, $bic, $address['shop_name'], 'single');
         $source = new Sepa($sAddress, $data);
         $details = CheckoutApiHandler::api()->sources()->add($source);
-Debug::write($details);
+
         if($details->isSuccessful()) {
             $mandate = array(
                 'mandate_reference' => $details->getValue(array('response_data', 'mandate_reference')),
