@@ -150,16 +150,6 @@
          "default":"",
          "required":1,
          "col":2
-      },
-      {
-         "name":"CHECKOUTCOM_SHARED_KEY",
-         "label":"Shared Key",
-         "description":"",
-         "type":"password",
-         "icon":"",
-         "default":"",
-         "required":1,
-         "col":2
       }
    ]
 ]
