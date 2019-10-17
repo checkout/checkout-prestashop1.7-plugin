@@ -21,7 +21,7 @@ class CheckoutcomPaymentOption extends PaymentOption
 	 * @return     PaymentOption  The card.
 	 */
     public static function getCard(&$module, &$params) {
-Debug::write('CheckoutCheckoutcomPaymentOption.getCard');
+
     	if(!Config::get('CHECKOUTCOM_CARD_ENABLED')) {
            return;
         }
@@ -29,13 +29,10 @@ Debug::write('CheckoutCheckoutcomPaymentOption.getCard');
         // Load Context
         $context = \Context::getContext();
 
-		// Load language
-        $lang = \Language::getLanguage($context->cart->id_lang);
-
         $context->smarty->assign([
             'module' => $module->name,
             'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
-            'lang' => $lang ? $lang['language_code'] : Config::get('CHECKOUTCOM_CARD_LANG_FALLBACK'),
+            'lang' => Config::get('CHECKOUTCOM_CARD_LANG_FALLBACK'),
             'debug' => DebugMode::isDebugModeEnabled()
         ]);
 
@@ -106,7 +103,7 @@ Debug::write('CheckoutCheckoutcomPaymentOption.getCard');
      * @return     PaymentOption  The card.
      */
     public static function getGoogle(&$module, &$params) {
-Debug::write('CheckoutCheckoutcomPaymentOption.getGoogle');
+
         if(!Config::get('CHECKOUTCOM_GOOGLE_ENABLED')) {
            return;
         }
@@ -114,14 +111,11 @@ Debug::write('CheckoutCheckoutcomPaymentOption.getGoogle');
         // Load Context
         $context = \Context::getContext();
 
-        // Load language
-        $lang = \Language::getLanguage($context->cart->id_lang);
-
         $context->smarty->assign([
             'module' => $module->name,
             'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
-            'lang' => $lang ? $lang['language_code'] : Config::get('CHECKOUTCOM_CARD_LANG_FALLBACK'),
-            'debug' => DebugMode::isDebugModeEnabled()
+            'merchantid' => Config::get('CHECKOUTCOM_GOOGLE_ID'),
+            'live' => Config::get('CHECKOUTCOM_LIVE_MODE')
         ]);
 
         $option = new PaymentOption();

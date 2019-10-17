@@ -56,9 +56,6 @@ console.log(name);
     }
 
 
-
-
-
     // Sepa
     window.loadMandate = function(e) {
 
@@ -88,13 +85,5 @@ console.log(name);
         });
 
     }
-
-
-
-
-
-
-
-
 
 })();
