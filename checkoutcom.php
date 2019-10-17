@@ -162,23 +162,19 @@ Debug::write('# checkoutcom.install');
      */
     protected function postProcess()
     {
- Debug::write('checkoutcom.postProcess-> ' . Tools::isSubmit('CHECKOUTCOM_SECRET_KEY'));
+
         foreach (Config::keys() as $key) {
             $value = Tools::getValue($key);
 
-            if($key === 'CHECKOUTCOM_SECRET_KEY') {
-
+            if(!$value && in_array($key, array('CHECKOUTCOM_SECRET_KEY', 'CHECKOUTCOM_PUBLIC_KEY', 'CHECKOUTCOM_SHARED_KEY'))) {
+                $value = Configuration::get($key);
             }
 
-
-Debug::write('----');
-Debug::write($key);
-Debug::write($value);
-Debug::write('----');
             if($value !== false) {
                 Configuration::updateValue($key, $value);
             }
         }
+
     }
 
 

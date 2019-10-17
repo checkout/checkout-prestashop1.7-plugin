@@ -43,14 +43,14 @@ abstract class Method {
 	 *
 	 * @return     Payment                             ( description_of_the_return_value )
 	 */
-	public static function makePayment(MethodSource $source) {
+	public static function makePayment(MethodSource $source)
+	{
 
 		$context = \Context::getContext();
 
 		$payment = new Payment($source, $context->currency->iso_code);
 		$payment->amount = static::fixAmount($context->cart->getOrderTotal(), $context->currency->iso_code);
 		$payment->metadata = static::getMetadata($context);
-		//$payment->reference = $order->getUniqReferenceOf();
 
 		$cart_id = $context->cart->id;
         $secure_key = $context->customer->secure_key;
@@ -61,9 +61,11 @@ abstract class Method {
         $payment->capture = (bool) Config::get('CHECKOUTCOM_PAYMENT_ACTION');
         $payment->success_url = $context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
         $payment->failure_url = $context->link->getModuleLink('checkoutcom', 'failure', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
+        // $payment->success_url = $context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
+        // $payment->failure_url = $context->link->getModuleLink('checkoutcom', 'failure', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
         $payment->description = Config::get('PS_SHOP_NAME') . ' Order';
         $payment->payment_type = 'Regular';
-
+        $payment->reference = $context->controller->module->currentOrderReference;
 
         static::addThreeDs($payment);
         static::addDynamicDescriptor($payment);
@@ -197,7 +199,7 @@ abstract class Method {
     	if($time && Config::get('CHECKOUTCOM_PAYMENT_ACTION')) {
     		$payment->capture_on = Utilities::formatDate(time() + ($time >= 0.0027 ? $time : 0.0027) * 3600);
     	}
-Debug::write($payment->capture_on);
+
     }
 
     /**

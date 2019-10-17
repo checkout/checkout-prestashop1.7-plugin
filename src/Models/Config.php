@@ -58,13 +58,13 @@ Debug::write('Config.uninstall()');
 	public static function load() {
 Debug::write('Config.loadConfigs()');
 
-		if(!static::$configs) {
+		if(!Config::$configs) {
 Debug::write('Config.loadConfigs().$configs is empty');
 			$files = scandir(static::CHECKOUTCOM_CONFIGS);
 			foreach ($files as $file) {
 	            if(strpos($file, '.json') !== false) {
 	            	$filename = basename($file, '.json');
-					self::$configs[$filename] = Utilities::getConfig($filename);
+					Config::$configs[$filename] = Utilities::getConfig($filename);
 	            }
 	        }
 
