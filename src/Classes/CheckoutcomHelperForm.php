@@ -212,7 +212,7 @@ class CheckoutcomHelperForm extends \HelperForm
      * @param      array $field
      * @return     array
      */
-    protected function switch(array &$field) {
+    protected function bswitch(array &$field) {
 
         $options = function(array $options) {
             $arr = array();
@@ -227,7 +227,7 @@ class CheckoutcomHelperForm extends \HelperForm
         };
 
         return array(
-                static::FIELD_TYPE => $field[static::FIELD_TYPE],
+                static::FIELD_TYPE => 'switch',
                 static::FIELD_LABEL => $this->l($field[static::FIELD_LABEL]),
                 static::FIELD_NAME => $field[static::FIELD_NAME],
                 static::FIELD_REQUIRED => Utilities::getValueFromArray($field, static::FIELD_REQUIRED, false),

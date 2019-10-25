@@ -13,7 +13,7 @@
          "name":"CHECKOUTCOM_CARD_ENABLED",
          "label":"Enable Card Payments",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":1,
          "required":0,
          "options":[
@@ -78,7 +78,7 @@
          "name":"CHECKOUTCOM_CARD_USE_3DS",
          "label":"Use 3D Secure",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -98,7 +98,7 @@
          "name":"CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D",
          "label":"Attempt non-3D Secure",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -118,7 +118,7 @@
          "name":"CHECKOUTCOM_CARD_SAVE_CARD_OPTION",
          "label":"Save Card Option",
          "description":"Display an option (checkbox) to save a new card on the payment page.",
-         "type":"switch",
+         "type":"bswitch",
          "default":1,
          "required":0,
          "options":[
@@ -138,7 +138,7 @@
          "name":"CHECKOUTCOM_CARD_MADA_CHECK_ENABLED",
          "label":"Enable MADA BIN Check",
          "description":"Add a flag to the charge request if the payment card is MADA.",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[

@@ -192,18 +192,19 @@ Debug::write('#hookPaymentOptions');
         if (!$this->active) {
             return;
         }
-
+Debug::write('#hookPaymentOptions -> enabled');
         $methods = array(
             CheckoutcomPaymentOption::getCard($this, $params),
             // CheckoutcomPaymentOption::getApple($this, $params),
              CheckoutcomPaymentOption::getGoogle($this, $params)
         );
-
+Debug::write('#hookPaymentOptions -> methods');
         $alternatives = CheckoutcomPaymentOption::getAlternatives($this, $params);
         foreach ($alternatives as $method) {
             array_push($methods, $method);
         }
-
+Debug::write('#hookPaymentOptions -> alternatives');
+//Debug::write($methods);
         return array_filter($methods); // Remove nulls
 
     }

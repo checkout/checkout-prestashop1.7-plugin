@@ -30,11 +30,21 @@ abstract class Method {
 	/**
 	 * Process payment.
 	 *
-	 * @param      array    $params  The parameters
+	 * @param      	array    $params  The parameters
 	 *
-	 * @return     Response  ( description_of_the_return_value )
+	 * @return     	Response
+	 *
+	 * @note		Cannot be abstract static after PHP 5.2.
 	 */
-	abstract public static function pay(array $params);
+	public static function pay(array $params) {
+
+		$response = new Response();
+		$response->http_code = 400;
+		$response->errors = array('Payment method in development.');
+		$response->message = $response->errors[0];
+		return $response;
+
+	}
 
 	/**
 	 * Generate payment object.

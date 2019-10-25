@@ -8,7 +8,7 @@
          "label":"Enable Giropay",
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Giropay",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -32,7 +32,7 @@
          "currencies": ["EUR"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Ideal",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -56,7 +56,7 @@
          "currencies": ["AUD", "NZD"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Poli",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -80,7 +80,7 @@
          "currencies": ["EUR"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Sepa",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -104,7 +104,7 @@
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Sofort",
          "label":"Enable Sofort",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -128,7 +128,7 @@
          "currencies": ["EUR","DKK","GBP","NOK","SEK"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Klarna",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -152,7 +152,7 @@
          "currencies": ["EUR"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Eps",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -176,7 +176,7 @@
          "currencies": ["EGP"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Fawry",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -200,7 +200,7 @@
          "currencies": ["EUR"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Bancontact",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -224,7 +224,7 @@
          "currencies": ["KWD"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Knet",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -248,7 +248,7 @@
          "currencies": ["USD"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Alipay",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[
@@ -272,7 +272,7 @@
          "currencies": ["USD", "BRL"],
          "class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Boleto",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":0,
          "options":[

@@ -13,7 +13,7 @@
          "name":"CHECKOUTCOM_GOOGLE_ENABLED",
          "label":"Enable Google Pay",
          "description":"",
-         "type":"switch",
+         "type":"bswitch",
          "default":0,
          "required":1,
          "options":[

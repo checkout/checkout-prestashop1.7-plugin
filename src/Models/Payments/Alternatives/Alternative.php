@@ -19,17 +19,4 @@ abstract class Alternative extends Method {
 		return array();
 	}
 
-	public static function pay(array $params) {
-
-
-
-
-die('aquila');
-	}
-
-
-
-
-
-
 }
