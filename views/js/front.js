@@ -1,10 +1,22 @@
+/**
+ * Very import line.
+ */
+window.checkoutcom.$confirmation = document.getElementById('payment-confirmation');
+
 // JQuery events
 (function() {
 
 	const MODULE_NAME = 'checkoutcom';
 
+    var lastOption = '';
 	// Override place order button behaviour
 	$('input:radio[name="payment-option"]').change(function(){
+
+        // Trigger custom form events every "change" event once, even for other payment methods.
+        if(lastOption) {
+            document.getElementById(lastOption).dispatchEvent(new Event("form:hide"));
+            lastOption = ''; // Prevent duplicate triggers.
+        }
 
 		const name = $(this).attr('data-module-name');
 console.log(name);
@@ -16,10 +28,9 @@ console.log(name);
 				return false;
 			});
 
-
-            // Trigger on change event.
-
-
+            // Trigger "show" event.
+            document.getElementById(name).dispatchEvent(new Event("form:show"));
+            lastOption = name;
 		}
 
 	});

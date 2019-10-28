@@ -112,7 +112,8 @@ Debug::write('CheckoutcomPaymentOption.getGoogle -> context');
             'module' => $module->name,
             'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
             'merchantid' => Config::get('CHECKOUTCOM_GOOGLE_ID'),
-            'live' => Config::get('CHECKOUTCOM_LIVE_MODE')
+            'live' => Config::get('CHECKOUTCOM_LIVE_MODE'),
+            'invoiceid' => $context->cart->id_address_invoice
         ]);
 Debug::write('CheckoutcomPaymentOption.getGoogle -> smarty');
         $option = new PaymentOption();
