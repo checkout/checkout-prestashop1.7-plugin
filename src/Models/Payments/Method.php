@@ -71,8 +71,6 @@ abstract class Method {
         $payment->capture = (bool) Config::get('CHECKOUTCOM_PAYMENT_ACTION');
         $payment->success_url = $context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
         $payment->failure_url = $context->link->getModuleLink('checkoutcom', 'failure', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
-        // $payment->success_url = $context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
-        // $payment->failure_url = $context->link->getModuleLink('checkoutcom', 'failure', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
         $payment->description = Config::get('PS_SHOP_NAME') . ' Order';
         $payment->payment_type = 'Regular';
         $payment->reference = $context->controller->module->currentOrderReference;
@@ -248,7 +246,5 @@ abstract class Method {
         }
 
     }
-
-
 
 }

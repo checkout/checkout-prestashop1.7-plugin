@@ -1,5 +1,6 @@
 <form name="{$module}" id="{$module}-google-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-merchantid="{$merchantid}" data-live="{$live}" data-invoiceid="{$invoiceid}" method="POST">
-	<input type="hidden" id="cko-google-token" name="token" value="" />
+	<input id="{$module}-google-source" type="hidden" name="source" value="google" required>
+	<input type="hidden" id="{$module}-google-token" name="token" value="" />
 </form>
 {literal}
 <script type="text/javascript">
@@ -47,7 +48,7 @@
 			cardPaymentMethod = Object.assign({tokenizationSpecification: tokenizationSpecification}, baseCardPaymentMethod),
 			paymentsClient = new window.google.payments.api.PaymentsClient({environment: +$form.dataset.live ? 'PRODUCTION' : 'TEST'}),
 			isReadyToPayRequest = Object.assign({}, baseRequest),
-			$input = document.getElementById('cko-google-token');
+			$input = document.getElementById('checkoutcom-google-token');
 
 		isReadyToPayRequest.allowedPaymentMethods = [baseCardPaymentMethod];
 
@@ -89,7 +90,7 @@
 
 				// Create Google Pay button
 				const button = paymentsClient.createButton({onClick: handleClick});
-				button.id = 'cko-google-pay';
+				button.id = 'checkoutcom-google-pay';
 				window.checkoutcom.$confirmation.appendChild(button);
 			});
 
@@ -97,7 +98,7 @@
 			$form.addEventListener("form:hide", function(event) {
 				// Show confirmation button
 				window.checkoutcom.$confirmation.childNodes[1].style.display = 'inline-block';
-				document.getElementById('cko-google-pay').remove();
+				document.getElementById('checkoutcom-google-pay').remove();
 			});
 		}
 
