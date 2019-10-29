@@ -2,9 +2,12 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments;
 
+use Checkout\Models\Tokens\GooglePay;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use Checkout\Models\Payments\TokenSource;
+use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
+use Checkout\Library\Exceptions\CheckoutHttpException;
 
 class Google extends Method {
 
@@ -17,10 +20,25 @@ class Google extends Method {
 	 */
 	public static function pay(array $params) {
 
-		$source = new TokenSource($params['token']);
-		$payment = static::makePayment($source);
+		$response = parent::pay($params);
 
-		return static::request($payment);
+		$token = '';
+		$payment = null;
+		$data = json_decode($params['token'], true);
+		$googlepay = new GooglePay($data['protocolVersion'], $data['signature'], $data['signedMessage']);
+
+		try {
+			$token = CheckoutApiHandler::api()->tokens()->request($googlepay);
+		} catch(CheckoutHttpException $ex) {
+			// @todo: log errors
+		}
+
+		if($token) {
+			$payment = static::makePayment(new TokenSource($token->getTokenId()));
+			$response = static::request($payment);
+		}
+
+		return $response;
 
 	}
 
