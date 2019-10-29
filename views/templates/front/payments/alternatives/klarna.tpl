@@ -1,4 +1,4 @@
-<form name="{$module}" id="{$module}-{$key}-form" action="{$link->getModuleLink($module, 'payment', [], true)|escape:'html'}" method="POST">
+<form name="{$module}" id="{$module}-{$key}-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" method="POST">
     <div id="{$module}-{$key}-frame" data-url="{$link->getModuleLink($module, 'klarna', [], true)|escape:'html'}" data-module="{$module}"></div>
     <input id="{$module}-{$key}-source" type="hidden" name="source" value="{$key}" required>
     <input id="{$module}-{$key}-auth-token" type="hidden" name="authorization_token" value="" required>

@@ -17,52 +17,50 @@ use Checkout\Models\Payments\Method as MethodSource;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
 
-abstract class Method {
+abstract class Method
+{
+    /**
+     * Ignore fields.
+     *
+     * @var array
+     */
+    const IGNORE_FIELDS = array('source', 'isolang', 'id_lang', 'module', 'controller', 'fc');
 
-	/**
-	 * Ignore fields.
-	 *
-	 * @var        array
-	 */
-	const IGNORE_FIELDS = array('source', 'isolang', 'id_lang', 'module', 'controller', 'fc');
+    /**
+     * Process payment.
+     *
+     * @param array $params The parameters
+     *
+     * @return Response
+     *
+     * @note		Cannot be abstract static after PHP 5.2.
+     */
+    public static function pay(array $params)
+    {
+        $response = new Response();
+        $response->http_code = 400;
+        $response->errors = array('Payment method in development.');
+        $response->message = $response->errors[0];
 
+        return $response;
+    }
 
-	/**
-	 * Process payment.
-	 *
-	 * @param      	array    $params  The parameters
-	 *
-	 * @return     	Response
-	 *
-	 * @note		Cannot be abstract static after PHP 5.2.
-	 */
-	public static function pay(array $params) {
+    /**
+     * Generate payment object.
+     *
+     * @param \Checkout\Models\Payments\IdSource $source The source
+     *
+     * @return Payment ( description_of_the_return_value )
+     */
+    public static function makePayment(MethodSource $source)
+    {
+        $context = \Context::getContext();
 
-		$response = new Response();
-		$response->http_code = 400;
-		$response->errors = array('Payment method in development.');
-		$response->message = $response->errors[0];
-		return $response;
+        $payment = new Payment($source, $context->currency->iso_code);
+        $payment->amount = static::fixAmount($context->cart->getOrderTotal(), $context->currency->iso_code);
+        $payment->metadata = static::getMetadata($context);
 
-	}
-
-	/**
-	 * Generate payment object.
-	 *
-	 * @param      \Checkout\Models\Payments\IdSource  $source  The source
-	 *
-	 * @return     Payment                             ( description_of_the_return_value )
-	 */
-	public static function makePayment(MethodSource $source)
-	{
-
-		$context = \Context::getContext();
-
-		$payment = new Payment($source, $context->currency->iso_code);
-		$payment->amount = static::fixAmount($context->cart->getOrderTotal(), $context->currency->iso_code);
-		$payment->metadata = static::getMetadata($context);
-
-		$cart_id = $context->cart->id;
+        $cart_id = $context->cart->id;
         $secure_key = $context->customer->secure_key;
 
         $payment->customer = static::getCustomer($context);
@@ -79,172 +77,157 @@ abstract class Method {
         static::addDynamicDescriptor($payment);
         static::addCaptureOn($payment);
 
-		return $payment;
+        return $payment;
+    }
 
-	}
+    /**
+     * Turn amount into integer according to currency.
+     *
+     * @param float $amount The amount
+     * @param string $currency The currency
+     *
+     * @return int
+     */
+    protected static function fixAmount($amount, $currency = '')
+    {
+        $multiplier = 100;
+        $full = array('BYN', 'BIF', 'DJF', 'GNF', 'ISK', 'KMF', 'XAF', 'CLF', 'XPF', 'JPY', 'PYG', 'RWF', 'KRW', 'VUV', 'VND', 'XOF');
+        $thousands = array('BHD', 'LYD', 'JOD', 'KWD', 'OMR', 'TND');
 
-	/**
-	 * Turn amount into integer according to currency.
-	 *
-	 * @param      float  $amount    The amount
-	 * @param      string  $currency  The currency
-	 * @return     integer
-	 */
-	protected static function fixAmount($amount, $currency = '') {
+        if (in_array($currency, $thousands)) {
+            $multiplier = 1000;
+        } elseif (in_array($currency, $full)) {
+            $multiplier = 1;
+        }
 
-		$multiplier = 100;
-		$full = array('BYN', 'BIF', 'DJF', 'GNF', 'ISK', 'KMF', 'XAF', 'CLF', 'XPF', 'JPY', 'PYG', 'RWF', 'KRW', 'VUV', 'VND', 'XOF');
-		$thousands = array('BHD', 'LYD', 'JOD', 'KWD', 'OMR', 'TND');
+        $price = (int) ('' . ($amount * $multiplier)); //@todo: Waiting on SDK precision fix. (#41)
 
-		if (in_array($currency, $thousands)) {
-			$multiplier = 1000;
-		} elseif (in_array($currency, $full)) {
-			$multiplier = 1;
-		}
+        if ($currency === 'CLP') {
+            //@todo: fix this.
+        }
 
-		$price = (int)('' . ($amount * $multiplier)); //@todo: Waiting on SDK precision fix. (#41)
+        return $price;
+    }
 
-		if($currency === 'CLP') {
-			//@todo: fix this.
-		}
+    /**
+     * Get Meta information.
+     *
+     * @param \Context $context The context
+     *
+     * @return Metadata the metadata
+     */
+    protected static function getMetadata(\Context $context)
+    {
+        $metadata = new Metadata();
 
-		return $price ;
+        $module = \Module::getInstanceByName('checkoutcom');
+        $metadata->server_url = \Tools::getHttpHost(true);
+        $metadata->sdk_data = 'PHP SDK ' . CheckoutApi::VERSION;
+        $metadata->integration_data = 'Checkout.com PrestaShop Plugin ' . $module->version;
+        $metadata->platform_data = 'PrestaShop ' . _PS_VERSION_;
 
+        return $metadata;
+    }
 
-	}
+    /**
+     * Get Customer information.
+     *
+     * @param \Context $context The context
+     *
+     * @return Customer the metadata
+     */
+    protected static function getCustomer(\Context $context)
+    {
+        $customer = new Customer();
+        $customer->email = $context->customer->email;
+        $customer->name = $context->customer->firstname . ' ' . $context->customer->lastname;
 
-	/**
-	 * Get Meta information.
-	 *
-	 * @param      \Context  $context  The context
-	 *
-	 * @return     Metadata  The metadata.
-	 */
-	protected static function getMetadata(\Context $context) {
+        return $customer;
+    }
 
-		$metadata = new Metadata();
+    /**
+     * Make API request.
+     *
+     * @param \Checkout\Models\Payments\Payment $payment The payment
+     *
+     * @return <null|Response>
+     */
+    protected static function request(Payment $payment)
+    {
+        $response = new Response();
 
-		$module = \Module::getInstanceByName('checkoutcom');
-		$metadata->server_url = \Tools::getHttpHost(true);
-		$metadata->sdk_data = 'PHP SDK ' . CheckoutApi::VERSION;
-		$metadata->integration_data = 'Checkout.com PrestaShop Plugin ' . $module->version;
-		$metadata->platform_data = 'PrestaShop ' . _PS_VERSION_;
+        try {
+            $response = CheckoutApiHandler::api()->payments()->request($payment);
+        } catch (CheckoutHttpException $ex) {
+            $response->http_code = $ex->getCode();
+            $response->message = $ex->getMessage();
+            $response->errors = $ex->getErrors();
+            Debug::write($ex->getBody());
+        }
 
-		return $metadata;
+        return $response;
+    }
 
-	}
+    /**
+     * Add extra params to source object.
+     *
+     * @param \Checkout\Models\Payments\IdSource $source The source
+     * @param array $params The parameters
+     */
+    protected static function setSourceAttributes(IdSource $source, array $params)
+    {
+        foreach ($params as $key => $value) {
+            if (!in_array($key, static::IGNORE_FIELDS)) {
+                $source->{$key} = $value;
+            }
+        }
+    }
 
-	/**
-	 * Get Customer information.
-	 *
-	 * @param      \Context  $context  The context
-	 *
-	 * @return     Customer  The metadata.
-	 */
-	protected static function getCustomer(\Context $context) {
+    /**
+     * Helper methods.
+     */
 
-		$customer = new Customer();
-		$customer->email = $context->customer->email;
-		$customer->name = $context->customer->firstname . ' ' . $context->customer->lastname;
-		return $customer;
-
-	}
-
-	/**
-	 * Make API request.
-	 *
-	 * @param      \Checkout\Models\Payments\Payment  $payment  The payment
-	 *
-	 * @return     <null|Response>
-	 */
-	protected static function request(Payment $payment) {
-
-		$response = new Response();
-
-		try{
-			$response = CheckoutApiHandler::api()->payments()->request($payment);
-		} catch(CheckoutHttpException $ex) {
-			$response->http_code = $ex->getCode();
-			$response->message = $ex->getMessage();
-			$response->errors = $ex->getErrors();
-			Debug::write($ex->getBody());
-		}
-
-		return $response;
-
-	}
-
-	/**
-	 * Add extra params to source object.
-	 *
-	 * @param      \Checkout\Models\Payments\IdSource  $source  The source
-	 * @param      array                               $params  The parameters
-	 */
-	protected static function setSourceAttributes(IdSource $source, array $params) {
-
-		foreach ($params as $key => $value) {
-			if(!in_array($key, static::IGNORE_FIELDS)) {
-				$source->{$key} = $value;
-			}
-		}
-
-	}
-
-
-	/**
-	 * Helper methods.
-	 */
-
-	/**
-	 * Adds a capture on.
-	 *
-	 * @param      \Checkout\Models\Payments\Payment  $payment  The payment
-	 */
+    /**
+     * Adds a capture on.
+     *
+     * @param \Checkout\Models\Payments\Payment $payment The payment
+     */
     public static function addCaptureOn(Payment $payment)
     {
-
-    	$time = (float) Config::get('CHECKOUTCOM_CAPTURE_TIME');
-    	if($time && Config::get('CHECKOUTCOM_PAYMENT_ACTION')) {
-    		$payment->capture_on = Utilities::formatDate(time() + ($time >= 0.0027 ? $time : 0.0027) * 3600);
-    	}
-
+        $time = (float) Config::get('CHECKOUTCOM_CAPTURE_TIME');
+        if ($time && Config::get('CHECKOUTCOM_PAYMENT_ACTION')) {
+            $payment->capture_on = Utilities::formatDate(time() + ($time >= 0.0027 ? $time : 0.0027) * 3600);
+        }
     }
 
     /**
      * Adds a dynamic descriptor.
      *
-     * @param      \Checkout\Models\Payments\Payment  $payment  The payment
+     * @param \Checkout\Models\Payments\Payment $payment The payment
      */
     public static function addDynamicDescriptor(Payment $payment)
     {
-
-		if (Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE')) {
-
-        	$payment->billing_descriptor = new BillingDescriptor(
-        		Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_NAME'),
-        		Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY')
-        	);
-
+        if (Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE')) {
+            $payment->billing_descriptor = new BillingDescriptor(
+                Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_NAME'),
+                Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY')
+            );
         }
-
     }
 
     /**
      * Adds a 3DS and IP.
      *
-     * @param      \Checkout\Models\Payments\Payment  $payment  The payment
+     * @param \Checkout\Models\Payments\Payment $payment The payment
      */
     public static function addThreeDs(Payment $payment)
     {
-
-		// Security
-    	$payment->payment_ip = \Tools::getRemoteAddr();
+        // Security
+        $payment->payment_ip = \Tools::getRemoteAddr();
         $payment->threeDs = new ThreeDs((bool) Config::get('CHECKOUTCOM_CARD_USE_3DS'));
 
-        if($payment->threeDs->enabled) {
-        	$payment->threeDs->attempt_n3d = (bool) Config::get('CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D');
+        if ($payment->threeDs->enabled) {
+            $payment->threeDs->attempt_n3d = (bool) Config::get('CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D');
         }
-
     }
-
 }

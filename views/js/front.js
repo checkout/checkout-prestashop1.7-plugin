@@ -1,9 +1,14 @@
 /**
  * Very import line.
  */
-window.checkoutcom.$confirmation = document.getElementById('payment-confirmation');
+var $el = document.getElementById('payment-confirmation');
+if($el) { // Confirmation page
+    window.checkoutcom.$confirmation = $el;
+}
 
-// JQuery events
+/**
+ * On document ready.
+ */
 (function() {
 
 	const MODULE_NAME = 'checkoutcom';

@@ -36,7 +36,7 @@
 			  }
 		},
 			allowedPaymentMethods = ['CARD', 'TOKENIZED_CARD'],
-			allowedCardNetworks = ['MASTERCARD', 'VISA'],
+			allowedCardNetworks = getAllowedCardNetworks(),
 			allowedCardAuthMethods = ["PAN_ONLY", "CRYPTOGRAM_3DS"],
 			baseCardPaymentMethod = {
 				type: 'CARD',
@@ -80,6 +80,22 @@
 	     */
 
 	    /**
+	     * Gets the allowed card networks.
+	     *
+	     * @return     {Array}  The allowed card networks.
+	     */
+	    function getAllowedCardNetworks() {
+
+	     	var brazilian = [];
+	     	if(prestashop.customer.addresses[$form.dataset.invoiceid].country_iso === "BR") {
+	     		brazilian = ["ELECTRON", "MAESTRO"];
+	     	}
+
+	     	return ["AMEX", "DISCOVER", "JCB", "MASTERCARD", "VISA"].concat(brazilian);
+
+	    }
+
+	    /**
 	     * Create Google Pay Button.
 	     */
 		function insertButton() {
@@ -114,7 +130,7 @@
 
 			paymentDataRequest.transactionInfo = {
 			  totalPriceStatus: 'FINAL',
-			  totalPrice: '' + prestashop.cart.totals.total.amount,
+			  totalPrice: '' + prestashop.cart.totals.total.amount, // Cast to string. Must be string.
 			  currencyCode: prestashop.currency.iso_code,
 			  countryCode: prestashop.customer.addresses[$form.dataset.invoiceid].country_iso //@todo: verify this; merchant or billing country?
 			};
@@ -148,8 +164,13 @@
 
 		}
 
+		/**
+		 * Write to console.
+		 *
+		 * @param      {mixed}  reason  The reason
+		 */
 		function write(reason) {
-			console.log(reason);
+			console.log('checkoutcom-google-form', reason);
 		}
 
 
