@@ -36,7 +36,7 @@ if (!defined('_PS_VERSION_') || !is_readable(CHECKOUTCOM_ROOT . DIRECTORY_SEPARA
 /**
  * Fix missing namespace at install
  */
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
@@ -45,7 +45,6 @@ use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
 
 class CheckoutCom extends PaymentModule
 {
-
     /**
      * Define module.
      */
@@ -57,7 +56,7 @@ class CheckoutCom extends PaymentModule
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
-        /**
+        /*
          * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
          */
         $this->bootstrap = true;
@@ -77,10 +76,10 @@ class CheckoutCom extends PaymentModule
      */
     public function install()
     {
-Debug::write('# checkoutcom.install');
-        if (extension_loaded('curl') == false)
-        {
+        Debug::write('# checkoutcom.install');
+        if (extension_loaded('curl') == false) {
             $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module.');
+
             return false;
         }
 
@@ -101,11 +100,12 @@ Debug::write('# checkoutcom.install');
     /**
      * Uninstall module.
      *
-     * @return     <type>  ( description_of_the_return_value )
+     * @return <type> ( description_of_the_return_value )
      */
     public function uninstall()
     {
         Config::uninstall();
+
         return parent::uninstall();
     }
 
@@ -114,10 +114,10 @@ Debug::write('# checkoutcom.install');
      */
     public function getContent()
     {
-        /**
+        /*
          * If values have been submitted in the form, process.
          */
-        if (((bool)Tools::isSubmit('submitCheckoutComModule')) == true) {
+        if (((bool) Tools::isSubmit('submitCheckoutComModule')) == true) {
             $this->postProcess();
         }
 
@@ -130,10 +130,10 @@ Debug::write('# checkoutcom.install');
     /**
      * Prepare configuration page.
      *
-     * @param      <type>  $smarty  The smarty
+     * @param <type> $smarty The smarty
      */
-    protected function checkoutcomSettings(&$smarty) {
-
+    protected function checkoutcomSettings(&$smarty)
+    {
         $helper = new CheckoutcomHelperForm();
 
         $helper->show_toolbar = false;
@@ -144,7 +144,7 @@ Debug::write('# checkoutcom.install');
 
         $helper->identifier = $this->identifier;
         $helper->submit_action = 'submitCheckoutComModule';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false).'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false) . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
         $helper->tpl_vars = array(
@@ -154,7 +154,6 @@ Debug::write('# checkoutcom.install');
         );
 
         $helper->addToSmarty($smarty);
-
     }
 
     /**
@@ -162,21 +161,18 @@ Debug::write('# checkoutcom.install');
      */
     protected function postProcess()
     {
-
         foreach (Config::keys() as $key) {
             $value = Tools::getValue($key);
 
-            if(!$value && in_array($key, array('CHECKOUTCOM_SECRET_KEY', 'CHECKOUTCOM_PUBLIC_KEY', 'CHECKOUTCOM_SHARED_KEY'))) {
+            if (!$value && in_array($key, array('CHECKOUTCOM_SECRET_KEY', 'CHECKOUTCOM_PUBLIC_KEY', 'CHECKOUTCOM_SHARED_KEY'))) {
                 $value = Configuration::get($key);
             }
 
-            if($value !== false) {
+            if ($value !== false) {
                 Configuration::updateValue($key, $value);
             }
         }
-
     }
-
 
     /**
      * Hooks
@@ -185,28 +181,28 @@ Debug::write('# checkoutcom.install');
     /**
      * Display payment options.
      *
-     * @return     array
+     * @return array
      */
-    public function hookPaymentOptions($params) {
-Debug::write('#hookPaymentOptions');
+    public function hookPaymentOptions($params)
+    {
+        Debug::write('#hookPaymentOptions');
         if (!$this->active) {
             return;
         }
-Debug::write('#hookPaymentOptions -> enabled');
+        Debug::write('#hookPaymentOptions -> enabled');
         $methods = array(
             CheckoutcomPaymentOption::getCard($this, $params),
             // CheckoutcomPaymentOption::getApple($this, $params),
-             CheckoutcomPaymentOption::getGoogle($this, $params)
+             CheckoutcomPaymentOption::getGoogle($this, $params),
         );
-Debug::write('#hookPaymentOptions -> methods');
+        Debug::write('#hookPaymentOptions -> methods');
         $alternatives = CheckoutcomPaymentOption::getAlternatives($this, $params);
         foreach ($alternatives as $method) {
             array_push($methods, $method);
         }
-Debug::write('#hookPaymentOptions -> alternatives');
-//Debug::write($methods);
+        Debug::write('#hookPaymentOptions -> alternatives');
+        //Debug::write($methods);
         return array_filter($methods); // Remove nulls
-
     }
 
     /**
@@ -214,13 +210,12 @@ Debug::write('#hookPaymentOptions -> alternatives');
      */
     public function hookHeader()
     {
-Debug::write('#hookHeader');
-        if(Tools::getValue('controller') === 'order') {
+        Debug::write('#hookHeader');
+        if (Tools::getValue('controller') === 'order') {
             $this->context->controller->addJquery();
-            $this->context->controller->addJS($this->_path.'/views/js/front.js');
-            $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+            $this->context->controller->addJS($this->_path . '/views/js/front.js');
+            $this->context->controller->addCSS($this->_path . '/views/css/front.css');
         }
-
     }
 
     /**
@@ -229,9 +224,9 @@ Debug::write('#hookHeader');
      */
     public function hookPayment($params)
     {
-Debug::write('#hookPayment');
+        Debug::write('#hookPayment');
         $currency_id = $params['cart']->id_currency;
-        $currency = new Currency((int)$currency_id);
+        $currency = new Currency((int) $currency_id);
 
         $this->smarty->assign('module_dir', $this->_path);
 
@@ -243,14 +238,15 @@ Debug::write('#hookPayment');
      */
     public function hookPaymentReturn($params)
     {
-Debug::write('#hookPaymentReturn');
+        Debug::write('#hookPaymentReturn');
         // if ($this->active == false)
         //     return;
 
         $order = $params['objOrder'];
 
-        if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR'))
+        if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR')) {
             $this->smarty->assign('status', 'ok');
+        }
 
         $this->smarty->assign(array(
             'id_order' => $order->id,
@@ -264,32 +260,31 @@ Debug::write('#hookPaymentReturn');
 
     public function hookActionPaymentCCAdd()
     {
-Debug::write('#hookActionPaymentCCAdd');
+        Debug::write('#hookActionPaymentCCAdd');
         /* Place your code here. */
     }
 
     public function hookActionPaymentConfirmation()
     {
-Debug::write('#hookActionPaymentConfirmation');
+        Debug::write('#hookActionPaymentConfirmation');
         /* Place your code here. */
     }
 
     public function hookDisplayPayment()
     {
-Debug::write('#hookDisplayPayment');
+        Debug::write('#hookDisplayPayment');
         /* Place your code here. */
     }
 
     public function hookDisplayPaymentReturn()
     {
-
-Debug::write('#hookDisplayPaymentReturn');
+        Debug::write('#hookDisplayPaymentReturn');
         /* Place your code here. */
     }
 
     public function hookDisplayPaymentTop()
     {
-Debug::write('#hookDisplayPaymentTop');
+        Debug::write('#hookDisplayPaymentTop');
         // I don't think this will be needed.
         /* Place your code here. */
     }

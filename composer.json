@@ -6,6 +6,9 @@
   "require": {
 	 "checkout/checkout-sdk-php": "^1.0"
   },
+  "require-dev": {
+    "prestashop/php-coding-standards": "dev-master"
+  },
   "autoload": {
     "psr-4": {
       "CheckoutCom\\PrestaShop\\": "src/"

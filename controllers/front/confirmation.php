@@ -23,11 +23,10 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
-
-use Checkout\CheckoutApi;
 use Checkout\Models\Response;
-use Checkout\Library\Exceptions\CheckoutHttpException;
 use CheckoutCom\PrestaShop\Helpers\Debug;
+use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
+use Checkout\Library\Exceptions\CheckoutHttpException;
 
 class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 {
@@ -41,35 +40,32 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
         $secure_key = Tools::getValue('secure_key');
         $payment_flagged = false;
         $transaction_id = '';
-
-
+        $status = 'Pending';
 
         $cart = new Cart((int) $cart_id);
         $customer = new Customer((int) $cart->id_customer);
 
-        if(Tools::isSubmit('cko-session-id')){
+        if (Tools::isSubmit('cko-session-id')) {
             $response = $this->_verifySession($_REQUEST['cko-session-id']);
 
-            if($response->isSuccessful()) {
+            if ($response->isSuccessful() && !$response->isPending()) {
+Debug::write($response);
                 $payment_flagged = $response->isFlagged();
                 $actions = $response->actions;
                 $action_id = $actions[0]['id'];
                 $transaction_id = $action_id;
                 $reference = $response->reference;
+                $status = $response->status;
             }
-        }  else {
+        } else {
             // Set error message
             $this->context->controller->errors[] = $this->trans('An error has occured while processing your transaction.', array(), 'Shop.Notifications.Error');
             // Redirect to cart
-            $this->redirectWithNotifications(__PS_BASE_URI__.'index.php?controller=order&step=1&key='.$secure_key.'&id_cart='
-                .(int)$cart_id);
+            $this->redirectWithNotifications(__PS_BASE_URI__ . 'index.php?controller=order&step=1&key=' . $secure_key . '&id_cart='
+                . (int) $cart_id);
         }
 
-        /**
-         * Since it's an example we are validating the order right here,
-         * You should not do it this way in your own module.
-         */
-        $payment_status = $payment_flagged == true ? Configuration::get('CHECKOUTCOM_FLAGGED_ORDER_STATUS') : Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
+        $payment_status = $payment_flagged == true ? Configuration::get('CHECKOUTCOM_FLAGGED_ORDER_STATUS') : $this->getOrderStatus($status);
         $message = null; // You can add a comment directly into the order so the merchant will see it in the BO.
 
         /**
@@ -99,31 +95,24 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $payments[0]->update();
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int) $cart->id . '&id_module=' . $module_id . '&id_order=' . $order_id . '&key=' . $secure_key);
-
         } else {
-            /**
+            /*
              * An error occured and is shown on a new page.
              */
             $this->context->controller->errors[] = $this->trans('An error has occured while processing your transaction.', array(), 'Shop.Notifications.Error');
             // Redirect to cart
-            $this->redirectWithNotifications(__PS_BASE_URI__.'index.php?controller=order&step=1&key='.$secure_key.'&id_cart='
-                .(int)$cart_id);
+            $this->redirectWithNotifications(__PS_BASE_URI__ . 'index.php?controller=order&step=1&key=' . $secure_key . '&id_cart='
+                . (int) $cart_id);
         }
     }
 
     private function _verifySession($session_id)
     {
-        $environment = Configuration::get('CHECKOUTCOM_LIVE_MODE') ? 'production' : 'sandbox';
-        $secret_key  = Configuration::get('CHECKOUTCOM_SECRET_KEY');
-
-        // Initialize the Checkout Api
-        $checkout = new CheckoutApi($secret_key, $environment);
         $response = new Response();
 
         try {
             // Get payment response
-            $response = $checkout->payments()->details($session_id);
-
+            $response = CheckoutApiHandler::api()->payments()->details($session_id);
         } catch (CheckoutHttpException $ex) {
             $response->http_code = $ex->getCode();
             $response->message = $ex->getMessage();
@@ -132,5 +121,32 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
         }
 
         return $response;
+    }
+
+    /**
+     * Gets the order status.
+     *
+     * @param string $status The status
+     *
+     * @return int the order status
+     */
+    protected function getOrderStatus($status)
+    {
+        switch ($status) {
+            case 'Captured':
+            case 'Partially Captured':
+                return Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
+            case 'Cancelled':
+            case 'Declined':
+            case 'Voided':
+                return Configuration::get('CHECKOUTCOM_VOID_ORDER_STATUS');
+            case 'Refunded':
+            case 'Partially Refunded':
+                return Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS');
+            case 'Pending':
+                return _PS_OS_PREPARATION_;
+            default:
+                return Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
+        }
     }
 }
