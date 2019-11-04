@@ -10,7 +10,6 @@ use Checkout\Models\Payments\ThreeDs;
 use Checkout\Models\Payments\IdSource;
 use Checkout\Models\Payments\Metadata;
 use CheckoutCom\PrestaShop\Helpers\Debug;
-use CheckoutCom\PrestaShop\Models\Config;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use Checkout\Models\Payments\BillingDescriptor;
 use Checkout\Models\Payments\Method as MethodSource;
@@ -66,10 +65,10 @@ abstract class Method
         $payment->customer = static::getCustomer($context);
 
         // Set the payment specifications
-        $payment->capture = (bool) Config::get('CHECKOUTCOM_PAYMENT_ACTION');
+        $payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
         $payment->success_url = $context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
         $payment->failure_url = $context->link->getModuleLink('checkoutcom', 'failure', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
-        $payment->description = Config::get('PS_SHOP_NAME') . ' Order';
+        $payment->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
         $payment->payment_type = 'Regular';
         $payment->reference = $context->controller->module->currentOrderReference;
 
@@ -88,7 +87,7 @@ abstract class Method
      *
      * @return int
      */
-    protected static function fixAmount($amount, $currency = '')
+    public static function fixAmount($amount, $currency = '')
     {
         $multiplier = 100;
         $full = array('BYN', 'BIF', 'DJF', 'GNF', 'ISK', 'KMF', 'XAF', 'CLF', 'XPF', 'JPY', 'PYG', 'RWF', 'KRW', 'VUV', 'VND', 'XOF');
@@ -123,8 +122,8 @@ abstract class Method
         $module = \Module::getInstanceByName('checkoutcom');
         $metadata->server_url = \Tools::getHttpHost(true);
         $metadata->sdk_data = 'PHP SDK ' . CheckoutApi::VERSION;
-        $metadata->integration_data = 'Checkout.com PrestaShop Plugin ' . $module->version;
-        $metadata->platform_data = 'PrestaShop ' . _PS_VERSION_;
+        $metadata->integration_data = 'Checkout.com ' . $module->version;
+        $metadata->platform_data = 'PHP ' . PHP_VERSION . '; PrestaShop ' . _PS_VERSION_;
 
         return $metadata;
     }
@@ -162,7 +161,7 @@ abstract class Method
             $response->http_code = $ex->getCode();
             $response->message = $ex->getMessage();
             $response->errors = $ex->getErrors();
-            Debug::write($ex->getBody());
+            \PrestaShopLogger::addLog($ex->getBody(), 3, $ex->getCode(), 'checkoutcom' , 0, true);
         }
 
         return $response;
@@ -194,8 +193,8 @@ abstract class Method
      */
     public static function addCaptureOn(Payment $payment)
     {
-        $time = (float) Config::get('CHECKOUTCOM_CAPTURE_TIME');
-        if ($time && Config::get('CHECKOUTCOM_PAYMENT_ACTION')) {
+        $time = (float) \Configuration::get('CHECKOUTCOM_CAPTURE_TIME');
+        if ($time && \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION')) {
             $payment->capture_on = Utilities::formatDate(time() + ($time >= 0.0027 ? $time : 0.0027) * 3600);
         }
     }
@@ -207,10 +206,10 @@ abstract class Method
      */
     public static function addDynamicDescriptor(Payment $payment)
     {
-        if (Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE')) {
+        if (\Configuration::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE')) {
             $payment->billing_descriptor = new BillingDescriptor(
-                Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_NAME'),
-                Config::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY')
+                \Configuration::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_NAME'),
+                \Configuration::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY')
             );
         }
     }
@@ -224,10 +223,10 @@ abstract class Method
     {
         // Security
         $payment->payment_ip = \Tools::getRemoteAddr();
-        $payment->threeDs = new ThreeDs((bool) Config::get('CHECKOUTCOM_CARD_USE_3DS'));
+        $payment->threeDs = new ThreeDs((bool) \Configuration::get('CHECKOUTCOM_CARD_USE_3DS'));
 
         if ($payment->threeDs->enabled) {
-            $payment->threeDs->attempt_n3d = (bool) Config::get('CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D');
+            $payment->threeDs->attempt_n3d = (bool) \Configuration::get('CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D');
         }
     }
 }

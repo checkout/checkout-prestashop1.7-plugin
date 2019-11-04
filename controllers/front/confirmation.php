@@ -49,7 +49,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $response = $this->_verifySession($_REQUEST['cko-session-id']);
 
             if ($response->isSuccessful() && !$response->isPending()) {
-Debug::write($response);
+
                 $payment_flagged = $response->isFlagged();
                 $actions = $response->actions;
                 $action_id = $actions[0]['id'];
@@ -96,6 +96,9 @@ Debug::write($response);
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int) $cart->id . '&id_module=' . $module_id . '&id_order=' . $order_id . '&key=' . $secure_key);
         } else {
+
+            \PrestaShopLogger::addLog("Cart {$cart->id} didn't match any order.", 2, 0, 'Cart' , $cart_id, true);
+
             /*
              * An error occured and is shown on a new page.
              */

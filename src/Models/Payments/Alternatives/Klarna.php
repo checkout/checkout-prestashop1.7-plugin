@@ -2,9 +2,10 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Address as KlarnaAddress;
 use Checkout\Models\Product;
+use CheckoutCom\PrestaShop\Helpers\Debug;
 use Checkout\Models\Payments\KlarnaSource;
+use Checkout\Models\Address as KlarnaAddress;
 
 class Klarna extends Alternative
 {
@@ -58,6 +59,10 @@ class Klarna extends Alternative
             $products[] = $product;
         }
 
+        $shipping = static::getShipping($context);
+        if($shipping) {
+            $products []= $shipping;
+        }
         return $products;
     }
 
@@ -87,4 +92,34 @@ class Klarna extends Alternative
 
         return $address;
     }
+
+    /**
+     * Gets the billing address.
+     *
+     * @param \Context $context The context
+     *
+     * @return KlarnaAddress the billing address
+     */
+    public static function getShipping(\Context $context)
+    {
+
+        $product = null;
+        if($context->cart->id_carrier) {
+
+            $carrier = new \Carrier($context->cart->id_carrier, $context->cart->id_lang);
+            $product = new Product();
+            $product->name = $carrier->name;
+            $product->quantity = 1;
+            $product->tax_rate = (int) $carrier->getTaxesRate(new \Address((int) $context->cart->id_address_delivery)) * 100;
+            $product->unit_price = static::fixAmount($context->cart->getOrderTotal(true, \Cart::ONLY_SHIPPING));
+            $product->total_amount = $product->unit_price;
+            $product->total_tax_amount = $product->unit_price - static::fixAmount($context->cart->getOrderTotal(false, \Cart::ONLY_SHIPPING));
+            $product->type = 'shipping_fee';
+
+        }
+
+        return $product;
+
+    }
+
 }

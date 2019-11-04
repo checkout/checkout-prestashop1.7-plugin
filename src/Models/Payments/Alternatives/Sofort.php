@@ -11,7 +11,7 @@ class Sofort extends Alternative
      *
      * @param array $params The parameters
      *
-     * @return Response ( description_of_the_return_value )
+     * @return Response
      */
     public static function pay(array $params)
     {

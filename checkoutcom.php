@@ -63,7 +63,7 @@ class CheckoutCom extends PaymentModule
 
         parent::__construct();
 
-        $this->displayName = $this->l('Checkout.com Payment Gateway');
+        $this->displayName = $this->l('Checkout.com');
         $this->description = $this->l('Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.');
 
         $this->confirmUninstall = $this->l('Are you sure you want to stop accepting payments?');
@@ -76,14 +76,15 @@ class CheckoutCom extends PaymentModule
      */
     public function install()
     {
-        Debug::write('# checkoutcom.install');
-        if (extension_loaded('curl') == false) {
-            $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module.');
 
+        if (extension_loaded('curl') == false) {
+            \PrestaShopLogger::addLog("cURL is not enabled.", 2, 0, 'checkoutcom' , 0);
+            $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module.');
             return false;
         }
 
         Config::install();
+        \PrestaShopLogger::addLog("The module has been installed.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
 
         return parent::install() &&
             $this->registerHook('paymentOptions') &&
@@ -105,7 +106,7 @@ class CheckoutCom extends PaymentModule
     public function uninstall()
     {
         Config::uninstall();
-
+        \PrestaShopLogger::addLog("The module has been uninstalled.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
         return parent::uninstall();
     }
 
@@ -172,6 +173,7 @@ class CheckoutCom extends PaymentModule
                 Configuration::updateValue($key, $value);
             }
         }
+        \PrestaShopLogger::addLog("Module configurations have been updated.", 1, 0, 'checkoutcom' , 0, true, $this->context->employee->id);
     }
 
     /**

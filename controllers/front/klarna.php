@@ -33,8 +33,8 @@ class CheckoutcomKlarnaModuleFrontController extends ModuleFrontController
         $billing = new Address((int) $this->context->cart->id_address_invoice);
 
         // Float precision workaround
-        $total = (int) ('' . $this->context->cart->getOrderTotal(true, Cart::BOTH) * 100);
-        $tax = (int) ('' . ($total - $this->context->cart->getOrderTotal(false, Cart::BOTH) * 100));
+        $total = (int) ('' . KlarnaModel::fixAmount($this->context->cart->getOrderTotal(true, Cart::BOTH)));
+        $tax = (int) ('' . ($total - KlarnaModel::fixAmount($this->context->cart->getOrderTotal(false, Cart::BOTH))));
 
         $klarna = new Klarna(
                 Country::getIsoById($billing->id_country),
@@ -80,4 +80,5 @@ class CheckoutcomKlarnaModuleFrontController extends ModuleFrontController
 
         return $result;
     }
+
 }

@@ -2,7 +2,6 @@
 
 namespace CheckoutCom\PrestaShop\Models;
 
-use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 
 class Config extends \Configuration
@@ -26,10 +25,8 @@ class Config extends \Configuration
      */
     public static function install()
     {
-        static::load();
-        Debug::write('Config.install()');
-
-        foreach (static::defaults() as $key => $value) {
+        Config::load();
+        foreach (Config::defaults() as $key => $value) {
             \Configuration::updateValue($key, $value);
         }
 
@@ -41,10 +38,8 @@ class Config extends \Configuration
      */
     public static function uninstall()
     {
-        static::load();
-        Debug::write('Config.uninstall()');
-
-        foreach (static::keys() as $key) {
+        Config::load();
+        foreach (Config::keys() as $key) {
             \Configuration::deleteByName($key);
         }
 
@@ -56,11 +51,8 @@ class Config extends \Configuration
      */
     public static function load()
     {
-        Debug::write('Config.loadConfigs()');
-
         if (!Config::$configs) {
-            Debug::write('Config.loadConfigs().$configs is empty');
-            $files = scandir(static::CHECKOUTCOM_CONFIGS);
+            $files = scandir(Config::CHECKOUTCOM_CONFIGS);
             foreach ($files as $file) {
                 if (strpos($file, '.json') !== false) {
                     $filename = basename($file, '.json');
@@ -79,25 +71,21 @@ class Config extends \Configuration
      */
     public static function values($name = '')
     {
-        static::load();
-        Debug::write('Config.values(' . $name . ')');
+        Config::load();
 
         $forms = array();
         $fields = array();
 
         if ($name) {
-            Debug::write('Config.values().' . $name);
-            $forms = static::$configs[$name];
+            $forms = Config::$configs[$name];
         } else {
-            Debug::write('Config.values().null');
-            foreach (static::$configs as $key => $configuration) {
+            foreach (Config::$configs as $key => $configuration) {
                 $forms = array_merge($forms, $configuration);
             }
         }
 
         foreach ($forms as $form) {
             foreach ($form as $field) {
-                Debug::write($field['name'] . ' -> ' . \Configuration::get($field['name'], Utilities::getValueFromArray($field, 'default')));
                 $fields[$field['name']] = \Configuration::get($field['name'], Utilities::getValueFromArray($field, 'default'));
             }
         }
@@ -114,18 +102,15 @@ class Config extends \Configuration
      */
     public static function defaults($name = '')
     {
-        static::load();
-        //Debug::write('Config.defaults('.$name.')');
+        Config::load();
 
         $forms = array();
         $fields = array();
 
         if ($name) {
-            Debug::write('Config.defaults().' . $name);
-            $forms = static::$configs[$name];
+            $forms = Config::$configs[$name];
         } else {
-            Debug::write('Config.defaults().null');
-            foreach (static::$configs as $key => $configuration) {
+            foreach (Config::$configs as $key => $configuration) {
                 $forms = array_merge($forms, $configuration);
             }
         }
@@ -148,18 +133,15 @@ class Config extends \Configuration
      */
     public static function keys($name = '')
     {
-        static::load();
-        //Debug::write('Config.defaults('.$name.')');
+        Config::load();
 
         $forms = array();
         $keys = array();
 
         if ($name) {
-            //Debug::write('Config.keys().' . $name);
-            $forms = static::$configs[$name];
+            $forms = Config::$configs[$name];
         } else {
-            //Debug::write('Config.keys().null');
-            foreach (static::$configs as $key => $configuration) {
+            foreach (Config::$configs as $key => $configuration) {
                 $forms = array_merge($forms, $configuration);
             }
         }
@@ -180,16 +162,12 @@ class Config extends \Configuration
      */
     public static function definition($name = '')
     {
-        static::load();
+        Config::load();
 
         if ($name) {
-            Debug::write('Config.definition().' . $name);
-
-            return static::$configs[$name];
+            return Config::$configs[$name];
         } else {
-            Debug::write('Config.definition().null');
-
-            return static::$configs;
+            return Config::$configs;
         }
     }
 }
