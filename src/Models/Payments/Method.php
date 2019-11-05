@@ -38,7 +38,7 @@ abstract class Method
     {
         $response = new Response();
         $response->http_code = 400;
-        $response->errors = array('Payment method in development.');
+        $response->errors = array(Utilities::getValueFromArray($params, 'source', 'Payment method') . ' in development.');
         $response->message = $response->errors[0];
 
         return $response;
@@ -51,7 +51,7 @@ abstract class Method
      *
      * @return Payment ( description_of_the_return_value )
      */
-    public static function makePayment(MethodSource $source)
+    public static function makePayment(MethodSource $source, array $params = array())
     {
         $context = \Context::getContext();
 
@@ -62,7 +62,7 @@ abstract class Method
         $cart_id = $context->cart->id;
         $secure_key = $context->customer->secure_key;
 
-        $payment->customer = static::getCustomer($context);
+        $payment->customer = static::getCustomer($context, $params);
 
         // Set the payment specifications
         $payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
@@ -135,7 +135,7 @@ abstract class Method
      *
      * @return Customer the metadata
      */
-    protected static function getCustomer(\Context $context)
+    protected static function getCustomer(\Context $context, array $params)
     {
         $customer = new Customer();
         $customer->email = $context->customer->email;

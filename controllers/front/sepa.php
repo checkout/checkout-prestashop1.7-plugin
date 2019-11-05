@@ -3,9 +3,11 @@
 use Checkout\Models\Sources\Sepa;
 use Checkout\Models\Sources\SepaData;
 use Checkout\Models\Sources\SepaAddress;
+use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
+use Checkout\Library\Exceptions\CheckoutHttpException;
 
 class CheckoutcomSepaModuleFrontController extends ModuleFrontController
 {
@@ -78,7 +80,7 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController
             'customer_postcode' => $billing->postcode,
             'customer_city' => $billing->city,
             'customer_firstname' => $billing->firstname,
-            'customer_lastname' => $billing->lastname,
+            'customer_lastname' => $billing->lastname
         );
 
         $shop = array(
@@ -105,12 +107,13 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController
     {
         $mandate = array();
         $sAddress = new SepaAddress($address['customer_address1'], $address['customer_city'], $address['customer_postcode'], $address['customer_country']);
-        $data = new SepaData($address['customer_address1'], $address['customer_address1'], $iban, $bic, $address['shop_name'], 'single');
+        $data = new SepaData($address['customer_firstname'], $address['customer_lastname'], $iban, $bic, $address['shop_name'], 'single');
         $source = new Sepa($sAddress, $data);
-        $details = CheckoutApiHandler::api()->sources()->add($source);
+        $details = $this->requestSource($source);
 
         if ($details->isSuccessful()) {
             $mandate = array(
+                'customer_id' => $details->getValue(array('customer', 'id')),
                 'mandate_reference' => $details->getValue(array('response_data', 'mandate_reference')),
                 'mandate_src' => $details->getId(),
             );
@@ -118,4 +121,29 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController
 
         return $mandate;
     }
+
+    /**
+     * Safely request source.
+     *
+     * @param \Checkout\Models\Sources\Sepa $sepa The sepa
+     *
+     * @return Response
+     */
+    protected function requestSource(Sepa $sepa)
+    {
+
+        $response = new Response();
+
+        try {
+            $response = CheckoutApiHandler::api()->sources()->add($sepa);
+        } catch (CheckoutHttpException $ex) {
+            $response->http_code = $ex->getCode();
+            $response->message = $ex->getMessage();
+            $response->errors = $ex->getErrors();
+            \PrestaShopLogger::addLog($ex->getBody(), 3, $ex->getCode(), 'CheckoutcomSepaModuleFrontController' , 0, true);
+        }
+
+        return $response;
+    }
+
 }

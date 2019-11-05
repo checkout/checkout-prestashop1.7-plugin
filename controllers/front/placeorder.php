@@ -116,7 +116,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             $this->context->cookie->write();
 
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('@todo print error related to api call here.');
+            $this->context->controller->errors[] = $this->module->l($response->message);
             // Redirect to cartcontext
             $this->redirectWithNotifications('index.php?controller=order');
         }
