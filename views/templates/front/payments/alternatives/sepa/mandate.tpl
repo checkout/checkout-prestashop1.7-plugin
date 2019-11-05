@@ -38,9 +38,10 @@
         <div class="sepa-checkbox-container" id="sepa-checkbox-container">
             <label class="sepa-checkbox-layout" for="sepa-checkbox-input">
                 <div class="sepa-checkbox-inner-container">
-                    <input style="margin-right: 10px;" class="sepa-checkbox-input" type="checkbox" id="sepa-checkbox-input" name="accepted" value="0" required>
+                    <input style="margin-right: 10px;" class="sepa-checkbox-input" type="checkbox" id="checkoutcom-sepa-accept-terms" name="accepted" required>
                     <h4 style="font-size: 12px;display: inline;">{l s='I accept the mandate for a single payment' mod='checkoutcom'}</h4>
                     <input type="hidden" name="id" value="{$mandate_src}" required>
+                    <input type="hidden" name="customer_id" value="{$customer_id}" required>
                 </div>
             </label>
         </div>

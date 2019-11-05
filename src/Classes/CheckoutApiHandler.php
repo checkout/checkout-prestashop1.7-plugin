@@ -14,9 +14,9 @@ class CheckoutApiHandler
      */
     public static function init()
     {
-        CheckoutApiHandler::$api = new CheckoutApi(Config::get('CHECKOUTCOM_SECRET_KEY'),
-                                                    !Config::get('CHECKOUTCOM_LIVE_MODE'),
-                                                    Config::get('CHECKOUTCOM_PUBLIC_KEY'));
+        CheckoutApiHandler::$api = new CheckoutApi(\Configuration::get('CHECKOUTCOM_SECRET_KEY'),
+                                                    !\Configuration::get('CHECKOUTCOM_LIVE_MODE'),
+                                                    \Configuration::get('CHECKOUTCOM_PUBLIC_KEY'));
     }
 
     /**

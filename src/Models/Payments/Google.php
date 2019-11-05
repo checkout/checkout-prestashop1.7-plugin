@@ -28,7 +28,7 @@ class Google extends Method
         try {
             $token = CheckoutApiHandler::api()->tokens()->request($googlepay);
         } catch (CheckoutHttpException $ex) {
-            // @todo: log errors
+            \PrestaShopLogger::addLog($ex->getBody(), 3, $ex->getCode(), 'checkoutcom' , 0, true);
         }
 
         if ($token) {

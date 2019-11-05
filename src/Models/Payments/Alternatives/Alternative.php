@@ -7,8 +7,9 @@ use CheckoutCom\PrestaShop\Models\Payments\Method;
 abstract class Alternative extends Method
 {
     /**
-     * Load variabels
+     * Load variabels to smarty.
      *
+     * @note 	Not being used currently.
      * @return array
      */
     public static function assign()

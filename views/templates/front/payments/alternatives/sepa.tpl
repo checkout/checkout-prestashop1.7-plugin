@@ -28,7 +28,10 @@
     $sForm.onsubmit = function(e) {
       e.preventDefault();
 
-    console.log('sepa aqui');
+      const $terms = document.getElementById('checkoutcom-sepa-accept-terms');
+      if($terms && $terms.checked) {
+        $sForm.submit();
+      }
 
     };
 </script>

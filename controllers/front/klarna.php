@@ -33,11 +33,12 @@ class CheckoutcomKlarnaModuleFrontController extends ModuleFrontController
         $billing = new Address((int) $this->context->cart->id_address_invoice);
 
         // Float precision workaround
-        $total = (int) ('' . $this->context->cart->getOrderTotal(true, Cart::BOTH) * 100);
-        $tax = (int) ('' . ($total - $this->context->cart->getOrderTotal(false, Cart::BOTH) * 100));
+        $total = (int) ('' . KlarnaModel::fixAmount($this->context->cart->getOrderTotal(true, Cart::BOTH)));
+        $tax = (int) ('' . ($total - KlarnaModel::fixAmount($this->context->cart->getOrderTotal(false, Cart::BOTH))));
+        $country = Country::getIsoById($billing->id_country);
 
         $klarna = new Klarna(
-                Country::getIsoById($billing->id_country),
+                $country,
                 $this->context->currency->iso_code,
                 $this->context->language->locale,
                 $total,
@@ -46,7 +47,14 @@ class CheckoutcomKlarnaModuleFrontController extends ModuleFrontController
             );
 
         $result = $this->requestSource($klarna);
-        if ($result && $result->isSuccessful()) {
+
+        if ($result->isSuccessful()) {
+
+            if(!$result->payment_method_categories) {
+                \PrestaShopLogger::addLog('Klarna `payment_method_categories` not available for ' . $this->context->currency->iso_code . '-' . $country . ' pair.', 2, 0, 'CheckoutcomKlarnaModuleFrontController' , 0, false);
+                die(json_encode($response));
+            }
+
             $response = array(
                 'success' => true,
                 'client_token' => $result->client_token,
@@ -70,14 +78,19 @@ class CheckoutcomKlarnaModuleFrontController extends ModuleFrontController
      */
     protected function requestSource(Klarna $klarna)
     {
-        $result = null;
+
+        $response = new Response();
 
         try {
-            $result = CheckoutApiHandler::api()->sources()->add($klarna);
-        } catch (CheckoutHttpException $e) {
-            //@todo: handle errors
+            $response = CheckoutApiHandler::api()->sources()->add($klarna);
+        } catch (CheckoutHttpException $ex) {
+            $response->http_code = $ex->getCode();
+            $response->message = $ex->getMessage();
+            $response->errors = $ex->getErrors();
+            \PrestaShopLogger::addLog($ex->getBody(), 3, $ex->getCode(), 'CheckoutcomKlarnaModuleFrontController' , 0, true);
         }
 
-        return $result;
+        return $response;
     }
+
 }

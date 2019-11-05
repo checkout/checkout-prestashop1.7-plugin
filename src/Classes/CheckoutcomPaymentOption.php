@@ -2,12 +2,9 @@
 
 namespace CheckoutCom\PrestaShop\Classes;
 
-use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use CheckoutCom\PrestaShop\Models\Config;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-
-//use PrestaShop\PrestaShop\Adapter\Debug\DebugMode;
 
 class CheckoutcomPaymentOption extends PaymentOption
 {
@@ -21,28 +18,26 @@ class CheckoutcomPaymentOption extends PaymentOption
      */
     public static function getCard(&$module, &$params)
     {
-        Debug::write('CheckoutcomPaymentOption.getCard');
+
         if (!Config::get('CHECKOUTCOM_CARD_ENABLED')) {
             return;
         }
-        Debug::write('CheckoutcomPaymentOption.getCard -> enabled');
+
         // Load Context
         $context = \Context::getContext();
-        Debug::write('CheckoutcomPaymentOption.getCard -> context');
+
         $context->smarty->assign([
             'module' => $module->name,
             'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
             'lang' => Config::get('CHECKOUTCOM_CARD_LANG_FALLBACK'),
-            'debug' => _PS_DEBUG_PROFILING_, //@todo: DebugMode::isDebugModeEnabled()
+            'debug' => _PS_MODE_DEV_, //@todo: DebugMode::isDebugModeEnabled() or _PS_DEBUG_PROFILING_
         ]);
 
-        Debug::write('CheckoutcomPaymentOption.getCard -> smarty -> ' . _PS_DEBUG_PROFILING_);
         $option = new PaymentOption();
         $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/card.tpl'))
                 ->setModuleName($module->name . '-card-form')
                 ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/supported.svg'))
                 ->setCallToActionText($module->l(Config::get('CHECKOUTCOM_CARD_TITLE')));
-        Debug::write('CheckoutcomPaymentOption.getCard -> option');
 
         return $option;
     }
@@ -96,14 +91,13 @@ class CheckoutcomPaymentOption extends PaymentOption
      */
     public static function getGoogle(&$module, &$params)
     {
-        Debug::write('CheckoutcomPaymentOption.getGoogle');
         if (!Config::get('CHECKOUTCOM_GOOGLE_ENABLED')) {
             return;
         }
-        Debug::write('CheckoutcomPaymentOption.getGoogle -> enabled');
+
         // Load Context
         $context = \Context::getContext();
-        Debug::write('CheckoutcomPaymentOption.getGoogle -> context');
+
         $context->smarty->assign([
             'module' => $module->name,
             'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
@@ -111,13 +105,12 @@ class CheckoutcomPaymentOption extends PaymentOption
             'live' => Config::get('CHECKOUTCOM_LIVE_MODE'),
             'invoiceid' => $context->cart->id_address_invoice,
         ]);
-        Debug::write('CheckoutcomPaymentOption.getGoogle -> smarty');
+
         $option = new PaymentOption();
         $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/google.tpl'))
                 ->setModuleName($module->name . '-google-form')
                 ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/googlepay.svg'))
                 ->setCallToActionText($module->l(Config::get('CHECKOUTCOM_GOOGLE_TITLE')));
-        Debug::write('CheckoutcomPaymentOption.getGoogle -> opttion');
 
         return $option;
     }
