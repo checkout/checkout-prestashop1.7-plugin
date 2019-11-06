@@ -4,11 +4,11 @@
         <ul class="form-list" >
             <li>
                 <label for="name" class="required">{l s='International Bank Account Number (IBAN)' mod='checkoutcom'}</label>
-                <input type="text" id="iban" name="iban" placeholder="" class="form-control input-text cvv required-entry validate-cc-cvn" required>
+                <input type="text" id="{$module}-{$key}-iban" name="iban" placeholder="" class="form-control input-text cvv required-entry validate-cc-cvn" required>
             </li>
             <li>
                 <label for="name" class="required">{l s='Bank Identifier Code (BIC)' mod='checkoutcom'}</label>
-                <input type="text" id="bic" name="bic" placeholder="" class="form-control input-text cvv required-entry validate-cc-cvn" required>
+                <input type="text" id="{$module}-{$key}-bic" name="bic" placeholder="" class="form-control input-text cvv required-entry validate-cc-cvn" required>
             </li>
         </ul>
         <input type="button" id="{$module}-{$key}-generator" name="mandate" placeholder="" value="{l s='GENERATE MANDATE' mod='checkoutcom'}" class="btn btn-primary center-block" style="margin-bottom: 14px;">
@@ -17,23 +17,45 @@
 </form>
 {literal}
 <script type="text/javascript">
+    /**
+     * Self executable
+     */
+    (function($form){
 
-    const $sForm = document.getElementById('checkoutcom-sepa-form');
-    const $button = document.getElementById('checkoutcom-sepa-generator');
+        const $button = document.getElementById('checkoutcom-sepa-generator');
+        const $bic = document.getElementById('checkoutcom-sepa-bic');
+        const $iban = document.getElementById('checkoutcom-sepa-iban');
+        var submitted = false; // Prevent multiple submit
 
-    $button.onclick = function(e) {
-        window.loadMandate(e);
-    };
+        /**
+         * On click generate mandate.
+         *
+         * @param      {<type>}  e       { parameter_description }
+         */
+        $button.onclick = function(e) {
 
-    $sForm.onsubmit = function(e) {
-      e.preventDefault();
+            if($bic.value && $iban.value) {
+                window.loadMandate(e);
+            }
 
-      const $terms = document.getElementById('checkoutcom-sepa-accept-terms');
-      if($terms && $terms.checked) {
-        $sForm.submit();
-      }
+        };
 
-    };
+        /**
+         * Add form validation.
+         *
+         * @param      {Event}  e
+         */
+        $form.onsubmit = function(e) {
+          e.preventDefault();
+
+          const $terms = document.getElementById('checkoutcom-sepa-accept-terms');
+          if($terms && $terms.checked && !submitted) {
+            submitted = true;
+            $form.submit();
+          }
+
+        };
+
+    })(document.getElementById('checkoutcom-sepa-form'));
 </script>
 {/literal}
-
