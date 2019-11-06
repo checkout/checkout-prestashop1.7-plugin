@@ -4,17 +4,21 @@
 	<input id="{$module}-card-token" type="hidden" name="token" value="" required>
   <input id="{$module}-card-bin" type="hidden" name="bin" value="">
 </form>
-
 {literal}
-<script type="text/javascript" src="https://cdn.checkout.com/js/framesv2.min.js"></script>
 <script type="text/javascript">
-
-  if(typeof Frames !== 'undefined') {
+  /**
+   * Checkout Frames Pay Class.
+   *
+   * @class      CheckoutcomFramesPay (name)
+   * @param      {<type>}    $form   The form
+   * @return     {Function}  { description_of_the_return_value }
+   */
+  function CheckoutcomFramesPay($form) {
 
     const $frames = document.getElementById('checkoutcom-card-frame');
     const $token = document.getElementById('checkoutcom-card-token');
     const $bin = document.getElementById('checkoutcom-card-bin');
-    const $cForm = document.getElementById('checkoutcom-card-form');
+    var submitted = false; // Prevent multiple submit
 
     /**
      * Initialize frames.
@@ -67,17 +71,16 @@
      *
      * @param      {Event}  e
      */
-    $cForm.onsubmit = function(e) {
+    $form.onsubmit = function(e) {
       e.preventDefault();
-      if($token.value) {
-        $cForm.submit();
+      if($token.value && !submitted) {
+        submitted = true;
+        $form.submit();
       }
     };
 
-  } else {
-    // Hide pay by card option
   }
-
 </script>
+<script type="text/javascript" async src="https://cdn.checkout.com/js/framesv2.min.js" onload="CheckoutcomFramesPay(document.getElementById('checkoutcom-card-form'));"></script>
 {/literal}
 <br>

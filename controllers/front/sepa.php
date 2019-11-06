@@ -1,5 +1,6 @@
 <?php
 
+use Checkout\Models\Response;
 use Checkout\Models\Sources\Sepa;
 use Checkout\Models\Sources\SepaData;
 use Checkout\Models\Sources\SepaAddress;

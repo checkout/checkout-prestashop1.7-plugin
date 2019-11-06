@@ -31,7 +31,9 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
     {
         $cart = $this->context->cart;
         if (!$cart->id || $cart->id_customer == 0 || $cart->id_address_delivery == 0 || $cart->id_address_invoice == 0 || !$this->module->active) {
-            Tools::redirect('index.php?controller=order&step=1');
+            $this->context->controller->errors[] = $this->module->l('Missing information for checkout.');
+            $this->redirectWithNotifications('index.php?controller=order');
+            return;
         }
 
         // Check that this payment option is still available in case the customer changed his address just before the end of the checkout process
@@ -43,16 +45,20 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             }
         }
         if (!$authorized) {
-            //@todo redirect to failed
-            die('payment not autorized');
+            // Set error message
+            $this->context->controller->errors[] = $this->module->l('Payment method not supported.');
+            $this->redirectWithNotifications('index.php?controller=order');
+            return;
         }
 
         $customer = new Customer($cart->id_customer);
         if (!Validate::isLoadedObject($customer)) {
+            // Set error message
+            $this->context->controller->errors[] = $this->module->l('Payment method not supported.');
             Tools::redirect('index.php?controller=order&step=1');
+            return;
         }
 
-        $currency = $this->context->currency;
         $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
 
         if ($this->module->validateOrder(
@@ -60,16 +66,17 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                                             _PS_OS_PREPARATION_,
                                             $total,
                                             $this->module->displayName,
-                                            'message',
-                                            array('mailid' => 'mailmess'),
-                                            (int) $currency->id,
+                                            '',
+                                            array(),
+                                            (int) $this->context->cart->id_currency,
                                             false,
                                             $customer->secure_key
                                         )
         ) {
             $this->paymentProcess($customer);
         } else {
-            //@todo: add log here
+
+            \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
 
             // Set error message
             $this->context->controller->errors[] = $this->module->l('Payment method not supported.');
@@ -104,7 +111,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $this->context->cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
         } else {
-            // Add log here
+            \PrestaShopLogger::addLog("Payment for order not processed.", 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
 
             $history = new OrderHistory();
             $history->id_order = Order::getOrderByCartId($this->context->cart->id);

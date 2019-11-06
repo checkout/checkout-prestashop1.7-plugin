@@ -14,14 +14,6 @@
 	function CheckoutcomGooglePay($form) {
 
 		/**
-		 * Safe check
-		 */
-		if(typeof window.checkoutcom === 'undefined') {
-			window.checkoutcom = new Object();
-			//window.checkoutcom.$confirmation = document.getElementById('payment-confirmation');
-		}
-
-		/**
 		 * Constants
 		 */
 		const baseRequest = {
@@ -49,13 +41,9 @@
 			paymentsClient = new window.google.payments.api.PaymentsClient({environment: +$form.dataset.live ? 'PRODUCTION' : 'TEST'}),
 			isReadyToPayRequest = Object.assign({}, baseRequest),
 			$input = document.getElementById('checkoutcom-google-token');
+		var self = this;
 
 		isReadyToPayRequest.allowedPaymentMethods = [baseCardPaymentMethod];
-
-		/**
-		 * Make it global
-		 */
-		window.checkoutcom.google = this;
 
 		/**
 		 * Init payments client.
@@ -67,11 +55,11 @@
 				insertButton();
 				prefetchData();
 			} else {
-				this.hide(response);
+				self.hide(response);
 			}
 
 		}).catch(function(err) {
-			window.checkoutcom.google.hide(err);
+			self.hide(err);
 	    });
 
 
@@ -159,7 +147,7 @@
 				$input.value = paymentData.paymentMethodData.tokenizationData.token;
 				$form.submit();
 			}).catch(function(err){
-				window.checkoutcom.google.hide(err);
+				self.hide(err);
 			});
 
 		}
@@ -201,5 +189,5 @@
 
 	}
 </script>
-<script type="text/javascript" async src="https://pay.google.com/gp/p/js/pay.js" onload="CheckoutcomGooglePay(document.getElementById('checkoutcom-google-form'))"></script>
+<script type="text/javascript" async src="https://pay.google.com/gp/p/js/pay.js" onload="CheckoutcomGooglePay(document.getElementById('checkoutcom-google-form'));"></script>
 {/literal}
