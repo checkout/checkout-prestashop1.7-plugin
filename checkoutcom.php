@@ -95,7 +95,8 @@ class CheckoutCom extends PaymentModule
             $this->registerHook('actionPaymentConfirmation') &&
             $this->registerHook('displayPayment') &&
             $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('displayPaymentTop');
+            $this->registerHook('displayPaymentTop') &&
+            $this->registerHook('displayCustomerAccount');
     }
 
     /**
@@ -215,6 +216,7 @@ class CheckoutCom extends PaymentModule
         if (Tools::getValue('controller') === 'order') {
             $this->context->controller->addJquery();
             $this->context->controller->addJS($this->_path . '/views/js/front.js');
+            $this->context->controller->addJS($this->_path . '/views/js/cko.js');
             $this->context->controller->addCSS($this->_path . '/views/css/front.css');
         }
     }
@@ -288,5 +290,31 @@ class CheckoutCom extends PaymentModule
         Debug::write('#hookDisplayPaymentTop');
         // I don't think this will be needed.
         /* Place your code here. */
+    }
+
+    /**
+     * This method is used to create checkout saved card table
+     */
+    private function _createCkoSaveCardTable()
+    {
+        $sql = "CREATE TABLE  IF NOT EXISTS "._DB_PREFIX_."cko_cards
+             (
+                entity_id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                customer_id INT(11) NOT NULL COMMENT 'Customer ID from PS'  ,
+                source_id VARCHAR(100) NOT NULL COMMENT 'Source ID from cko' ,
+                last_four INT(4) NOT NULL COMMENT 'Customer last four cc number',
+                card_scheme VARCHAR(20) NOT NULL COMMENT 'Credit Card scheme',
+                is_mada BIT NOT NULL DEFAULT 0 COMMENT 'Is mada card'
+             ) ENGINE=InnoDB;
+             ";
+
+        $db = Db::getInstance();
+        if (!$db->execute($sql))
+            die('Error has occured while creating your table. Please try again ');
+    }
+
+    public function hookDisplayCustomerAccount()
+    {
+        return $this->display(__FILE__, 'views/templates/hook/customer-account.tpl');
     }
 }

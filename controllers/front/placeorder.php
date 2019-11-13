@@ -24,6 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentHandler;
+use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 
 class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 {
@@ -96,8 +97,19 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         if ($response->isSuccessful()) {
             $url = $response->getRedirection();
             if ($url) {
+                if(Tools::getIsset('save-card-checkbox')){
+                    $context = \Context::getContext();
+                    $context->cookie->__set('save-card-checkbox', '1');
+                    $context->cookie->write();
+                }
+
                 Tools::redirect($url);
                 return;
+            }
+
+            // check if save card option was checked on checkout page
+            if(Tools::getIsset('save-card-checkbox')){
+                CheckoutcomCustomerCard ::saveCard($response, $customer->id);
             }
 
             $status = Configuration::get('CHECKOUTCOM_PAYMENT_ACTION') ? Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') : Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
