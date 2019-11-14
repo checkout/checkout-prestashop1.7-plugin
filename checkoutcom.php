@@ -292,29 +292,11 @@ class CheckoutCom extends PaymentModule
         /* Place your code here. */
     }
 
-    /**
-     * This method is used to create checkout saved card table
-     */
-    private function _createCkoSaveCardTable()
-    {
-        $sql = "CREATE TABLE  IF NOT EXISTS "._DB_PREFIX_."cko_cards
-             (
-                entity_id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                customer_id INT(11) NOT NULL COMMENT 'Customer ID from PS'  ,
-                source_id VARCHAR(100) NOT NULL COMMENT 'Source ID from cko' ,
-                last_four INT(4) NOT NULL COMMENT 'Customer last four cc number',
-                card_scheme VARCHAR(20) NOT NULL COMMENT 'Credit Card scheme',
-                is_mada BIT NOT NULL DEFAULT 0 COMMENT 'Is mada card'
-             ) ENGINE=InnoDB;
-             ";
-
-        $db = Db::getInstance();
-        if (!$db->execute($sql))
-            die('Error has occured while creating your table. Please try again ');
-    }
-
     public function hookDisplayCustomerAccount()
     {
-        return $this->display(__FILE__, 'views/templates/hook/customer-account.tpl');
+        // Show saved cards on customer's account if enable in module config
+        if(Configuration::get('CHECKOUTCOM_CARD_SAVE_CARD_OPTION')) {
+            return $this->display(__FILE__, 'views/templates/hook/customer-account.tpl');
+        }
     }
 }
