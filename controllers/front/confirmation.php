@@ -47,13 +47,15 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
         if (Tools::isSubmit('cko-session-id')) {
             $response = $this->_verifySession($_REQUEST['cko-session-id']);
-
+Debug::write($response);
             if ($response->isSuccessful() && !$response->isPending()) {
 
                 $payment_flagged = $response->isFlagged();
-                $actions = $response->actions;
-                $action_id = $actions[0]['id'];
-                $transaction_id = $action_id;
+                if(isset($response->actions)) {
+                    $actions = $response->actions;
+                    $action_id = $actions[0]['id'];
+                    $transaction_id = $action_id;
+                }
                 $reference = $response->reference;
                 $status = $response->status;
             }

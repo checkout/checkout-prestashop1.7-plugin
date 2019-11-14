@@ -23,6 +23,7 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
+use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentHandler;
 
 class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
@@ -60,7 +61,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         }
 
         $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
-
+Debug::write('###### ' . _PS_OS_PREPARATION_);
         if ($this->module->validateOrder(
                                             $cart->id,
                                             _PS_OS_PREPARATION_,
@@ -99,7 +100,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                 Tools::redirect($url);
                 return;
             }
-
+Debug::write('#### CHEGOU AQUI');
             $status = Configuration::get('CHECKOUTCOM_PAYMENT_ACTION') ? Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') : Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
             if ($response->isFlagged()) {
                 $status = Configuration::get('CHECKOUTCOM_FLAGGED_ORDER_STATUS');
