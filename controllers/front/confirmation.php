@@ -27,6 +27,7 @@ use Checkout\Models\Response;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
+use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 
 class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 {
@@ -56,6 +57,13 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 $transaction_id = $action_id;
                 $reference = $response->reference;
                 $status = $response->status;
+
+                $context = \Context::getContext();
+
+                if($context->cookie->__isset('save-card-checkbox') ){
+                    CheckoutcomCustomerCard::saveCard($response,$context->customer->id);
+                    $context->cookie->__unset('save-card-checkbox');
+                }
             }
         } else {
             // Set error message

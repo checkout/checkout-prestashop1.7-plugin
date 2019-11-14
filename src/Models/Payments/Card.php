@@ -2,10 +2,12 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments;
 
+use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use Checkout\Models\Payments\TokenSource;
 use Checkout\Models\Payments\Payment;
 use Checkout\Models\Payments\ThreeDs;
+use Checkout\Models\Payments\IdSource;
 
 class Card extends Method
 {
@@ -18,7 +20,24 @@ class Card extends Method
      */
     public static function pay(array $params)
     {
-        $source = new TokenSource($params['token']);
+    	
+        if($params['source'] == 'id') {
+            $context = \Context::getContext();
+            $customerId = $context->customer->id;
+            $entityId = $params['checkoutcom-saved-card'];
+
+            $sourceId = CheckoutcomCustomerCard::getSourceId($entityId, $customerId);
+            
+            $source = new IdSource($sourceId);
+
+            if(isset($params['cko-cvv']) && !empty($params['cko-cvv'])){
+                $source->cvv = $params['cko-cvv'];
+            }
+
+        } else {
+            $source = new TokenSource($params['token']);
+        }
+
         $payment = static::makePayment($source);
         static::addMada($payment, Utilities::getValueFromArray($params, 'bin', 0));
         return static::request($payment);
@@ -42,6 +61,13 @@ class Card extends Method
                     $payment->metadata->udf1 = 'mada';
                     unset($payment->capture);
                     unset($payment->capture_on);
+
+                    if(\Configuration::get('CHECKOUTCOM_CARD_SAVE_CARD_OPTION')){
+                        // Load Context
+                        $context = \Context::getContext();
+                        $context->cookie->__set('is_mada', 1);
+                    }
+
                     return;
                 }
             }

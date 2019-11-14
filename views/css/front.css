@@ -51,9 +51,21 @@
 	color: #777777;
 }
 
+#checkoutcom-card-form {
+    padding-left: 40px;
+}
 
+.save-card-check {
+    padding-top: 15px;
+}
 
+.card-logo {
+    padding-left: 5px;
+}
 
+#checkoutcom-cko-cvv {
+    width: 50px;
+}
 
 
 

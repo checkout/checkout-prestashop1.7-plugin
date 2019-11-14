@@ -3,6 +3,7 @@
 namespace CheckoutCom\PrestaShop\Models;
 
 use CheckoutCom\PrestaShop\Helpers\Utilities;
+use PrestaShop\PrestaShop\Adapter\Entity\Db;
 
 class Config extends \Configuration
 {
@@ -29,8 +30,10 @@ class Config extends \Configuration
         foreach (Config::defaults() as $key => $value) {
             \Configuration::updateValue($key, $value);
         }
+        
+        // create cko_cards table
+        Config::createCkoSaveCardTable();
 
-        //include(dirname(__FILE__).'/sql/install.php');
     }
 
     /**
@@ -169,5 +172,26 @@ class Config extends \Configuration
         } else {
             return Config::$configs;
         }
+    }
+
+     /**
+     * This method is used to create checkout saved card table
+     */
+    public static function createCkoSaveCardTable()
+    {
+        $sql = "CREATE TABLE  IF NOT EXISTS "._DB_PREFIX_."cko_cards
+             (
+                entity_id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                customer_id INT(11) NOT NULL COMMENT 'Customer ID from PS'  ,
+                source_id VARCHAR(100) NOT NULL COMMENT 'Source ID from cko' ,
+                last_four INT(4) NOT NULL COMMENT 'Customer last four cc number',
+                card_scheme VARCHAR(20) NOT NULL COMMENT 'Credit Card scheme',
+                is_mada BIT NOT NULL DEFAULT 0 COMMENT 'Is mada card'
+             ) ENGINE=InnoDB;
+             ";
+
+        $db = Db::getInstance();
+        if (!$db->execute($sql))
+            die('Error has occured while creating your table. Please try again ');
     }
 }

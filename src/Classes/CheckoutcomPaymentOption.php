@@ -5,6 +5,9 @@ namespace CheckoutCom\PrestaShop\Classes;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use CheckoutCom\PrestaShop\Models\Config;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
+
+//use PrestaShop\PrestaShop\Adapter\Debug\DebugMode;
 
 class CheckoutcomPaymentOption extends PaymentOption
 {
@@ -26,11 +29,23 @@ class CheckoutcomPaymentOption extends PaymentOption
         // Load Context
         $context = \Context::getContext();
 
+        // Get customers card list if exist
+        if(!$context->customer->is_guest) {
+            $cardList = CheckoutcomCustomerCard::getCardList($context->customer->id);
+
+            if(!empty($cardList)){
+                $context->smarty->assign('cardLists', $cardList);
+            }
+        }
+
         $context->smarty->assign([
             'module' => $module->name,
             'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
             'lang' => Config::get('CHECKOUTCOM_CARD_LANG_FALLBACK'),
             'debug' => _PS_MODE_DEV_, //@todo: DebugMode::isDebugModeEnabled() or _PS_DEBUG_PROFILING_
+            'save_card_option' => Config::get('CHECKOUTCOM_CARD_SAVE_CARD_OPTION'),
+            'is_guest' =>$context->customer->is_guest,
+            'img_dir' => _MODULE_DIR_.'checkoutcom/views/img/'
         ]);
 
         $option = new PaymentOption();
