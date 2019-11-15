@@ -27,6 +27,7 @@ use Checkout\Models\Response;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
+use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 
 class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 {
@@ -47,7 +48,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
         if (Tools::isSubmit('cko-session-id')) {
             $response = $this->_verifySession($_REQUEST['cko-session-id']);
-Debug::write($response);
+
             if ($response->isSuccessful() && !$response->isPending()) {
 
                 $payment_flagged = $response->isFlagged();
@@ -58,6 +59,13 @@ Debug::write($response);
                 }
                 $reference = $response->reference;
                 $status = $response->status;
+
+                $context = \Context::getContext();
+
+                if($context->cookie->__isset('save-card-checkbox') ){
+                    CheckoutcomCustomerCard::saveCard($response,$context->customer->id);
+                    $context->cookie->__unset('save-card-checkbox');
+                }
             }
         } else {
             // Set error message
@@ -122,7 +130,6 @@ Debug::write($response);
             $response->http_code = $ex->getCode();
             $response->message = $ex->getMessage();
             $response->errors = $ex->getErrors();
-            Debug::write($ex->getBody());
         }
 
         return $response;
@@ -141,8 +148,10 @@ Debug::write($response);
             case 'Captured':
             case 'Partially Captured':
                 return Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
-            case 'Cancelled':
             case 'Declined':
+                return _PS_OS_ERROR_;
+            case 'Cancelled':
+                return _PS_OS_CANCELED_;
             case 'Voided':
                 return Configuration::get('CHECKOUTCOM_VOID_ORDER_STATUS');
             case 'Refunded':

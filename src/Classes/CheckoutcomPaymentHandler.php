@@ -17,6 +17,10 @@ class CheckoutcomPaymentHandler
             'key' => 'card',
             'class' => 'CheckoutCom\\PrestaShop\\Models\\Payments\\Card',
         ),
+        array(
+            'key' => 'id',
+            'class' => 'CheckoutCom\\PrestaShop\\Models\\Payments\\Card',
+        ),
         // array(
         //     'key' => 'apple',
         //     'class' => ''

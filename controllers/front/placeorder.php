@@ -25,6 +25,7 @@
 */
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentHandler;
+use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 
 class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 {
@@ -61,7 +62,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         }
 
         $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
-Debug::write('###### ' . _PS_OS_PREPARATION_);
+
         if ($this->module->validateOrder(
                                             $cart->id,
                                             _PS_OS_PREPARATION_,
@@ -97,10 +98,22 @@ Debug::write('###### ' . _PS_OS_PREPARATION_);
         if ($response->isSuccessful()) {
             $url = $response->getRedirection();
             if ($url) {
+                if(Tools::getIsset('save-card-checkbox')){
+                    $context = \Context::getContext();
+                    $context->cookie->__set('save-card-checkbox', '1');
+                    $context->cookie->write();
+                }
+
                 Tools::redirect($url);
                 return;
             }
-Debug::write('#### CHEGOU AQUI');
+
+            // check if save card option was checked on checkout page
+            if(Tools::getIsset('save-card-checkbox')){
+                CheckoutcomCustomerCard::saveCard($response, $customer->id);
+            }
+
+
             $status = Configuration::get('CHECKOUTCOM_PAYMENT_ACTION') ? Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') : Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
             if ($response->isFlagged()) {
                 $status = Configuration::get('CHECKOUTCOM_FLAGGED_ORDER_STATUS');

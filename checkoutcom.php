@@ -94,7 +94,8 @@ class CheckoutCom extends PaymentModule
             $this->registerHook('actionPaymentConfirmation') &&
             $this->registerHook('displayPayment') &&
             $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('displayPaymentTop');
+            $this->registerHook('displayPaymentTop') &&
+            $this->registerHook('displayCustomerAccount');
     }
 
     /**
@@ -214,6 +215,7 @@ class CheckoutCom extends PaymentModule
         if (Tools::getValue('controller') === 'order') {
             $this->context->controller->addJquery();
             $this->context->controller->addJS($this->_path . '/views/js/front.js');
+            $this->context->controller->addJS($this->_path . '/views/js/cko.js');
             $this->context->controller->addCSS($this->_path . '/views/css/front.css');
         }
     }
@@ -287,5 +289,13 @@ class CheckoutCom extends PaymentModule
         Debug::write('#hookDisplayPaymentTop');
         // I don't think this will be needed.
         /* Place your code here. */
+    }
+
+    public function hookDisplayCustomerAccount()
+    {
+        // Show saved cards on customer's account if enable in module config
+        if(Configuration::get('CHECKOUTCOM_CARD_SAVE_CARD_OPTION')) {
+            return $this->display(__FILE__, 'views/templates/hook/customer-account.tpl');
+        }
     }
 }
