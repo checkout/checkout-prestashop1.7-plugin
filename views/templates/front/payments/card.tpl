@@ -32,7 +32,7 @@
                         <li>
                             <label>
                                 <input  class="{$module}-saved-card-mada" type="radio" name="{$module}-saved-card" value="{$entity_id}"/>
-                                <img class="card-logo" src="{$img_dir}{strtoLower($card_scheme).svg}"> ●●●● {$last_four}
+                                <img class="card-logo" src="{$img_dir}{strtoLower($card_scheme)}.svg"> ●●●● {$last_four}
                             </label>
                         </li>
 
@@ -40,7 +40,7 @@
                         <li>
                             <label>
                                 <input  class="{$module}-saved-card" type="radio" name="{$module}-saved-card" value="{$entity_id}"/>
-                                <img class="card-logo" src="{$img_dir}{strtoLower($card_scheme).svg}"> ●●●● {$last_four}
+                                <img class="card-logo" src="{$img_dir}{strtoLower($card_scheme)}.svg"> ●●●● {$last_four}
                             </label>
                         </li>
                     {/if}
