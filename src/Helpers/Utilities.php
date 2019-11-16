@@ -57,60 +57,39 @@ class Utilities
     }
 
 
-
-    public static function getOrderStatus($event) {
+    /**
+     * Return order status based in webhook event.
+     *
+     * @param      string  $event  The event
+     * @param      string $reference
+     *
+     * @return     mixed  The order status.
+     */
+    public static function getOrderStatus($event, $reference, $id) {
 
         switch ($event) {
             case 'card_verified':
             case 'payment_approved':
-            case 'payment_pending':
-                return _PS_OS_PREPARATION_;
-
-            case 'dispute_canceled':
-            case 'dispute_evidence_required':
-            case 'dispute_expired':
-            case 'dispute_lost':
-            case 'dispute_resolved':
-            case 'dispute_won':
-            case 'payment_retrieval':
-            case 'source.updated':
-                return '';
-
-
+                return \Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
             case 'card_verification_declined':
             case 'payment_declined':
             case 'payment_expired':
             case 'payment_capture_declined':
+            case 'payment_void_declined':
+            case 'payment_refund_declined':
+                \PrestaShopLogger::addLog('The `' . $event .'` was triggered for order ' . $reference . '.', 2, 0, 'CheckoutcomWebhookModuleFrontController' , $id, false);
                 return _PS_OS_ERROR_;
             case 'payment_voided':
-                return '';
+                return \Configuration::get('CHECKOUTCOM_VOID_ORDER_STATUS');
             case 'payment_canceled':
+                 \PrestaShopLogger::addLog('The `' . $event .'` was triggered for order ' . $reference . '.', 2, 0, 'CheckoutcomWebhookModuleFrontController' , $id, false);
                 return _PS_OS_CANCELED_;
-            case 'payment_void_declined':
-                return _PS_OS_DELIVERED_;
             case 'payment_captured':
-                return _PS_OS_DELIVERED_;
-
-            case 'payment_capture_pending':
-                return _PS_OS_PREPARATION_;
+                return \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
             case 'payment_refunded':
-                return _PS_OS_DELIVERED_;
-            case 'payment_refund_declined':
-                return _PS_OS_DELIVERED_;
-
-
-            case 'payment_refund_pending':
-                return _PS_OS_PREPARATION_;
-
-
-
-
-
-
-
-
-
+                return \Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS');
+            default:
+                return null;
         }
-
     }
 }

@@ -18,6 +18,7 @@ class Config extends \Configuration
      * Save configutation.
      *
      * @var array
+     * @note Implement apc_store() in the future.
      */
     protected static $configs = array();
 

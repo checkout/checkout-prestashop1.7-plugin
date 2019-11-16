@@ -41,26 +41,28 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
     }
 
     /**
-     * Initialize the page.
+     * Update order status based on webhook.
      */
     public function handleOrder()
     {
 
-        Debug::write($this->events);
         foreach ($this->events as $event) {
             $orders = Order::getByReference($event['data']['reference']);
             $list = $orders->getAll();
-            $status = Configuration::get('CHECKOUTCOM_FLAGGED_ORDER_STATUS');
-            if (isset(static::ACTIONS[$event['type']])) {
-                $status = Configuration::get(static::ACTIONS[$event['type']]);
+            $status = Utilities::getOrderStatus($event['type'], $event['data']['reference'], $event['data']['action_id']);
+            if ($status) {
+
+                foreach ($list as $order) {
+                    if($order->getCurrentOrderState() !== $status) {
+                        $history = new OrderHistory();
+                        $history->id_order = $order->id;
+                        $history->changeIdOrderState($status, $order->id);
+                        break;
+                    }
+                }
+
             }
 
-            foreach ($list as $order) {
-                $history = new OrderHistory();
-                $history->id_order = $order->id;
-                $history->changeIdOrderState($status, $order->id);
-                break;
-            }
         }
     }
 }

@@ -48,7 +48,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         }
         if (!$authorized) {
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('Payment method not supported.');
+            $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0001)');
             $this->redirectWithNotifications('index.php?controller=order');
             return;
         }
@@ -56,7 +56,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         $customer = new Customer($cart->id_customer);
         if (!Validate::isLoadedObject($customer)) {
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('Payment method not supported.');
+            $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0002)');
             Tools::redirect('index.php?controller=order&step=1');
             return;
         }
@@ -81,7 +81,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
 
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('Payment method not supported.');
+            $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0003)');
             // Redirect to cartcontext
             $this->redirectWithNotifications('index.php?controller=order&step=1&key=' . $customer->secure_key . '&id_cart=' . $cart->id);
         }
