@@ -121,6 +121,14 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             $history->id_order = Order::getOrderByCartId($this->context->cart->id);
             $history->changeIdOrderState($status, Order::getOrderByCartId($this->context->cart->id));
 
+             /**
+             * load order payment and set cko action id as order transaction id
+             */
+            $order = new Order((int) Order::getOrderByCartId($this->context->cart->id));
+            $payments = $order->getOrderPaymentCollection();
+            $payments[0]->transaction_id = $response->id;
+            $payments[0]->update();
+
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $this->context->cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
         } else {
             \PrestaShopLogger::addLog("Payment for order not processed.", 3, 0, 'checkoutcom' , $this->module->currentOrder, true);

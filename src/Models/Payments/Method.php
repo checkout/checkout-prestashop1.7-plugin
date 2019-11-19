@@ -15,6 +15,7 @@ use Checkout\Models\Payments\BillingDescriptor;
 use Checkout\Models\Payments\Method as MethodSource;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
+use Checkout\Models\Payments\Refund;
 
 abstract class Method
 {
@@ -228,5 +229,46 @@ abstract class Method
         if ($payment->threeDs->enabled) {
             $payment->threeDs->attempt_n3d = (bool) \Configuration::get('CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D');
         }
+    }
+
+    /**
+     * @param array $params
+     * @return bool|mixed
+     */
+    public static function makeRefund(array $params)
+    {
+        $cko_payment_id = $params['payment_id'];
+
+        // Check if cko_payment_id is empty
+        if(empty($cko_payment_id)){
+            return false;
+        }
+
+        try {
+            // Check if payment is already voided or captured on checkout.com hub
+            $details = CheckoutApiHandler::api()->payments()->details($cko_payment_id);
+
+            if ($details->status == 'Refunded' ) {
+                return false;
+            }
+
+            $ckoPayment = new Refund($cko_payment_id);
+
+            if(isset($params['amount'])){
+                $ckoPayment->amount = static::fixAmount($params['amount'], $params['currency_code']);
+            }
+
+            $response = CheckoutApiHandler::api()->payments()->refund($ckoPayment);
+
+            if (!$response->isSuccessful()) {
+                //@todo return error message
+            } else {
+                return $response;
+            }
+        } catch (CheckoutHttpException $ex) {
+
+        }
+
+        return false;
     }
 }

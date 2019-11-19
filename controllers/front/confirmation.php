@@ -52,9 +52,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             if ($response->isSuccessful() && !$response->isPending()) {
 
                 $payment_flagged = $response->isFlagged();
-                $actions = $response->actions;
-                $action_id = $actions[0]['id'];
-                $transaction_id = $action_id;
+                $transaction_id = $response->id;;
                 $reference = $response->reference;
                 $status = $response->status;
 
