@@ -18,6 +18,7 @@ class Config extends \Configuration
      * Save configutation.
      *
      * @var array
+     * @note Implement apc_store() in the future.
      */
     protected static $configs = array();
 
@@ -30,7 +31,7 @@ class Config extends \Configuration
         foreach (Config::defaults() as $key => $value) {
             \Configuration::updateValue($key, $value);
         }
-        
+
         // create cko_cards table
         Config::createCkoSaveCardTable();
 
@@ -192,6 +193,6 @@ class Config extends \Configuration
 
         $db = Db::getInstance();
         if (!$db->execute($sql))
-            die('Error has occured while creating your table. Please try again ');
+            die('Error has occured while creating your table. Please try again.');
     }
 }

@@ -7,6 +7,11 @@ use CheckoutCom\PrestaShop\Models\Config;
 
 class CheckoutApiHandler
 {
+    /**
+     * Checkout.com SDK Instance
+     *
+     * @var        CheckoutApi
+     */
     protected static $api = null;
 
     /**
@@ -26,10 +31,10 @@ class CheckoutApiHandler
      */
     public static function api()
     {
-        if (!static::$api) {
-            static::init();
+        if (!CheckoutApiHandler::$api) {
+            CheckoutApiHandler::init();
         }
 
-        return static::$api;
+        return CheckoutApiHandler::$api;
     }
 }

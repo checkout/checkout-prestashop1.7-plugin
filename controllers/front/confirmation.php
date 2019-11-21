@@ -52,6 +52,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             if ($response->isSuccessful() && !$response->isPending()) {
 
                 $payment_flagged = $response->isFlagged();
+
                 $transaction_id = $response->id;;
                 $reference = $response->reference;
                 $status = $response->status;
@@ -126,7 +127,6 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $response->http_code = $ex->getCode();
             $response->message = $ex->getMessage();
             $response->errors = $ex->getErrors();
-            Debug::write($ex->getBody());
         }
 
         return $response;
@@ -145,8 +145,10 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             case 'Captured':
             case 'Partially Captured':
                 return Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
-            case 'Cancelled':
             case 'Declined':
+                return _PS_OS_ERROR_;
+            case 'Cancelled':
+                return _PS_OS_CANCELED_;
             case 'Voided':
                 return Configuration::get('CHECKOUTCOM_VOID_ORDER_STATUS');
             case 'Refunded':

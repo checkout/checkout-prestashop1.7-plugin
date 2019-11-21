@@ -51,8 +51,45 @@ class Utilities
      *
      * @return string
      */
-    public function formatDate($timestamp)
+    public static function formatDate($timestamp)
     {
         return gmdate("Y-m-d\TH:i:s\Z", $timestamp);
+    }
+
+
+    /**
+     * Return order status based in webhook event.
+     *
+     * @param      string  $event  The event
+     * @param      string $reference
+     *
+     * @return     mixed  The order status.
+     */
+    public static function getOrderStatus($event, $reference, $id) {
+
+        switch ($event) {
+            case 'card_verified':
+            case 'payment_approved':
+                return \Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
+            case 'card_verification_declined':
+            case 'payment_declined':
+            case 'payment_expired':
+            case 'payment_capture_declined':
+            case 'payment_void_declined':
+            case 'payment_refund_declined':
+                \PrestaShopLogger::addLog('The `' . $event .'` was triggered for order ' . $reference . '.', 2, 0, 'CheckoutcomWebhookModuleFrontController' , $id, false);
+                return _PS_OS_ERROR_;
+            case 'payment_voided':
+                return \Configuration::get('CHECKOUTCOM_VOID_ORDER_STATUS');
+            case 'payment_canceled':
+                 \PrestaShopLogger::addLog('The `' . $event .'` was triggered for order ' . $reference . '.', 2, 0, 'CheckoutcomWebhookModuleFrontController' , $id, false);
+                return _PS_OS_CANCELED_;
+            case 'payment_captured':
+                return \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
+            case 'payment_refunded':
+                return \Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS');
+            default:
+                return null;
+        }
     }
 }

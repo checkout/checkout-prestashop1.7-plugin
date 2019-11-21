@@ -23,6 +23,7 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
+use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentHandler;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 
@@ -47,7 +48,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         }
         if (!$authorized) {
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('Payment method not supported.');
+            $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0001)');
             $this->redirectWithNotifications('index.php?controller=order');
             return;
         }
@@ -55,7 +56,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         $customer = new Customer($cart->id_customer);
         if (!Validate::isLoadedObject($customer)) {
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('Payment method not supported.');
+            $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0002)');
             Tools::redirect('index.php?controller=order&step=1');
             return;
         }
@@ -80,7 +81,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
 
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('Payment method not supported.');
+            $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0003)');
             // Redirect to cartcontext
             $this->redirectWithNotifications('index.php?controller=order&step=1&key=' . $customer->secure_key . '&id_cart=' . $cart->id);
         }
@@ -109,8 +110,9 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 
             // check if save card option was checked on checkout page
             if(Tools::getIsset('save-card-checkbox')){
-                CheckoutcomCustomerCard ::saveCard($response, $customer->id);
+                CheckoutcomCustomerCard::saveCard($response, $customer->id);
             }
+
 
             $status = Configuration::get('CHECKOUTCOM_PAYMENT_ACTION') ? Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') : Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
             if ($response->isFlagged()) {

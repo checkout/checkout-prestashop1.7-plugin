@@ -15,8 +15,11 @@ class Bancontact extends Alternative
      */
     public static function pay(array $params)
     {
-        $billing = new \Address((int) $this->context->cart->id_address_invoice);
-        $source = new BancontactSource($params['name'], \Country::getIsoById($billing->id_country), \Configuration::get('PS_SHOP_NAME'));
+        $context = \Context::getContext();
+        $billing = new \Address((int) $context->cart->id_address_invoice);
+        $source = new BancontactSource($context->customer->firstname . ' ' . $context->customer->lastname,
+                                       \Country::getIsoById($billing->id_country),
+                                       \Configuration::get('PS_SHOP_NAME'));
         $payment = static::makePayment($source);
 
         return static::request($payment);

@@ -28,7 +28,6 @@
  * Define module constants
  */
 define('CHECKOUTCOM_ROOT', __DIR__);
-
 if (!defined('_PS_VERSION_') || !is_readable(CHECKOUTCOM_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php')) {
     exit;
 }
