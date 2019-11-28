@@ -16,7 +16,7 @@ class Knet extends Alternative
     public static function pay(array $params)
     {
         $context = \Context::getContext();
-        $source = new KnetSource($context->language->locale);
+        $source = new KnetSource($context->language->iso_code);
         $payment = static::makePayment($source);
 
         return static::request($payment);
