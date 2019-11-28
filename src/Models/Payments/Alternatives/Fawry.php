@@ -37,8 +37,8 @@ class Fawry extends Alternative
         foreach ($context->cart->getProducts() as $item) {
             $product = new Product();
             $product->product_id = $item['id_product'];
-            $product->quantity = (int) $item['cart_quantity'];
-            $product->price = (int) ('' . ($item['price_wt'] * 100));
+            $product->quantity = 1;
+            $product->price = (int) ('' . ($item['total_wt'] * 100));
             $product->description = $item['id_product'];
 
             $products[] = $product;
