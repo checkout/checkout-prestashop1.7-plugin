@@ -43,8 +43,8 @@ console.log(data);
                     order_tax_amount:   +data.order_tax_amount,
                     order_lines:        data.order_lines,
                     billing_address:    {
-                        given_name:     prestashop.customer.firstname,
-                        family_name:    prestashop.customer.lastname,
+                        given_name:     prestashop.customer.addresses[data.id_address_invoice].firstname,
+                        family_name:    prestashop.customer.addresses[data.id_address_invoice].lastname,
                         email:          prestashop.customer.email,
                         //title:          data.billing.email,
                         street_address: prestashop.customer.addresses[data.id_address_invoice].address1,
@@ -52,7 +52,7 @@ console.log(data);
                         postal_code:    prestashop.customer.addresses[data.id_address_invoice].postcode,
                         city:           prestashop.customer.addresses[data.id_address_invoice].city,
                         region:         prestashop.customer.addresses[data.id_address_invoice].state,
-                        phone:          prestashop.customer.addresses[data.id_address_invoice].phone_mobile,
+                        phone:          prestashop.customer.addresses[data.id_address_invoice].phone,
                         country:        prestashop.customer.addresses[data.id_address_invoice].country_iso
                     }
                 },

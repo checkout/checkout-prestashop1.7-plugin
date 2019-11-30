@@ -17,13 +17,12 @@ class Fawry extends Alternative
     {
 
         $context = \Context::getContext();
-        $order = new \Order($context->controller->module->currentOrder);
-        $billing = new \Address((int) $context->cart->id_address_invoice);
+        $billing = new \Address($context->order->id_address_invoice);
 
         $source = new FawrySource(  $context->customer->email,
                                     $billing->phone,
-                                    \Configuration::get('PS_SHOP_NAME') . ' ' . $order->getUniqReference(),
-                                    Fawry::getProducts($order));
+                                    \Configuration::get('PS_SHOP_NAME') . ' ' . $context->order->getUniqReference(),
+                                    Fawry::getProducts($context));
 
         $payment = static::makePayment($source);
 
@@ -31,14 +30,14 @@ class Fawry extends Alternative
     }
 
     /**
-     * @param \Order $context
+     * @param \Context $context
      * @return array
      * @throws \Exception
      */
-    public static function getProducts(\Order $order)
+    public static function getProducts(\Context $context)
     {
         $products = array();
-        foreach ($order->getProducts() as $item) {
+        foreach ($context->order->getProducts() as $item) {
             $product = new Product();
             $product->product_id = $item['product_id'];
             $product->quantity = 1;
@@ -48,8 +47,8 @@ class Fawry extends Alternative
             $products[] = $product;
         }
 
-        if(+$order->total_shipping){
-            $products [] = Fawry::getShipping($order);
+        if(+$context->order->total_shipping){
+            $products [] = Fawry::getShipping($context);
         }
 
         return $products;
@@ -57,21 +56,21 @@ class Fawry extends Alternative
 
     /**
      * Get shipping in Product format.
-     * @param \Order $order
+     * @param \Context $context
      * @return Product
      */
-    public static function getShipping(\Order $order)
+    public static function getShipping(\Context $context)
     {
         $description = 'No carrier';
-        if($order->id_carrier) {
-            $carrier = new \Carrier($order->id_carrier, $order->id_lang);
+        if($context->order->id_carrier) {
+            $carrier = new \Carrier($context->order->id_carrier, $context->order->id_lang);
             $description = $carrier->name . ' Fee';
         }
 
         $product = new Product();
         $product->product_id = 0;
         $product->quantity = 1;
-        $product->price = static::fixAmount($order->total_shipping);
+        $product->price = static::fixAmount($context->order->total_shipping);
         $product->description = $description;
 
         return $product;

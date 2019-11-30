@@ -77,6 +77,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                                             $customer->secure_key
                                         )
         ) {
+            $this->context->order = new Order($this->module->currentOrder); // Add order to context. Experimental.
             $this->paymentProcess($customer);
         } else {
 
@@ -129,7 +130,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             /**
              * load order payment and set cko action id as order transaction id
              */
-            $order = new Order((int) Order::getOrderByCartId($this->context->cart->id));
+            $order = new Order($this->module->currentOrder);
             $payments = $order->getOrderPaymentCollection();
             $payments[0]->transaction_id = $response->id;
             $payments[0]->update();

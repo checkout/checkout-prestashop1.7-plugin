@@ -60,7 +60,7 @@
 
 
     {*frames will be added here*}
-    <div id="{$module}-card-frame" class="card-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-debug="{$debug}" data-lang="{$lang}" data-module="{$module}" data-saveCard="{$save_card_option}"></div>
+    <div id="{$module}-card-frame" class="card-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-billing="{$billingId}" data-debug="{$debug}" data-lang="{$lang}" data-module="{$module}" data-saveCard="{$save_card_option}"></div>
 
     {if $save_card_option == '1' and $is_guest == 0 }
         {*saved card checkbox0*}
@@ -103,7 +103,19 @@
         Frames.init({
             publicKey: $frames.dataset.key,
             debug: Boolean(+$frames.dataset.debug),
-            localization: $frames.dataset.lang.toUpperCase()
+            localization: $frames.dataset.lang.toUpperCase(),
+            cardholder: {
+                name: prestashop.customer.addresses[$frames.dataset.billing].firstname + ' ' + prestashop.customer.addresses[$frames.dataset.billing].lastname,
+                billingAddress: {
+                    addressLine1: prestashop.customer.addresses[$frames.dataset.billing].address1,
+                    addressLine2: prestashop.customer.addresses[$frames.dataset.billing].address2,
+                    postcode:     prestashop.customer.addresses[$frames.dataset.billing].postcode,
+                    city:         prestashop.customer.addresses[$frames.dataset.billing].city,
+                    state:        prestashop.customer.addresses[$frames.dataset.billing].state,
+                    country:      prestashop.customer.addresses[$frames.dataset.billing].country_iso
+                },
+                phone: prestashop.customer.addresses[$frames.dataset.billing].phone,
+            }
         });
 
         /**

@@ -49,29 +49,34 @@ abstract class Method
      * Generate payment object.
      *
      * @param \Checkout\Models\Payments\IdSource $source The source
+     * @param array     $params Parameters from the request.
      *
-     * @return Payment ( description_of_the_return_value )
+     * @return Payment
      */
     public static function makePayment(MethodSource $source, array $params = array())
     {
         $context = \Context::getContext();
-
         $payment = new Payment($source, $context->currency->iso_code);
-        $payment->amount = static::fixAmount($context->cart->getOrderTotal(), $context->currency->iso_code);
+
+        $payment->amount = static::fixAmount($context->order->getTotalPaid(), $context->currency->iso_code);
         $payment->metadata = static::getMetadata($context);
-
-        $cart_id = $context->cart->id;
-        $secure_key = $context->customer->secure_key;
-
         $payment->customer = static::getCustomer($context, $params);
+        $payment->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
+        $payment->payment_type = 'Regular';
+        $payment->reference = $context->order->getUniqReference();
 
         // Set the payment specifications
         $payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
-        $payment->success_url = $context->link->getModuleLink('checkoutcom', 'confirmation', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
-        $payment->failure_url = $context->link->getModuleLink('checkoutcom', 'failure', ['cart_id' => $cart_id, 'secure_key' => $secure_key], true);
-        $payment->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
-        $payment->payment_type = 'Regular';
-        $payment->reference = $context->controller->module->currentOrderReference;
+        $payment->success_url = $context->link->getModuleLink(  'checkoutcom',
+                                                                'confirmation',
+                                                                ['cart_id' => $context->cart->id,
+                                                                 'secure_key' => $context->customer->secure_key],
+                                                                true);
+        $payment->failure_url = $context->link->getModuleLink(  'checkoutcom',
+                                                                'failure',
+                                                                ['cart_id' => $context->cart->id,
+                                                                 'secure_key' => $context->customer->secure_key],
+                                                                true);
 
         static::addThreeDs($payment);
         static::addDynamicDescriptor($payment);
@@ -88,7 +93,7 @@ abstract class Method
      *
      * @return int
      */
-    public static function fixAmount($amount, $currency = '')
+    public static function fixAmount($amount, $currency = '', $reverse = false)
     {
         $multiplier = 100;
         $full = array('BYN', 'BIF', 'DJF', 'GNF', 'ISK', 'KMF', 'XAF', 'CLF', 'XPF', 'JPY', 'PYG', 'RWF', 'KRW', 'VUV', 'VND', 'XOF');
@@ -100,7 +105,11 @@ abstract class Method
             $multiplier = 1;
         }
 
-        $price = (int) ('' . ($amount * $multiplier)); //@todo: Waiting on SDK precision fix. (#41)
+        if($reverse) {
+            $price = \Tools::ps_round($amount / $multiplier);
+        } else {
+            $price = (int) ('' . ($amount * $multiplier)); //@todo: Waiting on SDK precision fix. (#41)
+        }
 
         if ($currency === 'CLP') {
             //@todo: fix this.
@@ -248,7 +257,7 @@ abstract class Method
             // Check if payment is already voided or captured on checkout.com hub
             $details = CheckoutApiHandler::api()->payments()->details($cko_payment_id);
 
-            if ($details->status == 'Refunded' ) {
+            if ($details->status == 'Refunded') {
                 return false;
             }
 
