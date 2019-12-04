@@ -160,9 +160,8 @@ class CheckoutcomHelperForm extends \HelperForm
      */
     public function addToSmarty(&$smarty)
     {
-        //Debug::write('CheckoutcomHelperForm.addToSmarty($smarty)');
+
         foreach (Config::definition() as $key => $forms) {
-            //Debug::write('CheckoutcomHelperForm.addToSmarty($smarty).' . $key);
             $smarty->assign(static::CHECKOUTCOM_CONFIGS_PREFIX . $key, $this->generateForm($forms));
         }
     }
@@ -178,13 +177,13 @@ class CheckoutcomHelperForm extends \HelperForm
      */
     public function generateForm($forms)
     {
-        //Debug::write('CheckoutcomHelperForm.generateForm($smarty)');
+
         $list = array();
 
         foreach ($forms as $form) {
             $current = array('legend' => array(static::FIELD_TITLE => ''),
-                            'input' => array(),
-                            'submit' => array(static::FIELD_TITLE => $this->l('Save')), );
+                             'input' => array(),
+                             'submit' => array(static::FIELD_TITLE => $this->l('Save')), );
 
             foreach ($form as $field) {
                 $input = $this->{$field[static::FIELD_TYPE]}($field);
@@ -192,7 +191,7 @@ class CheckoutcomHelperForm extends \HelperForm
                     $current['input'][] = $input;
                 }
             }
-            //Debug::write($form);
+
             $list[] = array('form' => $current);
         }
 

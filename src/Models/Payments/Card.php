@@ -20,14 +20,14 @@ class Card extends Method
      */
     public static function pay(array $params)
     {
-    	
+
         if($params['source'] == 'id') {
             $context = \Context::getContext();
             $customerId = $context->customer->id;
             $entityId = $params['checkoutcom-saved-card'];
 
             $sourceId = CheckoutcomCustomerCard::getSourceId($entityId, $customerId);
-            
+
             $source = new IdSource($sourceId);
 
             if(isset($params['cko-cvv']) && !empty($params['cko-cvv'])){

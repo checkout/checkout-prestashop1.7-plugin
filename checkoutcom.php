@@ -89,13 +89,6 @@ class CheckoutCom extends PaymentModule
         return parent::install() &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('header') &&
-            $this->registerHook('payment') &&
-            $this->registerHook('paymentReturn') &&
-            $this->registerHook('actionPaymentCCAdd') &&
-            $this->registerHook('actionPaymentConfirmation') &&
-            $this->registerHook('displayPayment') &&
-            $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('displayPaymentTop') &&
             $this->registerHook('displayCustomerAccount') &&
             $this->registerHook('actionOrderSlipAdd') &&
             $this->registerHook('displayAdminOrderContentOrder');
@@ -214,86 +207,21 @@ class CheckoutCom extends PaymentModule
      */
     public function hookHeader()
     {
-        Debug::write('#hookHeader');
+
         if (Tools::getValue('controller') === 'order') {
             $this->context->controller->addJquery();
             $this->context->controller->addJS($this->_path . '/views/js/front.js');
             $this->context->controller->addJS($this->_path . '/views/js/cko.js');
             $this->context->controller->addCSS($this->_path . '/views/css/front.css');
         }
+
     }
 
     /**
-     * This method is used to render the payment button,
-     * Take care if the button should be displayed or not.
+     * Display saved card settings on customer dashbboard.
+     *
+     * @return     <type>  ( description_of_the_return_value )
      */
-    public function hookPayment($params)
-    {
-        Debug::write('#hookPayment');
-        $currency_id = $params['cart']->id_currency;
-        $currency = new Currency((int) $currency_id);
-
-        $this->smarty->assign('module_dir', $this->_path);
-
-        return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
-    }
-
-    /**
-     * This hook is used to display the order confirmation page.
-     */
-    public function hookPaymentReturn($params)
-    {
-        Debug::write('#hookPaymentReturn');
-        // if ($this->active == false)
-        //     return;
-
-        $order = $params['objOrder'];
-
-        if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR')) {
-            $this->smarty->assign('status', 'ok');
-        }
-
-        $this->smarty->assign(array(
-            'id_order' => $order->id,
-            'reference' => $order->reference,
-            'params' => $params,
-            'total' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),
-        ));
-
-        return $this->display(__FILE__, 'views/templates/hook/confirmation.tpl');
-    }
-
-    public function hookActionPaymentCCAdd()
-    {
-        Debug::write('#hookActionPaymentCCAdd');
-        /* Place your code here. */
-    }
-
-    public function hookActionPaymentConfirmation()
-    {
-        Debug::write('#hookActionPaymentConfirmation');
-        /* Place your code here. */
-    }
-
-    public function hookDisplayPayment()
-    {
-        Debug::write('#hookDisplayPayment');
-        /* Place your code here. */
-    }
-
-    public function hookDisplayPaymentReturn()
-    {
-        Debug::write('#hookDisplayPaymentReturn');
-        /* Place your code here. */
-    }
-
-    public function hookDisplayPaymentTop()
-    {
-        Debug::write('#hookDisplayPaymentTop');
-        // I don't think this will be needed.
-        /* Place your code here. */
-    }
-
     public function hookDisplayCustomerAccount()
     {
         // Show saved cards on customer's account if enable in module config
@@ -302,7 +230,7 @@ class CheckoutCom extends PaymentModule
         }
     }
 
-    
+
     /**
      * used to create refunds on cko
      *

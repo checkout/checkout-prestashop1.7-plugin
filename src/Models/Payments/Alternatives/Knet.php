@@ -6,6 +6,21 @@ use Checkout\Models\Payments\KnetSource;
 
 class Knet extends Alternative
 {
+
+    /**
+     * Arabic locale.
+     *
+     * @var string
+     */
+    const LOCALE_AR = 'ar';
+
+    /**
+     * English locale.
+     *
+     * @var string
+     */
+    const LOCALE_EN = 'en';
+
     /**
      * Process payment.
      *
@@ -16,7 +31,8 @@ class Knet extends Alternative
     public static function pay(array $params)
     {
         $context = \Context::getContext();
-        $source = new KnetSource($context->language->iso_code);
+        $language = substr($context->language->iso_code, 0, 2) !== Knet::LOCALE_AR ? Knet::LOCALE_EN : Knet::LOCALE_AR;
+        $source = new KnetSource($language);
         $payment = static::makePayment($source);
 
         return static::request($payment);

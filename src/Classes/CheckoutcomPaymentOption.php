@@ -44,6 +44,7 @@ class CheckoutcomPaymentOption extends PaymentOption
             'lang' => Config::get('CHECKOUTCOM_CARD_LANG_FALLBACK'),
             'debug' => _PS_MODE_DEV_, //@todo: DebugMode::isDebugModeEnabled() or _PS_DEBUG_PROFILING_
             'save_card_option' => Config::get('CHECKOUTCOM_CARD_SAVE_CARD_OPTION'),
+            'billingId' => $context->cart->id_address_invoice,
             'is_guest' =>$context->customer->is_guest,
             'img_dir' => _MODULE_DIR_.'checkoutcom/views/img/'
         ]);

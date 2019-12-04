@@ -23,9 +23,11 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
+
+use Checkout\Models\Response;
 use CheckoutCom\PrestaShop\Helpers\Debug;
-use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentHandler;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
+use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentHandler;
 
 class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 {
@@ -75,6 +77,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                                             $customer->secure_key
                                         )
         ) {
+            $this->context->order = new Order($this->module->currentOrder); // Add order to context. Experimental.
             $this->paymentProcess($customer);
         } else {
 
@@ -85,6 +88,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             // Redirect to cartcontext
             $this->redirectWithNotifications('index.php?controller=order&step=1&key=' . $customer->secure_key . '&id_cart=' . $cart->id);
         }
+
     }
 
     /**
@@ -120,34 +124,51 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             }
 
             $history = new OrderHistory();
-            $history->id_order = Order::getOrderByCartId($this->context->cart->id);
-            $history->changeIdOrderState($status, Order::getOrderByCartId($this->context->cart->id));
+            $history->id_order = $this->module->currentOrder;
+            $history->changeIdOrderState($status, $this->module->currentOrder);
 
-             /**
+            /**
              * load order payment and set cko action id as order transaction id
              */
-            $order = new Order((int) Order::getOrderByCartId($this->context->cart->id));
+            $order = new Order($this->module->currentOrder);
             $payments = $order->getOrderPaymentCollection();
             $payments[0]->transaction_id = $response->id;
             $payments[0]->update();
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $this->context->cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
         } else {
-            \PrestaShopLogger::addLog("Payment for order not processed.", 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
-
-            $history = new OrderHistory();
-            $history->id_order = Order::getOrderByCartId($this->context->cart->id);
-            $history->changeIdOrderState(_PS_OS_ERROR_, Order::getOrderByCartId($this->context->cart->id));
-
-            // Restore cart
-            $duplication = $this->context->cart->duplicate();
-            $this->context->cookie->id_cart = $duplication['cart']->id;
-            $this->context->cookie->write();
-
-            // Set error message
-            $this->context->controller->errors[] = $this->module->l($response->message);
-            // Redirect to cartcontext
-            $this->redirectWithNotifications('index.php?controller=order');
+            $this->handleFail($response);
         }
+
     }
+
+    /**
+     * Handle fail payment response.
+     *
+     * @param      \Checkout\Models\Response  $response  The response
+     */
+    protected function handleFail(Response $response) {
+
+        \PrestaShopLogger::addLog('Payment for order not processed.', 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
+
+        $history = new OrderHistory();
+        $history->id_order = $this->module->currentOrder;
+        $history->changeIdOrderState(_PS_OS_ERROR_, $this->module->currentOrder);
+
+        // Restore cart
+        $duplication = $this->context->cart->duplicate();
+        $this->context->cookie->id_cart = $duplication['cart']->id;
+        $this->context->cookie->write();
+
+        // Set error message
+        $this->context->controller->errors[] = $this->module->l($response->message);
+        foreach ($response->errors as $error) {
+            $this->context->controller->errors[] = 'Error: ' . $error;
+        }
+
+        // Redirect to cartcontext
+        $this->redirectWithNotifications('index.php?controller=order');
+
+    }
+
 }
