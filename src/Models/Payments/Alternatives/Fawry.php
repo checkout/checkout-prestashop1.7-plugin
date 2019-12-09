@@ -37,15 +37,23 @@ class Fawry extends Alternative
     public static function getProducts(\Context $context)
     {
         $products = array();
-        foreach ($context->order->getProducts() as $item) {
-            $product = new Product();
-            $product->product_id = $item['product_id'];
-            $product->quantity = 1;
-            $product->price = (int) ('' . ($item['total_price_tax_incl'] * 100));
-            $product->description = $item['product_quantity'] . 'x ' . $item['product_name'];
+        $productPrice = 0;
 
-            $products[] = $product;
+        foreach ($context->order->getProducts() as $item) {
+
+            $productPrice += (int) ('' . ($item['total_price_tax_incl'] * 100));
         }
+
+        $discount = static::fixAmount($context->order->total_discounts);
+        $totalProductPrice = $productPrice - $discount;
+
+        $product = new Product();
+        $product->product_id = $context->order->id;
+        $product->quantity = 1;
+        $product->price = $totalProductPrice;
+        $product->description = \Configuration::get('PS_SHOP_NAME'). ' - Order reference :'. $context->order->getUniqReference();
+
+        $products[] = $product;
 
         if(+$context->order->total_shipping){
             $products [] = Fawry::getShipping($context);
