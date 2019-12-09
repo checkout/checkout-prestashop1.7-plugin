@@ -103,7 +103,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         if ($response->isSuccessful()) {
 
             // Flag Order
-            if($response->isFlagged() && !Utilities::addMessageToOrder($this->module->l('⚠️ This order is flagged.'), $this->context->order)) {
+            if($response->isFlagged() && !Utilities::addMessageToOrder($this->module->l('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.'), $this->context->order)) {
                 \PrestaShopLogger::addLog('Failed to add payment flag note to order.', 2, 0, 'CheckoutcomPlaceorderModuleFrontController' , $this->context->order->id, true);
             }
 
