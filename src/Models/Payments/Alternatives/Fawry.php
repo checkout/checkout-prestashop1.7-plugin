@@ -48,10 +48,10 @@ class Fawry extends Alternative
         $totalProductPrice = $productPrice - $discount;
 
         $product = new Product();
-        $product->product_id = 'total_products';
+        $product->product_id = \Configuration::get('PS_SHOP_NAME'). ' - Order reference :'. $context->order->getUniqReference();
         $product->quantity = 1;
         $product->price = $totalProductPrice;
-        $product->description = 'Total Products';
+        $product->description = \Configuration::get('PS_SHOP_NAME'). ' - Order reference :'. $context->order->getUniqReference();
 
         $products[] = $product;
 
