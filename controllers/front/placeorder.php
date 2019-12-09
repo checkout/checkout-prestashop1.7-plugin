@@ -26,6 +26,7 @@
 
 use Checkout\Models\Response;
 use CheckoutCom\PrestaShop\Helpers\Debug;
+use CheckoutCom\PrestaShop\Helpers\Utilities;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentHandler;
 
@@ -100,6 +101,12 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
     {
         $response = CheckoutcomPaymentHandler::execute(Tools::getAllValues());
         if ($response->isSuccessful()) {
+
+            // Flag Order
+            if($response->isFlagged() && !Utilities::addMessageToOrder($this->module->l('⚠️ This order is flagged.'), $this->context->order)) {
+                \PrestaShopLogger::addLog('Failed to add payment flag note to order.', 2, 0, 'CheckoutcomPlaceorderModuleFrontController' , $this->context->order->id, true);
+            }
+
             $url = $response->getRedirection();
             if ($url) {
                 if(Tools::getIsset('save-card-checkbox')){
@@ -117,21 +124,10 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                 CheckoutcomCustomerCard::saveCard($response, $customer->id);
             }
 
-
-            $status = Configuration::get('CHECKOUTCOM_PAYMENT_ACTION') ? Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') : Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
-            if ($response->isFlagged()) {
-                $status = Configuration::get('CHECKOUTCOM_FLAGGED_ORDER_STATUS');
-            }
-
-            $history = new OrderHistory();
-            $history->id_order = $this->module->currentOrder;
-            $history->changeIdOrderState($status, $this->module->currentOrder);
-
             /**
              * load order payment and set cko action id as order transaction id
              */
-            $order = new Order($this->module->currentOrder);
-            $payments = $order->getOrderPaymentCollection();
+            $payments = $this->context->order->getOrderPaymentCollection();
             $payments[0]->transaction_id = $response->id;
             $payments[0]->update();
 

@@ -92,4 +92,46 @@ class Utilities
                 return null;
         }
     }
+
+    /**
+     * Add private message to order.
+     *
+     * @param      string  $message  The message
+     * @param      Order  $order    The order
+     */
+    public static function addMessageToOrder($message, \Order $order)
+    {
+
+        // load customer
+        $customer = new \Customer($order->id_customer);
+
+        $id_customer_thread = \CustomerThread::getIdCustomerThreadByEmailAndIdOrder($customer->email, $order->id);
+
+        // load customer thread
+        if (!$id_customer_thread) {
+            $customer_thread = new \CustomerThread();
+            $customer_thread->id_contact = 0;
+            $customer_thread->id_customer = (int) $order->id_customer;
+            $customer_thread->id_shop = (int) $order->id_shop;
+            $customer_thread->id_order = (int) $order->id;
+            $customer_thread->id_lang = (int) $order->id_lang;
+            $customer_thread->email = $customer->email;
+            $customer_thread->status = 'open';
+            $customer_thread->token = \Tools::passwdGen(12);
+            $customer_thread->add();
+        } else {
+            $customer_thread = new \CustomerThread((int) $id_customer_thread);
+        }
+
+        // Set private note to order
+        $customer_message = new \CustomerMessage();
+        $customer_message->id_customer_thread = $customer_thread->id;
+        $customer_message->id_employee = 0;
+        $customer_message->message = $message;
+        $customer_message->private = 1;
+
+        return $customer_message->add();
+
+    }
+
 }
