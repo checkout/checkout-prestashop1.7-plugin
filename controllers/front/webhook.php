@@ -74,7 +74,10 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                                 $message .= "has been partially captured";
                             }
 
-                            $this->_addNewPrivateMessage($order, $message);
+                            if(!Utilities::addMessageToOrder($message, $order)) {
+                                $this->errors[] = $this->trans('An error occurred while saving message', array(), 'Admin.Payment.Notification');
+                            }
+
                         }
 
                         $history = new OrderHistory();
@@ -99,49 +102,6 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
         }
 
         return $allow;
-    }
-
-    /**
-     * @param $order
-     * @param $message
-     * @throws PrestaShopDatabaseException
-     * @throws PrestaShopException
-     */
-    private function _addNewPrivateMessage($order, $message)
-    {
-        // load customer
-        $customer = new Customer ($order->id_customer);
-
-        $id_customer_thread = CustomerThread::getIdCustomerThreadByEmailAndIdOrder($customer->email, $order->id);
-
-        // load customer thread
-        if (!$id_customer_thread) {
-            $customer_thread = new CustomerThread();
-            $customer_thread->id_contact = 0;
-            $customer_thread->id_customer = (int) $order->id_customer;
-            $customer_thread->id_shop = (int) $order->id_shop;
-            $customer_thread->id_order = (int) $order->id;
-            $customer_thread->id_lang = (int) $order->id_lang;
-            $customer_thread->email = $customer->email;
-            $customer_thread->status = 'open';
-            $customer_thread->token = Tools::passwdGen(12);
-            $customer_thread->add();
-        } else {
-            $customer_thread = new CustomerThread((int) $id_customer_thread);
-        }
-
-        // Set private note to order
-        $customer_message = new CustomerMessage();
-        $customer_message->id_customer_thread = $customer_thread->id;
-        $customer_message->id_employee = 0;
-        $customer_message->message = $message;
-        $customer_message->private = 1;
-
-        if (!$customer_message->add()) {
-            $this->errors[] = $this->trans('An error occurred while saving message', array(), 'Admin.Payment.Notification');
-        }
-
-        return;
     }
 
     /**

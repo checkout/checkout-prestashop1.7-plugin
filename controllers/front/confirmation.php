@@ -1,36 +1,28 @@
 <?php
 /**
-* 2007-2019 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2019 PrestaShop SA
-*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+ * Checkout.com
+ * Authorised and regulated as an electronic money institution
+ * by the UK Financial Conduct Authority (FCA) under number 900816.
+ *
+ * PrestaShop v1.7
+ *
+ * @category  prestashop-module
+ * @package   Checkout.com
+ * @author    Platforms Development Team <platforms@checkout.com>
+ * @copyright 2010-2020 Checkout.com
+ * @license   https://opensource.org/licenses/mit-license.html MIT License
+ * @link      https://docs.checkout.com/
+ */
+
 use Checkout\Models\Response;
-use CheckoutCom\PrestaShop\Helpers\Debug;
+use CheckoutCom\PrestaShop\Helpers\Utilities;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 
 class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 {
+
     public function postProcess()
     {
         if ((Tools::isSubmit('cart_id') == false) || (Tools::isSubmit('secure_key') == false)) {
@@ -39,7 +31,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
         $cart_id = Tools::getValue('cart_id');
         $secure_key = Tools::getValue('secure_key');
-        $payment_flagged = false;
+        $flagged = false;
         $transaction_id = '';
         $status = 'Pending';
 
@@ -51,7 +43,8 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
             if ($response->isSuccessful() && !$response->isPending()) {
 
-                $payment_flagged = $response->isFlagged();
+                $flagged = $response->isFlagged();
+                $threeDS = $response->getValue(array('threeDs', 'enrolled')) === 'Y';
 
                 $transaction_id = $response->id;;
                 $reference = $response->reference;
@@ -72,7 +65,6 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 . (int) $cart_id);
         }
 
-        $payment_status = $payment_flagged == true ? Configuration::get('CHECKOUTCOM_FLAGGED_ORDER_STATUS') : $this->getOrderStatus($status);
         $message = null; // You can add a comment directly into the order so the merchant will see it in the BO.
 
         /**
@@ -87,19 +79,17 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $module_id = $this->module->id;
 
             /**
-             * load order history and change status
-             */
-            $history = new OrderHistory();
-            $history->id_order = Order::getOrderByCartId((int) $cart->id);
-            $history->changeIdOrderState($payment_status, Order::getOrderByCartId((int) $cart->id));
-
-            /**
              * load order payment and set cko action id as order transaction id
              */
             $order = new Order($order_id);
             $payments = $order->getOrderPaymentCollection();
             $payments[0]->transaction_id = $transaction_id;
             $payments[0]->update();
+
+            // Flag Order
+            if($flagged && $threeDS && !Utilities::addMessageToOrder($this->module->l('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.'), $order)) {
+                \PrestaShopLogger::addLog('Failed to add payment flag note to order.', 2, 0, 'CheckoutcomPlaceorderModuleFrontController' , $order->id, true);
+            }
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int) $cart->id . '&id_module=' . $module_id . '&id_order=' . $order_id . '&key=' . $secure_key);
         } else {
@@ -132,32 +122,4 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
         return $response;
     }
 
-    /**
-     * Gets the order status.
-     *
-     * @param string $status The status
-     *
-     * @return int the order status
-     */
-    protected function getOrderStatus($status)
-    {
-        switch ($status) {
-            case 'Captured':
-            case 'Partially Captured':
-                return Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
-            case 'Declined':
-                return _PS_OS_ERROR_;
-            case 'Cancelled':
-                return _PS_OS_CANCELED_;
-            case 'Voided':
-                return Configuration::get('CHECKOUTCOM_VOID_ORDER_STATUS');
-            case 'Refunded':
-            case 'Partially Refunded':
-                return Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS');
-            case 'Pending':
-                return _PS_OS_PREPARATION_;
-            default:
-                return Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
-        }
-    }
 }
