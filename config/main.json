@@ -1,0 +1,147 @@
+[
+   [
+      {
+         "name":"CHECKOUTCOM_LIVE_MODE",
+         "label":"Environment",
+         "desc":"Use this module in live mode.",
+         "type":"select",
+         "default":0,
+         "required":0,
+         "options":[
+            {
+               "id":"id_option",
+               "value":1,
+               "label":"Live"
+            },
+            {
+               "id":"id_option",
+               "value":0,
+               "label":"Sandbox"
+            }
+         ]
+      },
+      {
+         "name":"CHECKOUTCOM_PAYMENT_ACTION",
+         "label":"Payment Action",
+         "desc":"",
+         "type":"select",
+         "default":0,
+         "required":0,
+         "options":[
+            {
+               "id":"id_option",
+               "value":0,
+               "label":"Authorize"
+            },
+            {
+               "id":"id_option",
+               "value":1,
+               "label":"Authorize + Capture"
+            }
+         ]
+      },
+      {
+         "name":"CHECKOUTCOM_CAPTURE_TIME",
+         "label":"Capture Time",
+         "desc":"Specify the number of hours before capture. Ex: 1.5 for capture after 1h30.",
+         "type":"text",
+         "default":"",
+         "required":0,
+         "col":2
+      },
+      {
+         "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE",
+         "label":"Enable Dynamic Descriptor",
+         "desc":"",
+         "type":"bswitch",
+         "default":0,
+         "required":0,
+         "options":[
+            {
+               "id":"id_option",
+               "value":1,
+               "label":"Enabled"
+            },
+            {
+               "id":"id_option",
+               "value":0,
+               "label":"Disabled"
+            }
+         ]
+      },
+      {
+         "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_NAME",
+         "label":"Descriptor Name",
+         "desc":"",
+         "type":"text",
+         "default":"",
+         "required":0,
+         "col":2
+      },
+      {
+         "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY",
+         "label":"Descriptor City",
+         "desc":"",
+         "type":"text",
+         "default":"",
+         "required":0,
+         "col":2
+      }
+   ],
+   [
+      {
+         "name":"CHECKOUTCOM_AUTH_ORDER_STATUS",
+         "label":"Authorization order status",
+         "desc":"Select the status that should be used for orders with successful payment authorisation.",
+         "type":"dynamic",
+         "default":3,
+         "required":0
+      },
+      {
+         "name":"CHECKOUTCOM_CAPTURE_ORDER_STATUS",
+         "label":"Capture order status",
+         "desc":"Select the status that should be used for orders with successful payment capture.",
+         "type":"dynamic",
+         "default":2,
+         "required":0
+      },
+      {
+         "name":"CHECKOUTCOM_VOID_ORDER_STATUS",
+         "label":"Void order status",
+         "desc":"Select the status that should be used for orders with successful payment capture.",
+         "type":"dynamic",
+         "default":6,
+         "required":0
+      },
+      {
+         "name":"CHECKOUTCOM_REFUND_ORDER_STATUS",
+         "label":"Refund order status",
+         "desc":"Select the status that should be used for orders with successful payment refund.",
+         "type":"dynamic",
+         "default":7,
+         "required":0
+      }
+   ],
+   [
+      {
+         "name":"CHECKOUTCOM_SECRET_KEY",
+         "label":"Secret Key",
+         "description":"",
+         "type":"text",
+         "icon":"",
+         "default":"",
+         "required":1,
+         "col":2
+      },
+      {
+         "name":"CHECKOUTCOM_PUBLIC_KEY",
+         "label":"Public Key",
+         "description":"",
+         "type":"text",
+         "icon":"",
+         "default":"",
+         "required":1,
+         "col":2
+      }
+   ]
+]
