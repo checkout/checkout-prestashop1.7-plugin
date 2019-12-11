@@ -14,31 +14,13 @@ You can find a full installation guide [here](https://github.com/checkout/checko
 # Initial Setup
 If you do not have an account yet, simply go to [checkout.com](https://checkout.com/) and hit the "Get Test Account" button.
 
-# Keys
-There are 2 keys that you need to configure in the NON-PCI extension, while for the PCI version you just need 2:
-- **Secret Key**
-- **Public Key** (not needed for PCI extension)
-
-> The Private Shared Key is generated when you [configure the Webhook URL](https://docs.checkout.com/docs/business-level-administration#section-manage-webhook-url) in the Checkout HUB.
-
-# URLs
-In order to successfully complete 3D Secure transactions, and to keep Prestashop order statuses in sync you need to configure the following URLs in your Checkout HUB as follows:
-
-| Type | URL Example | Description |
-| ------ | ------ | ------ |
-| Redirections **Success**| _example.com_**/index.php?fc=module&module=checkoutcom&controller=success** | Redirect after 3D Secure |
-| Redirections **Fail**| _example.com_**/index.php?fc=module&module=checkoutcom&controller=failure** | Redirect after 3D Secure |
-| Webhook | _example.com_**/index.php?fc=module&module=checkoutcom&controller=webhook** | Sync Prestashop |
-
-> You can see a guide on how to set the URLs in the HUB [here](https://docs.checkout.com/docs/business-level-administration#section-manage-channel-urls) ; You can find test card details [here](https://docs.checkout.com/docs/testing#section-credit-cards)
-
 # Going LIVE
 
 Upon receiving your live credentials from your account manager, here are the required steps to start processing live transactions:
 
-- In the plugin settings, place your **live** keys
-- Switch the _Endpoint URL mode_ to **live**.
-- Make sure you have configured the Redirection and Webhook URLs correctly in your **live** Checkout.com HUB
+- In the module configuration page, replace your secret and public keys with **live** keys
+- Switch the _Environment_ to **live**.
+- Make sure you have configured the Webhook URLs correctly in your **live** Checkout.com hub dashboard.
 
 
 # Reference
