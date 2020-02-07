@@ -19,6 +19,15 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
      */
     public function run()
     {
+        if(_PS_VERSION_ > '1.7.6.0'){
+            global $kernel;
+
+            if(!$kernel){ 
+              require_once _PS_ROOT_DIR_.'/app/AppKernel.php';
+              $kernel = new \AppKernel('prod', false);
+              $kernel->boot(); 
+            }
+        }
 
         $post = file_get_contents('php://input');
         if (Utilities::getValueFromArray($_SERVER, 'HTTP_CKO_SIGNATURE', '') !== hash_hmac('sha256', $post, Configuration::get('CHECKOUTCOM_SECRET_KEY'))) {
@@ -83,7 +92,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                         $history = new OrderHistory();
                         $history->id_order = $order->id;
                         $history->changeIdOrderState($status, $order->id);
-
+                        $history->addWithemail();
                     }
                 }
             }
