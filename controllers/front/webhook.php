@@ -24,7 +24,8 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
             if(!$kernel){ 
               require_once _PS_ROOT_DIR_.'/app/AppKernel.php';
-              $kernel = new \AppKernel('prod', false);
+              
+              $kernel = new \AppKernel('prod', (bool) \Configuration::get('CHECKOUTCOM_LIVE_MODE'));
               $kernel->boot(); 
             }
         }
