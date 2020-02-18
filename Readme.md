@@ -10,7 +10,7 @@ This extension allows shop owners to process online payments (card / alternative
 
 # Installation
 You can find a full installation guide [here](https://github.com/checkout/checkout-prestashop1.7-plugin/wiki/Installation)
-<br/><strong>ATTENTION: this repo is set up for an installation through composer. If you want to use the prestashop drag and drop feature on your backoffice to install the module, please [follow this link](https://github.com/checkout/checkout-prestashop1.7-plugin/blob/drag-drop/checkoutcom-drag-drop.zip) and click on the "Download" button on the right side of the page.</strong>
+<br/><strong>ATTENTION: this repo is set up for an installation through composer. If you want to use the prestashop drag and drop feature on your backoffice to install the module, please [follow this link](https://github.com/checkout/checkout-prestashop1.7-plugin/blob/drag-drop/checkoutcom.zip) and click on the "Download" button on the right side of the page.</strong>
 
 # Initial Setup
 If you do not have an account yet, simply go to [checkout.com](https://checkout.com/) and hit the "Get Test Account" button.
