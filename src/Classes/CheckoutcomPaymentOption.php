@@ -130,4 +130,37 @@ class CheckoutcomPaymentOption extends PaymentOption
 
         return $option;
     }
+    /**
+     * Generate payment option.
+     *
+     * @param <type> $module The module
+     * @param <type> $params The parameters
+     *
+     * @return PaymentOption the card
+     */
+    public static function getApple(&$module, &$params)
+    {
+        if (!Config::get('CHECKOUTCOM_APPLE_ENABLED')) {
+            return;
+        }
+
+        // Load Context
+        $context = \Context::getContext();
+
+        $context->smarty->assign([
+            'module' => $module->name,
+            'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
+            'merchantid' => Config::get('CHECKOUTCOM_APPLE_ID'),
+            'live' => Config::get('CHECKOUTCOM_LIVE_MODE'),
+            'invoiceid' => $context->cart->id_address_invoice,
+        ]);
+
+        $option = new PaymentOption();
+        $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/apple.tpl'))
+            ->setModuleName($module->name . '-apple-form')
+            ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/applepay.svg'))
+            ->setCallToActionText($module->l(Config::get('CHECKOUTCOM_APPLE_TITLE')));
+
+        return $option;
+    }
 }

@@ -180,9 +180,10 @@ class CheckoutCom extends PaymentModule
 
         $methods = array(
             CheckoutcomPaymentOption::getCard($this, $params),
-            // CheckoutcomPaymentOption::getApple($this, $params),
+            CheckoutcomPaymentOption::getApple($this, $params),
             CheckoutcomPaymentOption::getGoogle($this, $params),
         );
+
 
         $alternatives = CheckoutcomPaymentOption::getAlternatives($this, $params);
         foreach ($alternatives as $method) {
