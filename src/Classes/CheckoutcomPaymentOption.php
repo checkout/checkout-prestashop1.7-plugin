@@ -143,7 +143,10 @@ class CheckoutcomPaymentOption extends PaymentOption
         if (!Config::get('CHECKOUTCOM_APPLE_ENABLED')) {
             return;
         }
-
+        //get default shop country id
+        $id_country = Tools::getCountry();
+        //get country object
+        $country = new Country($id_country);
         // Load Context
         $context = \Context::getContext();
 
@@ -152,6 +155,7 @@ class CheckoutcomPaymentOption extends PaymentOption
             'CHECKOUTCOM_PUBLIC_KEY' => Config::get('CHECKOUTCOM_PUBLIC_KEY'),
             'merchantid' => Config::get('CHECKOUTCOM_APPLE_ID'),
             'live' => Config::get('CHECKOUTCOM_LIVE_MODE'),
+            'merchant_country_iso' => strtoupper($country->iso_code),
             'invoiceid' => $context->cart->id_address_invoice,
         ]);
 

@@ -1,4 +1,4 @@
-<form name="{$module}" id="{$module}-apple-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-merchantid="{$merchantid}" data-live="{$live}" data-invoiceid="{$invoiceid}" data-module="{$module}" method="POST">
+<form name="{$module}" id="{$module}-apple-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-merchant_country_iso="{$merchant_iso_code}" data-merchantid="{$merchantid}" data-live="{$live}" data-invoiceid="{$invoiceid}" data-module="{$module}" method="POST">
     <input id="{$module}-apple-source" type="hidden" name="source" value="apple" required>
     <input type="hidden" id="{$module}-apple-token" name="token" value="" />
 </form>
@@ -22,14 +22,14 @@
 
             var applePayButton = document.querySelector('.applePayButton');
             var applePayOptionForm = document.querySelector('.payment-option-checkoutcom-apple-form');
-            if(window.ApplePaySession && ApplePaySession.canMakePaymentsWithActiveCard(applePayForm.dataset.merchantid)){
+            if(window.ApplePaySession && ApplePaySession.canMakePayments()){
                 applePayOptionForm.style.display = "block";
             }else{
                 applePayOptionForm.style.display = "none";
             }
             applePayButton.addEventListener('click', function(){
                 var paymentReq = {
-                    countryCode: "SA",
+                    countryCode: applePayForm.dataset.merchant_country_iso,
                     currencyCode: prestashop.currency.iso_code,
                     merchantCapabilities: [
                         "supports3DS"
@@ -39,7 +39,7 @@
                         "masterCard"
                     ],
                     total: {
-                        label: "Qavashop",
+                        label: prestashop.shop.name,
                         amount: prestashop.cart.totals.total.amount
                     },
                     lineItems: [
