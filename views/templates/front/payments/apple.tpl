@@ -53,7 +53,7 @@
 
                 var apple_pay_ = new ApplePaySession(6, paymentReq);
                 apple_pay_.begin();
-                var apple_validate_url = "module/" + applePayForm.dataset.module + "/applevalidate";
+                var apple_validate_url = "module/" + applePayForm.dataset.module + "/applepay";
                 apple_pay_.onpaymentauthorized = function onpaymentauthorized(event) {
                     var token = event.payment.token;
                     if(token){
