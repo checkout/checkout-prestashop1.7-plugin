@@ -65,6 +65,7 @@
 
                 apple_pay_.onvalidatemerchant = function onvalidatemerchant(event) {
                     var appleValidationUrl = event.validationURL;
+                    //@todo: use XMLHttpRequest instead of jQuery post
                     $.post(apple_validate_url,{ url: appleValidationUrl },
                         function( data ) {
                             apple_pay_.completeMerchantValidation(JSON.parse(data));
