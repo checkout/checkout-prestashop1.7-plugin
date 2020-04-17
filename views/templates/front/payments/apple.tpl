@@ -70,7 +70,6 @@
                             apple_pay_.completeMerchantValidation(JSON.parse(data));
                         }, 'text')
                         .fail(function(xhr, textStatus, errorThrown) {
-                            console.log(errorThrown, textStatus);
                             apple_pay_.abort();
                         });
                 };
