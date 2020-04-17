@@ -34,10 +34,7 @@
                     merchantCapabilities: [
                         "supports3DS"
                     ],
-                    supportedNetworks: [
-                        "visa",
-                        "masterCard"
-                    ],
+                    supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
                     total: {
                         label: prestashop.shop.name,
                         amount: prestashop.cart.totals.total.amount
