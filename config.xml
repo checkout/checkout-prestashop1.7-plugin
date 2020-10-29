@@ -2,7 +2,7 @@
 <module>
 	<name>checkoutcom</name>
 	<displayName><![CDATA[Checkout.com]]></displayName>
-	<version><![CDATA[2.0.1]]></version>
+	<version><![CDATA[2.0.2]]></version>
 	<description><![CDATA[Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.]]></description>
 	<author><![CDATA[Checkout.com]]></author>
 	<tab><![CDATA[payments_gateways]]></tab>

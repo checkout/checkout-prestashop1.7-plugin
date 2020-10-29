@@ -130,10 +130,12 @@ abstract class Method
         $metadata = new Metadata();
 
         $module = \Module::getInstanceByName('checkoutcom');
-        $metadata->server_url = \Tools::getHttpHost(true);
-        $metadata->sdk_data = 'PHP SDK ' . CheckoutApi::VERSION;
-        $metadata->integration_data = 'Checkout.com ' . $module->version;
-        $metadata->platform_data = 'PHP ' . PHP_VERSION . '; PrestaShop ' . _PS_VERSION_;
+        
+        $udf5 = "Platform Data - PrestaShop " . _PS_VERSION_
+        . ", Integration Data - Checkout.com " . $module->version . ", SDK Data - PHP SDK ". CheckoutApi::VERSION 
+        .", Server - " . \Tools::getHttpHost(true);
+
+        $metadata->udf5 = $udf5;
 
         return $metadata;
     }
