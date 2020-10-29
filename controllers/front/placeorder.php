@@ -140,7 +140,8 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         $history = new OrderHistory();
         $history->id_order = $this->module->currentOrder;
         $history->changeIdOrderState(_PS_OS_ERROR_, $this->module->currentOrder);
-
+        $history->addWithemail();
+        
         // Restore cart
         $duplication = $this->context->cart->duplicate();
         $this->context->cookie->id_cart = $duplication['cart']->id;
