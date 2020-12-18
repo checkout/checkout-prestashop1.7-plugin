@@ -121,6 +121,11 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             $payments[0]->transaction_id = $response->id;
             $payments[0]->update();
 
+            $history = new OrderHistory();
+            $history->id_order = $this->context->order->id;
+            $history->changeIdOrderState(\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'), $this->context->order->id);
+            $history->addWithemail();
+
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $this->context->cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
         } else {
             $this->handleFail($response);
@@ -133,7 +138,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
      *
      * @param      \Checkout\Models\Response  $response  The response
      */
-    protected function handleFail(Response $response) {
+    protected function handleFail() {
 
         \PrestaShopLogger::addLog('Payment for order not processed.', 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
 
