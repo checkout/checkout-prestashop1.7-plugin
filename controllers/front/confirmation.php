@@ -92,7 +92,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $history = new OrderHistory();
             $history->id_order = $order_id;
             $history->changeIdOrderState(\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'), $order_id);
-            $history->addWithemail();
+            // $history->addWithemail();
 
             // Flag Order
             if($flagged && $threeDS && !Utilities::addMessageToOrder($this->module->l('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.'), $order)) {
