@@ -29,6 +29,7 @@ class CheckoutcomFailureModuleFrontController extends ModuleFrontController
         $history = new OrderHistory();
         $history->id_order = Order::getOrderByCartId($cart_id);
         $history->changeIdOrderState(_PS_OS_ERROR_, Order::getOrderByCartId($cart_id));
+        $history->addWithemail();
 
         // Restore cart
         $this->context->cart = new Cart($cart_id);
