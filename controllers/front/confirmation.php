@@ -81,6 +81,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             /**
              * load order payment and set cko action id as order transaction id
              */
+
             $order = new Order($order_id);
             $payments = $order->getOrderPaymentCollection();
             $payments[0]->transaction_id = $transaction_id;
@@ -89,9 +90,11 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             /**
              * Load the order history, change the status and send email confirmation
              */
+            $orderStatus = $status === 'Captured' ? \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') : \Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
+
             $history = new OrderHistory();
             $history->id_order = $order_id;
-            $history->changeIdOrderState(\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'), $order_id);
+            $history->changeIdOrderState($orderStatus, $order_id);
             // $history->addWithemail();
 
             // Flag Order
