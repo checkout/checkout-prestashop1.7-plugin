@@ -30,6 +30,26 @@
          ]
       },
       {
+         "name": "CHECKOUTCOM_CARD_IFRAME_STYLE",
+         "label": "Iframe Style",
+         "description": "test",
+         "type": "select",
+         "default": 0,
+         "required": 0,
+         "options": [
+           {
+             "id": "id_option",
+             "value": "singleIframe",
+             "label": "Single Iframe"
+           },
+           {
+             "id": "id_option",
+             "value": "multiIframe",
+             "label": "Multiple Iframe"
+           }
+         ]
+      },
+      {
          "name":"CHECKOUTCOM_CARD_LANG_FALLBACK",
          "label":"Language Fallback",
          "description":"Select the language to use by default if the one used by the shopper is not supported by the integration.",
