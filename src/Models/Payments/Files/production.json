@@ -607,5 +607,54 @@
     "pan_length": 16,
     "card_brand": "mada / Visa co-branded",
     "is_old": "Yes"
+  },
+  {
+    "bank": "International Bank",
+    "bin": 407197,
+    "pan_length": 16,
+    "card_brand": "mada / Visa co-branded",
+    "is_old": "Yes"
+  },
+  {
+    "bank": "International Bank",
+    "bin": 407395,
+    "pan_length": 16,
+    "card_brand": "mada / Visa co-branded",
+    "is_old": "Yes"
+  },
+  {
+    "bank": "International Bank",
+    "bin": 520058,
+    "pan_length": 16,
+    "card_brand": "mada / Visa co-branded",
+    "is_old": "Yes"
+  },
+  {
+    "bank": "International Bank",
+    "bin": 530060,
+    "pan_length": 16,
+    "card_brand": "mada / Visa co-branded",
+    "is_old": "Yes"
+  },
+  {
+    "bank": "International Bank",
+    "bin": 531196,
+    "pan_length": 16,
+    "card_brand": "mada / Visa co-branded",
+    "is_old": "Yes"
+  },
+  {
+    "bank": "International Bank",
+    "bin": 412565,
+    "pan_length": 16,
+    "card_brand": "mada / Visa co-branded",
+    "is_old": "Yes"
+  },
+  {
+    "bank": "International Bank",
+    "bin": 506968,
+    "pan_length": 16,
+    "card_brand": "mada / Visa co-branded",
+    "is_old": "Yes"
   }
 ]
