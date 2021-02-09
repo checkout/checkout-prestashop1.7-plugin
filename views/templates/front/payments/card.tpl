@@ -58,9 +58,62 @@
         </ul>
     {/if}
 
+    {if $isSingleIframe}
+        {*frames will be added here*}
+        <div id="{$module}-card-frame" class="card-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-billing="{$billingId}" data-debug="{$debug}" data-lang="{$lang}" data-module="{$module}" data-saveCard="{$save_card_option}"  ></div>
+    {else}
+        <div id="{$module}-multi-frame" class="multi-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-billing="{$billingId}" data-debug="{$debug}" data-lang="{$lang}" data-module="{$module}" data-saveCard="{$save_card_option}" data-imagedir="{$img_dir}">
+            {*frames will be added here*}
+            <div class="input-container card-number">
+                <div class="icon-container">
+                    <img id="icon-card-number"
+                        src="{$img_dir}card-icons/card.svg"
+                        alt="PAN" />
+                </div>
+                <div class="card-number-frame"></div>
+                <div class="icon-container payment-method">
+                    <img id="logo-payment-method" />
+                </div>
+                <div class="icon-container">
+                    <img id="icon-card-number-error"
+                        src="{$img_dir}card-icons/error.svg"
+                </div>
+            </div>
 
-    {*frames will be added here*}
-    <div id="{$module}-card-frame" class="card-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-billing="{$billingId}" data-debug="{$debug}" data-lang="{$lang}" data-module="{$module}" data-saveCard="{$save_card_option}"></div>
+            <div class="date-and-code">
+                <div>
+                    <div class="input-container expiry-date">
+                        <div class="icon-container">
+                            <img id="icon-expiry-date"
+                                src="{$img_dir}card-icons/exp-date.svg"
+                                alt="Expiry date" />
+                        </div>
+                        <div class="expiry-date-frame"></div>
+                        <div class="icon-container">
+                            <img id="icon-expiry-date-error"
+                                src="{$img_dir}card-icons/error.svg" />
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="input-container cvv">
+                        <div class="icon-container">
+                            <img id="icon-cvv"
+                                src="{$img_dir}card-icons/cvv.svg"
+                                alt="CVV" />
+                        </div>
+                        <div class="cvv-frame"></div>
+                        <div class="icon-container">
+                            <img id="icon-cvv-error"
+                                src="{$img_dir}card-icons/error.svg" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    {/if}
 
     {if $save_card_option == '1' and $is_guest == 0 }
         {*saved card checkbox0*}
@@ -90,12 +143,13 @@
      */
     function CheckoutcomFramesPay($form) {
 
-        const $frames = document.getElementById('checkoutcom-card-frame');
+        const $frames = document.getElementById('checkoutcom-card-frame') ?? document.getElementById('checkoutcom-multi-frame');
+
         const $token = document.getElementById('checkoutcom-card-token');
         const $bin = document.getElementById('checkoutcom-card-bin');
         const $source = document.getElementById('checkoutcom-card-source');
+        const $imageDir = $frames.dataset.imagedir;
         var submitted = false; // Prevent multiple submit
-
 
         /**
          * Initialize frames.
@@ -155,6 +209,48 @@
             }
         );
 
+        Frames.addEventHandler(
+            Frames.Events.PAYMENT_METHOD_CHANGED,
+            paymentMethodChanged
+        );
+
+        function paymentMethodChanged(event) {
+            var pm = event.paymentMethod;
+            let container = document.querySelector(".icon-container.payment-method");
+
+            if (!pm) {
+                clearPaymentMethodIcon(container);
+            } else {
+                clearErrorIcon("card-number");
+                showPaymentMethodIcon(container, pm);
+            }
+        }
+
+        function clearPaymentMethodIcon(parent) {
+            if (parent) parent.classList.remove("show");
+
+            var logo = document.getElementById("logo-payment-method");
+            logo.style.setProperty("display", "none");
+        }
+
+        function clearErrorIcon(el) {
+            var logo = document.getElementById("icon-" + el + "-error");
+            logo.style.removeProperty("display");
+        }
+
+        function showPaymentMethodIcon(parent, pm) {
+            if (parent) parent.classList.add("show");
+
+            var logo = document.getElementById("logo-payment-method");
+            if (pm) {
+                var name = pm.toLowerCase();
+                var test = $imageDir + "card-icons/";
+                logo.setAttribute("src", test + name + ".svg");
+                logo.setAttribute("alt", pm || "payment method");
+            }
+            logo.style.removeProperty("display");
+        }
+
         /**
          * Add form validation.
          *
@@ -180,8 +276,8 @@
                 }
             }
         };
-
     }
+
 </script>
 <script type="text/javascript" async src="https://cdn.checkout.com/js/framesv2.min.js" onload="CheckoutcomFramesPay(document.getElementById('checkoutcom-card-form'));"></script>
 {/literal}
