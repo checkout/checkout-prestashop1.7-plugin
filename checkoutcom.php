@@ -42,7 +42,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.0.3';
+        $this->version = '2.1.0';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
