@@ -30,10 +30,10 @@ class CheckoutcomPaymentOption extends PaymentOption
         $context = \Context::getContext();
 
         // Get customers card list if exist
-        if(!$context->customer->is_guest) {
+        if (!$context->customer->is_guest) {
             $cardList = CheckoutcomCustomerCard::getCardList($context->customer->id);
 
-            if(!empty($cardList)){
+            if (!empty($cardList)) {
                 $context->smarty->assign('cardLists', $cardList);
             }
         }
@@ -46,7 +46,8 @@ class CheckoutcomPaymentOption extends PaymentOption
             'save_card_option' => Config::get('CHECKOUTCOM_CARD_SAVE_CARD_OPTION'),
             'billingId' => $context->cart->id_address_invoice,
             'is_guest' =>$context->customer->is_guest,
-            'img_dir' => _MODULE_DIR_.'checkoutcom/views/img/'
+            'img_dir' => _MODULE_DIR_.'checkoutcom/views/img/',
+            'isSingleIframe' => Config::get('CHECKOUTCOM_CARD_IFRAME_STYLE') === 'singleIframe' ? true : false
         ]);
 
         $option = new PaymentOption();
