@@ -1,4 +1,4 @@
-/**
+s/**
  * Very import line.
  */
 var $el = document.getElementById('payment-confirmation');
@@ -24,20 +24,26 @@ if($el) { // Confirmation page
         }
 
 		const name = $(this).attr('data-module-name');
-console.log(name);
-		if(name.indexOf(MODULE_NAME) === 0) {
+        const formButtonId = $(this).attr("id");
 
-			const $submit = $('div#payment-confirmation button[type=submit]');
-			$submit.click(function(e) {
-				$('#' + name).submit();
-				return false;
-			});
+        let $submit = $("div#payment-confirmation button[type=submit]");
 
-            // Trigger "show" event.
-            document.getElementById(name).dispatchEvent(new Event("form:show"));
-            lastOption = name;
-		}
+		if (name.indexOf(MODULE_NAME) === 0) {
+          $submit.click(function (e) {
+            $("#" + name).submit();
+            return false;
+          });
 
+          // Trigger "show" event.
+          document.getElementById(name).dispatchEvent(new Event("form:show"));
+          lastOption = name;
+        } else {
+          $submit.click(function (e) {
+            $("button#pay-with-" + formButtonId)
+              .parent("form")
+              .submit();
+          });
+        }
 	});
 
 
