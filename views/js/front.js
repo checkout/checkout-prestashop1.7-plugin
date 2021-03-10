@@ -1,4 +1,4 @@
-s/**
+/**
  * Very import line.
  */
 var $el = document.getElementById('payment-confirmation');
