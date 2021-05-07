@@ -138,7 +138,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
      *
      * @param      \Checkout\Models\Response  $response  The response
      */
-    protected function handleFail() {
+    protected function handleFail($response) {
 
         \PrestaShopLogger::addLog('Payment for order not processed.', 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
 
