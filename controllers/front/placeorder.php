@@ -152,10 +152,16 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         $this->context->cookie->id_cart = $duplication['cart']->id;
         $this->context->cookie->write();
 
-        // Set error message
-        $this->context->controller->errors[] = $this->module->l($response->message);
-        foreach ($response->errors as $error) {
-            $this->context->controller->errors[] = 'Error: ' . $error;
+        if ($response->status === 'Declined' && $response->response_summary) {
+            
+            $this->context->controller->errors[] = $this->module->l('An error has occured while processing your payment. Payment Declined. ('. $response->response_summary.')');
+        } else {
+
+            // Set error message
+            $this->context->controller->errors[] = $this->module->l($response->message);
+            foreach ($response->errors as $error) {
+                $this->context->controller->errors[] = 'Error: ' . $error;
+            }
         }
 
         // Redirect to cartcontext
