@@ -97,6 +97,15 @@ class CheckoutCom extends PaymentModule
     }
 
     /**
+     * use the new module translation system
+     * 
+     */
+    public function isUsingNewTranslationSystem()
+	{
+		return true;
+	}
+
+    /**
      * Load the configuration form
      */
     public function getContent()

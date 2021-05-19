@@ -26,7 +26,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
     {
         $cart = $this->context->cart;
         if (!$cart->id || $cart->id_customer == 0 || $cart->id_address_delivery == 0 || $cart->id_address_invoice == 0 || !$this->module->active) {
-            $this->context->controller->errors[] = $this->module->l('Missing information for checkout.');
+            $this->context->controller->errors[] = $this->trans('Missing information for checkout.', [], 'Modules.Checkoutcom.Placeorder.php');
             $this->redirectWithNotifications('index.php?controller=order');
             return;
         }
@@ -41,7 +41,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         }
         if (!$authorized) {
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0001)');
+            $this->context->controller->errors[] = $this->trans('Payment method not supported. (0001)', [], 'Modules.Checkoutcom.Placeorder.php');
             $this->redirectWithNotifications('index.php?controller=order');
             return;
         }
@@ -49,7 +49,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         $customer = new Customer($cart->id_customer);
         if (!Validate::isLoadedObject($customer)) {
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0002)');
+            $this->context->controller->errors[] = $this->trans('Payment method not supported. (0002)', [], 'Modules.Checkoutcom.Placeorder.php');
             Tools::redirect('index.php?controller=order&step=1');
             return;
         }
@@ -75,7 +75,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
 
             // Set error message
-            $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0003)');
+            $this->context->controller->errors[] = $this->trans('Payment method not supported. (0003)', [], 'Modules.Checkoutcom.Placeorder.php');
             // Redirect to cartcontext
             $this->redirectWithNotifications('index.php?controller=order&step=1&key=' . $customer->secure_key . '&id_cart=' . $cart->id);
         }
@@ -93,7 +93,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         if ($response->isSuccessful()) {
 
             // Flag Order
-            if($response->isFlagged() && !Utilities::addMessageToOrder($this->module->l('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.'), $this->context->order)) {
+            if($response->isFlagged() && !Utilities::addMessageToOrder($this->trans('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.' , [], 'Modules.Checkoutcom.Placeorder.php'), $this->context->order)) {
                 \PrestaShopLogger::addLog('Failed to add payment flag note to order.', 2, 0, 'CheckoutcomPlaceorderModuleFrontController' , $this->context->order->id, true);
             }
 
@@ -138,7 +138,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
      *
      * @param      \Checkout\Models\Response  $response  The response
      */
-    protected function handleFail() {
+    protected function handleFail($response) {
 
         \PrestaShopLogger::addLog('Payment for order not processed.', 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
 
@@ -152,10 +152,15 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         $this->context->cookie->id_cart = $duplication['cart']->id;
         $this->context->cookie->write();
 
-        // Set error message
-        $this->context->controller->errors[] = $this->module->l($response->message);
-        foreach ($response->errors as $error) {
-            $this->context->controller->errors[] = 'Error: ' . $error;
+        if ($response->status === 'Declined' && $response->response_summary) {
+            $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment. Payment Declined. %errorMessage%', ['%errorMessage%' => $response->response_summary], 'Modules.Checkoutcom.Placeorder.php');
+        } else {
+
+            // Set error message
+            $this->context->controller->errors[] = $this->trans($response->message);
+            foreach ($response->errors as $error) {
+                $this->context->controller->errors[] = 'Error: ' . $error;
+            }
         }
 
         // Redirect to cartcontext

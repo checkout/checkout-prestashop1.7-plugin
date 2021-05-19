@@ -40,7 +40,7 @@ class CheckoutcomFailureModuleFrontController extends ModuleFrontController
         $this->context->cookie->write();
 
         // Set error message
-        $this->context->controller->errors[] = $this->module->l('An error has occured while processing your payment.');
+        $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment.', [], 'Modules.Checkoutcom.Failure.php');
         // Redirect to cartcontext
         $this->redirectWithNotifications('index.php?controller=order');
     }
