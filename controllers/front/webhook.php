@@ -73,7 +73,9 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
                         if($isPartial) {
 
-                            $message = $this->trans("An amount of {$currency}{$amount} ");
+                            $message = $this->trans("An amount of %currency% %amount% ", 
+                            ['%currency%' => $currency, '%amount%' => $amount], 
+                            'Modules.Checkoutcom.Webhook.php');
 
                             if($event['type'] == 'payment_refunded'){
                                 $message .= "has been partially refunded";
@@ -85,7 +87,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                             }
 
                             if(!Utilities::addMessageToOrder($message, $order)) {
-                                $this->errors[] = $this->trans('An error occurred while saving message', array(), 'Admin.Payment.Notification');
+                                $this->errors[] = $this->trans('An error occurred while saving message', [], 'Admin.Payment.Notification');
                             }
 
                         }

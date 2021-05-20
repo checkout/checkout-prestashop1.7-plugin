@@ -59,7 +59,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             }
         } else {
             // Set error message
-            $this->context->controller->errors[] = $this->trans('An error has occured while processing your transaction.', array(), 'Shop.Notifications.Error');
+            $this->context->controller->errors[] = $this->trans('An error has occured while processing your transaction.', [], 'Shop.Notifications.Error');
             // Redirect to cart
             $this->redirectWithNotifications(__PS_BASE_URI__ . 'index.php?controller=order&step=1&key=' . $secure_key . '&id_cart='
                 . (int) $cart_id);
@@ -98,7 +98,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             // $history->addWithemail();
 
             // Flag Order
-            if($flagged && $threeDS && !Utilities::addMessageToOrder($this->module->l('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.'), $order)) {
+            if($flagged && $threeDS && !Utilities::addMessageToOrder($this->trans('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.', [], 'Modules.Checkoutcom.Confirmation.php'), $order)) {
                 \PrestaShopLogger::addLog('Failed to add payment flag note to order.', 2, 0, 'CheckoutcomPlaceorderModuleFrontController' , $order->id, true);
             }
 
@@ -110,7 +110,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             /*
              * An error occured and is shown on a new page.
              */
-            $this->context->controller->errors[] = $this->trans('An error has occured while processing your transaction.', array(), 'Shop.Notifications.Error');
+            $this->context->controller->errors[] = $this->trans('An error has occured while processing your transaction.', [], 'Shop.Notifications.Error');
             // Redirect to cart
             $this->redirectWithNotifications(__PS_BASE_URI__ . 'index.php?controller=order&step=1&key=' . $secure_key . '&id_cart='
                 . (int) $cart_id);
