@@ -158,6 +158,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 
             // Set error message
             $this->context->controller->errors[] = $this->trans($response->message);
+          
             foreach ($response->errors as $error) {
                 $this->context->controller->errors[] = 'Error: ' . $error;
             }

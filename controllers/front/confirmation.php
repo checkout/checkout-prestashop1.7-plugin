@@ -46,7 +46,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 $flagged = $response->isFlagged();
                 $threeDS = $response->getValue(array('threeDs', 'enrolled')) === 'Y';
 
-                $transaction_id = $response->id;;
+                $transaction_id = $response->id;
                 $reference = $response->reference;
                 $status = $response->status;
 
