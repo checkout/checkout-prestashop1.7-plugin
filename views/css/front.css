@@ -518,3 +518,7 @@ iframe{width:100%}
     .card-frame{width:500px;margin-bottom:0}}
 
 
+
+.payment-option img {
+    max-height: 26px;
+}
