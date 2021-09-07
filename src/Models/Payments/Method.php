@@ -174,7 +174,7 @@ abstract class Method
 			$response->http_code = $ex->getCode();
 			$response->message = $ex->getMessage();
 			$response->errors = $ex->getErrors();
-			\PrestaShopLogger::addLog($ex->getBody(), 3, $ex->getCode(), 'checkoutcom' , 0, true);
+			\PrestaShopLogger::addLog($ex->getMessage(), 3, $ex->getCode(), 'checkoutcom' , 0, true);
 		}
 
 		return $response;
