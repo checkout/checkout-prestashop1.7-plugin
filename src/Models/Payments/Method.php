@@ -64,7 +64,7 @@ abstract class Method
 		$payment->customer = static::getCustomer($context, $params);
 		$payment->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
 		$payment->payment_type = 'Regular';
-		// $payment->reference = $context->order->getUniqReference();
+		$payment->reference = 'CART_' . $context->cart->id;
 
 		// Set the payment specifications
 		$payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
