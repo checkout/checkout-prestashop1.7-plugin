@@ -24,20 +24,6 @@ class CheckoutcomFailureModuleFrontController extends ModuleFrontController
             return false;
         }
 
-        $cart_id = Tools::getValue('cart_id');
-
-        $history = new OrderHistory();
-        $history->id_order = Order::getOrderByCartId($cart_id);
-        $history->changeIdOrderState(_PS_OS_ERROR_, Order::getOrderByCartId($cart_id));
-
-        // Restore cart
-        $this->context->cart = new Cart($cart_id);
-        $this->context->cookie->id_cart = $cart_id;
-
-        $duplication = $this->context->cart->duplicate();
-        $this->context->cookie->id_cart = $duplication['cart']->id;
-        $this->context->cookie->write();
-
         // Set error message
         $this->context->controller->errors[] = $this->module->l('An error has occured while processing your payment.');
         // Redirect to cartcontext

@@ -42,12 +42,33 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $response = $this->_verifySession($_REQUEST['cko-session-id']);
 
             if ($response->isSuccessful() && !$response->isPending()) {
+                $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
+                if ($this->module->validateOrder(
+                                                    $cart->id,
+                                                    _PS_OS_PAYMENT_,
+                                                    $total,
+                                                    $this->module->displayName,
+                                                    '',
+                                                    array(),
+                                                    (int) $cart->id_currency,
+                                                    false,
+                                                    $customer->secure_key
+                                                )
+                ) {
+                    $this->context->order = new Order($this->module->currentOrder); // Add order to context. Experimental.
+                } else {
+                    \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
+                    // Set error message
+                    $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0003)');
+                    // Redirect to cartcontext
+                    $this->redirectWithNotifications('index.php?controller=order&step=1&key=' . $customer->secure_key . '&id_cart=' . $cart->id);
+                }
 
                 $flagged = $response->isFlagged();
                 $threeDS = $response->getValue(array('threeDs', 'enrolled')) === 'Y';
 
                 $transaction_id = $response->id;;
-                $reference = $response->reference;
+                $reference = $this->context->order->getUniqReference();
                 $status = $response->status;
 
                 $context = \Context::getContext();
@@ -81,10 +102,16 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             /**
              * load order payment and set cko action id as order transaction id
              */
+
             $order = new Order($order_id);
             $payments = $order->getOrderPaymentCollection();
             $payments[0]->transaction_id = $transaction_id;
             $payments[0]->update();
+
+            /**
+             * Load the order history, change the status and send email confirmation
+             */
+            $orderStatus = $status === 'Captured' ? \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') : \Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
 
             // Flag Order
             if($flagged && $threeDS && !Utilities::addMessageToOrder($this->module->l('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.'), $order)) {
