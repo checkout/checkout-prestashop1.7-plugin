@@ -89,17 +89,39 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 				CheckoutcomCustomerCard::saveCard($response, $customer->id);
 			}
 
+			if ( !isset( $this->module->currentOrder ) ) {
+				$cart = new Cart((int) $this->context->cart->id);
+        		$customer = new Customer((int) $cart->id_customer);
+        		$total = (float) $cart->getOrderTotal(true, Cart::BOTH);
+        		
+        		if ($this->module->validateOrder(
+                                                    $cart->id,
+                                                    _PS_OS_PAYMENT_,
+                                                    $total,
+                                                    $this->module->displayName,
+                                                    '',
+                                                    array(),
+                                                    (int) $cart->id_currency,
+                                                    false,
+                                                    $customer->secure_key
+                                                )
+                ) {
+                    $this->context->order = new Order($this->module->currentOrder); // Add order to context. Experimental.
+                } else {
+                    \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
+                    // Set error message
+                    $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0004)');
+                    // Redirect to cartcontext
+                    $this->redirectWithNotifications('index.php?controller=order&step=1&key=' . $customer->secure_key . '&id_cart=' . $cart->id);
+                }
+			}
+
 			/**
 			 * load order payment and set cko action id as order transaction id
 			 */
 			$payments = $this->context->order->getOrderPaymentCollection();
 			$payments[0]->transaction_id = $response->id;
 			$payments[0]->update();
-
-			$history = new OrderHistory();
-			$history->id_order = $this->context->order->id;
-			$history->changeIdOrderState(\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'), $this->context->order->id);
-			// $history->addWithemail();
 
 			Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $this->context->cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
 		} else {
