@@ -75,6 +75,9 @@ class CheckoutcomPaymentOption extends PaymentOption
         $list = array();
         $methods = Config::definition('alternatives')[0];
 
+        $address_invoice = new \Address($context->cart->id_address_invoice);
+        $country_invoice = $address_invoice->country;
+
         foreach ($methods as $field) {
             if (Config::get($field['name']) &&
                 in_array($context->currency->iso_code,
@@ -83,6 +86,20 @@ class CheckoutcomPaymentOption extends PaymentOption
                 if ($class) {
                     $context->smarty->assign($field);
                     $context->smarty->assign($class::assign());
+                }
+
+                // MULTIBANCO
+                if ( $field['key'] === 'multibanco' ) {
+                    // Change Multibanco payment label
+                    $field['title'] = "Pay with APM by Checkout.com";
+
+                    // Allow only portugal invoice address for Multibanco
+                    if ( $country_invoice !== 'Portugal' ) {
+                        continue;
+                    }
+                // Allow only Multibanco for portugal invoice address 
+                }else if( $country_invoice === 'Portugal' ){
+                    continue;
                 }
 
                 $option = new PaymentOption();
