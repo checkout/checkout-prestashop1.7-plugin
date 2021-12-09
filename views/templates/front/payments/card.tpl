@@ -143,7 +143,11 @@
      */
     function CheckoutcomFramesPay($form) {
 
-        const $frames = document.getElementById('checkoutcom-card-frame') ?? document.getElementById('checkoutcom-multi-frame');
+        if ( document.getElementById("checkoutcom-card-frame") !== null ) {
+            var $frames =  document.getElementById("checkoutcom-card-frame");
+        }else{
+            var $frames =  document.getElementById("checkoutcom-multi-frame");
+        }
 
         const $token = document.getElementById('checkoutcom-card-token');
         const $bin = document.getElementById('checkoutcom-card-bin');
