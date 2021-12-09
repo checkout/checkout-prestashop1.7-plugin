@@ -676,3 +676,7 @@ _:-ms-fullscreen,
 label {
   text-align: left;
 }
+
+.payment-option img {
+    max-height: 26px;
+}
