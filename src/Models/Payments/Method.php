@@ -56,14 +56,15 @@ abstract class Method
     public static function makePayment(MethodSource $source, array $params = array())
     {
         $context = \Context::getContext();
+        $total = $context->cart->getOrderTotal();
         $payment = new Payment($source, $context->currency->iso_code);
 
-        $payment->amount = static::fixAmount($context->order->getTotalPaid(), $context->currency->iso_code);
+        $payment->amount = static::fixAmount($total, $context->currency->iso_code);
         $payment->metadata = static::getMetadata($context);
         $payment->customer = static::getCustomer($context, $params);
         $payment->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
         $payment->payment_type = 'Regular';
-        $payment->reference = $context->order->getUniqReference();
+        $payment->reference = 'CART_' . $context->cart->id;
 
         // Set the payment specifications
         $payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
@@ -173,7 +174,7 @@ abstract class Method
             $response->http_code = $ex->getCode();
             $response->message = $ex->getMessage();
             $response->errors = $ex->getErrors();
-            \PrestaShopLogger::addLog($ex->getBody(), 3, $ex->getCode(), 'checkoutcom' , 0, true);
+            \PrestaShopLogger::addLog($ex->getMessage(), 3, $ex->getCode(), 'checkoutcom' , 0, true);
         }
 
         return $response;
