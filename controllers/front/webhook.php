@@ -32,7 +32,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
         $post = file_get_contents('php://input');
         if (Utilities::getValueFromArray($_SERVER, 'HTTP_CKO_SIGNATURE', '') !== hash_hmac('sha256', $post, Configuration::get('CHECKOUTCOM_SECRET_KEY'))) {
-            \PrestaShopLogger::addLog('Invalid inbound webhook.', 1, 0, 'CheckoutcomWebhookModuleFrontController' , 0, false);
+            \PrestaShopLogger::addLog('Invalid inbound webhook.', 1, 0, 'CheckoutcomWebhookModuleFrontController' , 0, true);
             die();
         }
 
@@ -55,10 +55,13 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
     {
 
         foreach ($this->events as $event) {
+            $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
+            $sql = 'SELECT `reference` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
+            $order_reference = Db::getInstance()->getValue($sql);
 
-            $orders = Order::getByReference($event['data']['reference']);
+            $orders = Order::getByReference($order_reference);
             $list = $orders->getAll();
-            $status = +Utilities::getOrderStatus($event['type'], $event['data']['reference'], $event['data']['action_id']);
+            $status = +Utilities::getOrderStatus($event['type'], $order_reference, $event['data']['action_id']);
 
             if ($status) {
 

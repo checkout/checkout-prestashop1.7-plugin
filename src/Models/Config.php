@@ -187,7 +187,7 @@ class Config extends \Configuration
                 source_id VARCHAR(100) NOT NULL COMMENT 'Source ID from cko' ,
                 last_four INT(4) NOT NULL COMMENT 'Customer last four cc number',
                 card_scheme VARCHAR(20) NOT NULL COMMENT 'Credit Card scheme',
-                is_mada BIT NOT NULL DEFAULT 0 COMMENT 'Is mada card'
+                is_mada INT(1) NOT NULL DEFAULT 0 COMMENT 'Is mada card'
              ) ENGINE=InnoDB;
              ";
 

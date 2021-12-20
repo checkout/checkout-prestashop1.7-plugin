@@ -2,9 +2,11 @@
  * On document ready.
  */
 $(document).ready(function () {
-  const $frames =
-    document.getElementById("checkoutcom-card-frame") ??
-    document.getElementById("checkoutcom-multi-frame");
+  if ( document.getElementById("checkoutcom-card-frame") !== null ) {
+    var $frames = document.getElementById("checkoutcom-card-frame");
+  }else{
+    var $frames = document.getElementById("checkoutcom-multi-frame");
+  }
 
   if ($frames) {
     var savecard = $frames.dataset.savecard;

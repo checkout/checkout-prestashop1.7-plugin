@@ -54,32 +54,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             return;
         }
 
-        $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
-
-        if ($this->module->validateOrder(
-                                            $cart->id,
-                                            _PS_OS_PREPARATION_,
-                                            $total,
-                                            $this->module->displayName,
-                                            '',
-                                            array(),
-                                            (int) $this->context->cart->id_currency,
-                                            false,
-                                            $customer->secure_key
-                                        )
-        ) {
-            $this->context->order = new Order($this->module->currentOrder); // Add order to context. Experimental.
-            $this->paymentProcess($customer);
-        } else {
-
-            \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
-
-            // Set error message
-            $this->context->controller->errors[] = $this->trans('Payment method not supported. (0003)', [], 'Modules.Checkoutcom.Placeorder.php');
-            // Redirect to cartcontext
-            $this->redirectWithNotifications('index.php?controller=order&step=1&key=' . $customer->secure_key . '&id_cart=' . $cart->id);
-        }
-
+        $this->paymentProcess($customer);
     }
 
     /**
@@ -114,6 +89,33 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                 CheckoutcomCustomerCard::saveCard($response, $customer->id);
             }
 
+            if ( !isset( $this->module->currentOrder ) ) {
+                $cart = new Cart((int) $this->context->cart->id);
+                $customer = new Customer((int) $cart->id_customer);
+                $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
+                
+                if ($this->module->validateOrder(
+                                                    $cart->id,
+                                                    _PS_OS_PAYMENT_,
+                                                    $total,
+                                                    $this->module->displayName,
+                                                    '',
+                                                    array(),
+                                                    (int) $cart->id_currency,
+                                                    false,
+                                                    $customer->secure_key
+                                                )
+                ) {
+                    $this->context->order = new Order($this->module->currentOrder); // Add order to context. Experimental.
+                } else {
+                    \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
+                    // Set error message
+                    $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0004)');
+                    // Redirect to cartcontext
+                    $this->redirectWithNotifications('index.php?controller=order&step=1&key=' . $customer->secure_key . '&id_cart=' . $cart->id);
+                }
+            }
+
             /**
              * load order payment and set cko action id as order transaction id
              */
@@ -121,10 +123,14 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             $payments[0]->transaction_id = $response->id;
             $payments[0]->update();
 
+            // Reset order history
+            $sql = 'DELETE FROM `'._DB_PREFIX_.'order_history` WHERE `id_order`='.$this->context->order->id;
+            Db::getInstance()->execute($sql);
+
             $history = new OrderHistory();
             $history->id_order = $this->context->order->id;
             $history->changeIdOrderState(\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'), $this->context->order->id);
-            // $history->addWithemail();
+            $history->add();
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $this->context->cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
         } else {
@@ -141,16 +147,6 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
     protected function handleFail($response) {
 
         \PrestaShopLogger::addLog('Payment for order not processed.', 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
-
-        $history = new OrderHistory();
-        $history->id_order = $this->module->currentOrder;
-        $history->changeIdOrderState(_PS_OS_ERROR_, $this->module->currentOrder);
-        $history->addWithemail();
-        
-        // Restore cart
-        $duplication = $this->context->cart->duplicate();
-        $this->context->cookie->id_cart = $duplication['cart']->id;
-        $this->context->cookie->write();
 
         if ($response->status === 'Declined' && $response->response_summary) {
             $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment. Payment Declined. %errorMessage%', ['%errorMessage%' => $response->response_summary], 'Modules.Checkoutcom.Placeorder.php');
