@@ -113,6 +113,15 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
              */
             $orderStatus = $status === 'Captured' ? \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') : \Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
 
+            // Reset order history
+            $sql = 'DELETE FROM `'._DB_PREFIX_.'order_history` WHERE `id_order`='.$order_id;
+            Db::getInstance()->execute($sql);
+
+            $history = new OrderHistory();
+            $history->id_order = $order_id;
+            $history->changeIdOrderState($orderStatus, $order_id);
+            $history->add();
+
             // Flag Order
             if($flagged && $threeDS && !Utilities::addMessageToOrder($this->trans('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.', [], 'Modules.Checkoutcom.Confirmation.php'), $order)) {
                 \PrestaShopLogger::addLog('Failed to add payment flag note to order.', 2, 0, 'CheckoutcomPlaceorderModuleFrontController' , $order->id, true);
