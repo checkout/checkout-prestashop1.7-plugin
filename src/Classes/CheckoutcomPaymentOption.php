@@ -6,6 +6,8 @@ use CheckoutCom\PrestaShop\Helpers\Utilities;
 use CheckoutCom\PrestaShop\Models\Config;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
+use CheckoutCom\PrestaShop\Models\Payments\Method;
+use Checkout\Models\Payments\IdealSource;
 
 //use PrestaShop\PrestaShop\Adapter\Debug\DebugMode;
 
@@ -101,6 +103,13 @@ class CheckoutcomPaymentOption extends PaymentOption
                 }else if( $country_invoice === 'Portugal' ){
                     continue;
                 }
+                
+                // iDeal : get iDeal banks
+                $bic = '';
+                $source = new IdealSource($bic, 'iDEAL payment');
+                $banks = Method::getBanks($source);
+                $issuers = $banks->countries[0]['issuers'];
+                $context->smarty->assign('idealBanks', $issuers);
 
                 $option = new PaymentOption();
                 $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/alternatives/' . $field['key'] . '.tpl'))

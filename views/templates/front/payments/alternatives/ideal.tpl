@@ -2,8 +2,15 @@
     <input id="{$module}-{$key}-source" type="hidden" name="source" value="{$key}" required>
     <ul class="form-list" >
         <li>
-            <label for="name" class="required">{l s='Bank Identifier Code (BIC)' mod='checkoutcom'}</label>
-            <input type="text" id="{$module}-{$key}-bic" name="bic" class="form-control input-text cvv required-entry validate-cc-cvn" required>
+            <label for="name" class="required">{l s='Select iDeal Bank' mod='checkoutcom'}</label>
+            <select class="form-control cvv required-entry validate-cc-cvn" id="{$module}-{$key}-bic" name="bic">
+                {foreach $idealBanks as $bank}
+                    <option value="{$bank['bic']|escape:'html':'UTF-8'}">
+                            {$bank['name']|escape:'html':'UTF-8'}
+                    </option>
+                {/foreach}
+            </select>
+            {* <input type="text" id="{$module}-{$key}-bic" name="bic" class="form-control input-text cvv required-entry validate-cc-cvn" required >*}
         </li>
     </ul>
 </form>
