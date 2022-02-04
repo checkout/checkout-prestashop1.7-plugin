@@ -283,4 +283,13 @@ abstract class Method
 
         return false;
     }
+    
+    /**
+     *
+     */
+    public static function getBanks($source)
+    {
+        $response = CheckoutApiHandler::api()->payments()->banks($source);
+        return $response;
+    }
 }
