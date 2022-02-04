@@ -16,7 +16,7 @@ class Ideal extends Alternative
     public static function pay(array $params)
     {
         $bic = self::checkBic($params['bic']);
-        $source = new IdealSource($bic, \Configuration::get('PS_SHOP_NAME'));
+        $source = new IdealSource($bic, /*\Configuration::get('PS_SHOP_NAME')*/ 'iDEAL Payment');
         $payment = static::makePayment($source);
 
         return static::request($payment);
