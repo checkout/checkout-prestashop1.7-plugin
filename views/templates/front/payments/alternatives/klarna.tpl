@@ -27,6 +27,7 @@
         load: function(data, methods) {
 console.log(data);
             var self = this;
+            var country_iso = prestashop.customer.addresses[data.id_address_invoice].country_iso;
             try {
               console.log(data);
                 Klarna.Payments.init({client_token: data.client_token}); // Initialize Klarna
@@ -36,9 +37,9 @@ console.log(data);
                     instance_id: "checkoutcom-klarna-payments-instance"
                 },
                 {
-                    purchase_country:   prestashop.customer.addresses[data.id_address_invoice].country_iso,
+                    purchase_country:   country_iso,
                     purchase_currency:  prestashop.currency.iso_code,
-                    locale:             prestashop.language.locale,
+                    locale:             country_iso.toLowerCase()+'-'+country_iso,
                     order_amount:       +data.order_amount,
                     order_tax_amount:   +data.order_tax_amount,
                     order_lines:        data.order_lines,
