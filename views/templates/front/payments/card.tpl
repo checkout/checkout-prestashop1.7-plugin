@@ -156,6 +156,14 @@
         var submitted = false; // Prevent multiple submit
 
         /**
+         * Customer phone length check
+         */
+        var customerPhone = prestashop.customer.addresses[$frames.dataset.billing].phone;
+        if ( customerPhone.length < 6 || customerPhone.length > 25 ) {
+            customerPhone = '';
+        }
+
+        /**
          * Initialize frames.
          */
         Frames.init({
@@ -172,7 +180,7 @@
                     state:        prestashop.customer.addresses[$frames.dataset.billing].state,
                     country:      prestashop.customer.addresses[$frames.dataset.billing].country_iso
                 },
-                phone: prestashop.customer.addresses[$frames.dataset.billing].phone,
+                phone: customerPhone,
             }
         });
 
