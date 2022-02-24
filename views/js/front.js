@@ -29,6 +29,7 @@ if($el) { // Confirmation page
         let $submit = $("div#payment-confirmation button[type=submit]");
 
 		if (name.indexOf(MODULE_NAME) === 0) {
+          $submit.off("click");
           $submit.click(function (e) {
             $("#" + name).submit();
             return false;
@@ -38,6 +39,7 @@ if($el) { // Confirmation page
           document.getElementById(name).dispatchEvent(new Event("form:show"));
           lastOption = name;
         } else {
+          $submit.off("click");
           $submit.click(function (e) {
             $("button#pay-with-" + formButtonId)
               .parent("form")
