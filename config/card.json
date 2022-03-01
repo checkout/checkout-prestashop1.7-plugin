@@ -173,6 +173,55 @@
                "label":"No"
             }
          ]
+      },
+      {
+         "name":"CHECKOUTCOM_PAYMENT_EVENT",
+         "label":"Type of payment",
+         "desc":"",
+         "type":"select",
+         "default":0,
+         "required":0,
+         "options":[
+            {
+               "id":"id_option",
+               "value":0,
+               "label":"Authorize"
+            },
+            {
+               "id":"id_option",
+               "value":1,
+               "label":"Authorize + Capture"
+            }
+         ]
+      },
+      {
+         "name":"CHECKOUTCOM_PAYMENT_ACTION",
+         "label":"Payment Action",
+         "desc":"",
+         "type":"select",
+         "default":0,
+         "required":0,
+         "options":[
+            {
+               "id":"id_option",
+               "value":0,
+               "label":"Authorize"
+            },
+            {
+               "id":"id_option",
+               "value":1,
+               "label":"Authorize + Capture"
+            }
+         ]
+      },
+      {
+         "name":"CHECKOUTCOM_CAPTURE_TIME",
+         "label":"Capture Time",
+         "desc":"Specify the number of hours before capture. Ex: 1.5 for capture after 1h30.",
+         "type":"text",
+         "default":"",
+         "required":0,
+         "col":2
       }
    ]
 ]
