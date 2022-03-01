@@ -1,0 +1,24 @@
+.regular-radio-container {
+	padding-top: 8px;
+}
+
+.regular-radio-btn {
+	margin-top: -2px !important;
+	vertical-align: middle;
+}
+
+.regular-radio-label {
+	font-weight: normal !important;
+}
+
+.select2 {
+	max-width: 650px !important;
+	width: 100% !important;
+}
+
+.webhook-url{
+	display: inline-block;
+	padding: 7px;
+	background-color: gray;
+	color: white;
+}
