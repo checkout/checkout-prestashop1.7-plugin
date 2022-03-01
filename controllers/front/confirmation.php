@@ -42,12 +42,16 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $response = $this->_verifySession($_REQUEST['cko-session-id']);
 
             if ($response->isSuccessful() && !$response->isPending()) {
+                $suffix = '';
+                if ($response->source['type'] === 'card') {
+                    $suffix = '-card';
+                }
                 $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
                 if ($this->module->validateOrder(
                                                     $cart->id,
                                                     _PS_OS_PAYMENT_,
                                                     $total,
-                                                    $this->module->displayName,
+                                                    $this->module->displayName.$suffix,
                                                     '',
                                                     array(),
                                                     (int) $cart->id_currency,
