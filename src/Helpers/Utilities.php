@@ -41,7 +41,7 @@ class Utilities
      */
     public static function getFile($path)
     {
-        return is_readable($path) ? file_get_contents($path) : null;
+        return is_readable($path) ? Tools::file_get_contents($path) : null;
     }
 
     /**

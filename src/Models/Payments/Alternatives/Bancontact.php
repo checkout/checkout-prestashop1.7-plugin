@@ -13,7 +13,7 @@ class Bancontact extends Alternative
      *
      * @return Response ( description_of_the_return_value )
      */
-    public static function pay(array $params)
+    public static function pay()
     {
         $context = \Context::getContext();
         $billing = new \Address((int) $context->cart->id_address_invoice);

@@ -50,7 +50,7 @@
                 <li>
                     <label>
                         <input  class= "{$module}-new-card" type="radio" name="{$module}-saved-card"  value="new_card"/>
-                        <img class="card-logo" src="{$img_dir}addcard.svg"> {l s='New card' mod={$module} }
+                        <img class="card-logo" src="{$img_dir}addcard.svg"> {l s='New card' mod='checkoutcom' }
                     </label>
                 </li>
 
@@ -120,13 +120,13 @@
         <div class="save-card-check">
             <label for="save-card-checkbox" >
                 <input type="checkbox" name="save-card-checkbox" id="save-card-checkbox" />
-                {l s='Save card for future payment' mod={$module}}
+                {l s='Save card for future payment' mod='checkoutcom'}
             </label>
         </div>
 
         <div class="cvvVerification">
             <label for="{$module}-cko-cvv">
-                <em>* </em>{l s='Card Verification Number' mod={$module}}
+                <em>* </em>{l s='Card Verification Number' mod='checkoutcom'}
                 <input id="{$module}-cko-cvv" type="number" name="cko-cvv" min="3" max="4" autocomplete="off"/>
             </label>
         </div>

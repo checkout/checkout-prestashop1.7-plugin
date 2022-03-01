@@ -72,7 +72,6 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 $threeDS = $response->getValue(array('threeDs', 'enrolled')) === 'Y';
 
                 $transaction_id = $response->id;
-                $reference = $this->context->order->getUniqReference();
                 $status = $response->status;
 
                 $context = \Context::getContext();
@@ -90,7 +89,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 . (int) $cart_id);
         }
 
-        $message = null; // You can add a comment directly into the order so the merchant will see it in the BO.
+        // $message = null; // You can add a comment directly into the order so the merchant will see it in the BO.
 
         /**
          * If the order has been validated we try to retrieve it

@@ -53,7 +53,7 @@ abstract class Method
      *
      * @return Payment
      */
-    public static function makePayment(MethodSource $source, array $params = array(), bool $capture = true)
+    public static function makePayment(MethodSource $source, array $params = array())
     {
         $context = \Context::getContext();
         $total = $context->cart->getOrderTotal();
@@ -126,7 +126,7 @@ abstract class Method
      *
      * @return Metadata the metadata
      */
-    protected static function getMetadata(\Context $context)
+    protected static function getMetadata()
     {
         $metadata = new Metadata();
 
@@ -148,7 +148,7 @@ abstract class Method
      *
      * @return Customer the metadata
      */
-    protected static function getCustomer(\Context $context, array $params)
+    protected static function getCustomer(\Context $context)
     {
         $customer = new Customer();
         $customer->email = $context->customer->email;

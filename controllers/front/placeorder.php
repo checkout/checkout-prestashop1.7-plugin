@@ -108,7 +108,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                 ) {
                     $this->context->order = new Order($this->module->currentOrder); // Add order to context. Experimental.
                 } else {
-                    \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
+                    \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart->id, true);
                     // Set error message
                     $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0004)');
                     // Redirect to cartcontext

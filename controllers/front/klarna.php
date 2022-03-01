@@ -40,7 +40,7 @@ class CheckoutcomKlarnaModuleFrontController extends ModuleFrontController
         $klarna = new Klarna(
                 $country,
                 $this->context->currency->iso_code,
-                strtolower($country).'-'.$country,
+                Tools::strtolower($country).'-'.$country,
                 $total,
                 $tax,
                 KlarnaModel::getProducts($this->context)

@@ -43,7 +43,7 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController
      */
     public function postProcess()
     {
-        $post = file_get_contents('php://input');
+        $post = Tools::file_get_contents('php://input');
         parse_str($post, $this->data);
     }
 

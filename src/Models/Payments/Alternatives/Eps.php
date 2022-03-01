@@ -13,7 +13,7 @@ class Eps extends Alternative
      *
      * @return Response
      */
-    public static function pay(array $params)
+    public static function pay()
     {
         $source = new EpsSource(\Configuration::get('PS_SHOP_NAME'));
         $payment = static::makePayment($source);

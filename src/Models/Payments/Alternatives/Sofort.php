@@ -13,7 +13,7 @@ class Sofort extends Alternative
      *
      * @return Response
      */
-    public static function pay(array $params)
+    public static function pay()
     {
         $source = new SofortSource();
         $payment = static::makePayment($source);

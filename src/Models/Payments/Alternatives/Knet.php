@@ -28,10 +28,10 @@ class Knet extends Alternative
      *
      * @return Response ( description_of_the_return_value )
      */
-    public static function pay(array $params)
+    public static function pay()
     {
         $context = \Context::getContext();
-        $language = substr($context->language->iso_code, 0, 2) !== Knet::LOCALE_AR ? Knet::LOCALE_EN : Knet::LOCALE_AR;
+        $language = Tools::substr($context->language->iso_code, 0, 2) !== Knet::LOCALE_AR ? Knet::LOCALE_EN : Knet::LOCALE_AR;
         $source = new KnetSource($language);
         $payment = static::makePayment($source);
 

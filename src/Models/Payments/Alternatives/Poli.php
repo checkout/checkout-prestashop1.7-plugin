@@ -13,7 +13,7 @@ class Poli extends Alternative
      *
      * @return Response ( description_of_the_return_value )
      */
-    public static function pay(array $params)
+    public static function pay()
     {
         $source = new PoliSource();
         $payment = static::makePayment($source);
