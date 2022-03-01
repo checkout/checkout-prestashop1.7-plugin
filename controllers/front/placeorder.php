@@ -98,7 +98,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                                                     $cart->id,
                                                     _PS_OS_PAYMENT_,
                                                     $total,
-                                                    $this->module->displayName,
+                                                    $this->module->displayName.'-card',
                                                     '',
                                                     array(),
                                                     (int) $cart->id_currency,
