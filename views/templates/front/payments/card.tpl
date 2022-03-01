@@ -76,7 +76,7 @@
                 </div>
                 <div class="icon-container">
                     <img id="icon-card-number-error"
-                        src="{$img_dir}card-icons/error.svg"
+                        src="{$img_dir}card-icons/error.svg">
                 </div>
             </div>
 

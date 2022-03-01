@@ -56,7 +56,7 @@ class CheckoutcomPaymentOption extends PaymentOption
         $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/card.tpl'))
                 ->setModuleName($module->name . '-card-form')
                 ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/supported.svg'))
-                ->setCallToActionText($module->l(Config::get('CHECKOUTCOM_CARD_TITLE')));
+                ->setCallToActionText($module->l('Pay by Card with Checkout.com'));
 
         return $option;
     }
@@ -153,7 +153,7 @@ class CheckoutcomPaymentOption extends PaymentOption
         $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/google.tpl'))
                 ->setModuleName($module->name . '-google-form')
                 ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/googlepay.svg'))
-                ->setCallToActionText($module->l(Config::get('CHECKOUTCOM_GOOGLE_TITLE')));
+                ->setCallToActionText($module->l('Pay by Google Pay with Checkout.com'));
 
         return $option;
     }
