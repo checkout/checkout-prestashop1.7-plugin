@@ -164,6 +164,7 @@ class CheckoutCom extends PaymentModule
             'fields_value' => Config::values(),
             'order_states' => OrderState::getOrderStates($this->context->language->id),
             'trigger_statuses' => json_decode(Configuration::get('CHECKOUTCOM_TRIGGER_STATUS')),
+            'webhook_url' => _PS_BASE_URL_SSL_.'/index.php?fc=module&module=checkoutcom&controller=webhook',
         ]);
     }
 

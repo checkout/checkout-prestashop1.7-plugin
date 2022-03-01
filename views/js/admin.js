@@ -1,6 +1,7 @@
 $(document).ready(function () {
 	var webhook_url = $('.webhook-url-container').html();
 	$("#CHECKOUTCOM_PUBLIC_KEY").parent().parent().parent().append(webhook_url);
+	$('.webhook-url-container').remove();
 	
 	checkCardEnabled();
 	checkDeferredPayment();
