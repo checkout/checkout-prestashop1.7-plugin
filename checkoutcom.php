@@ -31,7 +31,9 @@ use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomHelperForm;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
-use CheckoutCom\PrestaShop\Models\Payments\Method;
+use OrderState;
+use Checkout\CheckoutApi;
+use Checkout\Models\Payments\Capture;
 
 class CheckoutCom extends PaymentModule
 {
@@ -77,11 +79,16 @@ class CheckoutCom extends PaymentModule
         \PrestaShopLogger::addLog("The module has been installed.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
 
         return parent::install() &&
+            $this->addOrderState($this->l('Payment authorized, awaiting capture')) &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('header') &&
             $this->registerHook('displayCustomerAccount') &&
             $this->registerHook('actionOrderSlipAdd') &&
-            $this->registerHook('displayAdminOrderContentOrder');
+            $this->registerHook('displayAdminOrderContentOrder') && 
+            $this->registerHook('displayBackOfficeHeader') &&
+            $this->registerHook('displayAdminOrderMainBottom') &&
+            $this->registerHook('displayAdminOrder') &&
+            $this->registerHook('actionOrderStatusPostUpdate');
     }
 
     /**
@@ -101,9 +108,9 @@ class CheckoutCom extends PaymentModule
      * 
      */
     public function isUsingNewTranslationSystem()
-	{
-		return true;
-	}
+    {
+        return true;
+    }
 
     /**
      * Load the configuration form
@@ -147,9 +154,17 @@ class CheckoutCom extends PaymentModule
             'fields_value' => Config::values(),
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
+            'order_states' => OrderState::getOrderStates($this->context->language->id),
+            'trigger_statuses' => json_decode(Configuration::get('CHECKOUTCOM_TRIGGER_STATUS')),
         );
 
         $helper->addToSmarty($smarty);
+
+        $this->context->smarty->assign([
+            'fields_value' => Config::values(),
+            'order_states' => OrderState::getOrderStates($this->context->language->id),
+            'trigger_statuses' => json_decode(Configuration::get('CHECKOUTCOM_TRIGGER_STATUS')),
+        ]);
     }
 
     /**
@@ -169,6 +184,49 @@ class CheckoutCom extends PaymentModule
             }
         }
         \PrestaShopLogger::addLog("Module configurations have been updated.", 1, 0, 'checkoutcom' , 0, true, $this->context->employee->id);
+
+        if ( Tools::getValue('trigger_statuses') === "no_status" ) { 
+            Configuration::updateValue('CHECKOUTCOM_TRIGGER_STATUS', null); 
+        }elseif( Tools::getValue('trigger_statuses') ){ 
+            Configuration::updateValue('CHECKOUTCOM_TRIGGER_STATUS', json_encode(Tools::getValue('trigger_statuses'))); 
+        } 
+ 
+        if ( Tools::isSubmit('submitCheckoutComModule') ) { 
+            $this->context->controller->confirmations[] = 'Configuration has been successfully saved.'; 
+        }
+    }
+
+    public function addOrderState($name)
+    {
+        $state_exist = false;
+        $states = OrderState::getOrderStates((int)$this->context->language->id);
+ 
+        // check if order state exist
+        foreach ($states as $state) {
+            if (in_array($name, $state)) {
+                $state_exist = true;
+                break;
+            }
+        }
+ 
+        // If the state does not exist, we create it.
+        if (!$state_exist) {
+            // create new order state
+            $order_state = new OrderState();
+            $order_state->color = '#00ffff';
+            $order_state->send_email = false;
+            $order_state->module_name = $this->name;
+            $order_state->name = array();
+            $languages = Language::getLanguages(false);
+            foreach ($languages as $language){
+                $order_state->name[ $language['id_lang'] ] = $name;
+            }
+ 
+            // Update object
+            $order_state->add();
+        }
+ 
+        return true;
     }
 
     /**
@@ -430,6 +488,140 @@ class CheckoutCom extends PaymentModule
             $this->context->smarty->assign('is_capture', $is_capture);
 
             return $this->display(__FILE__, 'views/templates/admin/admin_order_content.tpl');
+        }
+    }
+
+    public function hookDisplayBackOfficeHeader() 
+    { 
+        $this->context->controller->addJquery();
+        
+        $this->context->controller->addJS($this->_path . 'views/js/select2.js'); 
+        $this->context->controller->addCSS($this->_path . 'views/css/select2.css'); 
+ 
+        $this->context->controller->addJS($this->_path . 'views/js/admin.js'); 
+        $this->context->controller->addCSS($this->_path . 'views/css/admin.css'); 
+    }
+
+
+    /** 
+     * @param array $params 
+     * @return string 
+     */ 
+    public function displayAdminOrder($params) 
+    {
+        $order_id = Tools::getValue('id_order');
+        $payment = new OrderPayment();
+        $payment = $payment->getByOrderId($order_id);
+        $order = new Order($order_id);
+        $transaction = [];
+        $transaction['transaction_id'] = "CART_" . $order->id_cart;
+        $transaction['amount'] = number_format( $order->total_paid_tax_incl, 2);
+        $transaction['payment_method'] = $order->payment;
+
+        $time = (float) \Configuration::get('CHECKOUTCOM_CAPTURE_TIME');
+        $event = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_EVENT');
+        $action = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
+     
+        if(strpos($order->payment, '-card') !== false ){
+            $sql = 'SELECT * FROM '._DB_PREFIX_."checkoutcom_adminorder WHERE `transaction_id` = '" . $transaction['transaction_id'] . "'"; 
+            $row = Db::getInstance()->executeS($sql);
+     
+            if ( !empty($row) ) {
+                $transaction['amountCaptured'] = $row[0]['amount_captured'];
+                $transaction['capturableAmount'] = $transaction['amount'] - $row[0]['amount_captured'];
+     
+                $transaction['amountRefunded'] = $row[0]['amount_refunded'];
+                $transaction['refundableAmount'] = $transaction['amount'] - $row[0]['amount_refunded'];
+     
+                $transaction['isCapturable'] = false;
+                $transaction['isRefundable'] = false;
+            }elseif( !$action ){
+                $transaction['amountCaptured'] = 0;
+                $transaction['capturableAmount'] = (float) $transaction['amount'];
+     
+                $transaction['amountRefunded'] = 0;
+                $transaction['refundableAmount'] = 0;
+     
+                $transaction['isCapturable'] = true;
+                $transaction['isRefundable'] = false;
+
+                if (Tools::isSubmit('amountToCapture')) { 
+                    $amountToCapture = number_format( Tools::getValue('amountToCapture'), 2);
+
+                    if ( $amountToCapture <= $transaction['capturableAmount']) {
+                        $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
+                        $sql .= "VALUES ('".$transaction['transaction_id']."', ".$amountToCapture.", 0)";
+
+                        $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
+                        try {
+                            $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, $amountToCapture*100));
+                        } catch (Exception $ex) {
+                            $details->http_code = $ex->getCode();
+                            $details->message = $ex->getMessage();
+                            $details->errors = $ex->getErrors();
+                        }
+
+                        if (Db::getInstance()->execute($sql) && $details->http_code === 202) {
+                            $transaction['amountCaptured'] = $amountToCapture;
+                            $transaction['capturableAmount'] = $transaction['capturableAmount'] - $amountToCapture;
+                            $transaction['isCapturable'] = false;
+
+                            $this->context->smarty->assign([ 
+                                'capture_confirmation' => true
+                            ]);
+                        }else{
+                            $this->context->smarty->assign([ 
+                                'transactionError' => $details->message
+                            ]);
+                        }
+                    }else{
+                        $this->context->smarty->assign([
+                            'transactionError' => 'The amount to capture is greater than the capturable amount'
+                        ]);
+                    }
+                }
+            } 
+     
+            $this->context->smarty->assign([ 
+                'transaction' => $transaction 
+            ]); 
+
+            return $this->display(__FILE__, '/views/templates/hook/hookAdminOrder.tpl'); 
+        } 
+    } 
+
+    public function hookDisplayAdminOrderMainBottom($params)
+    {
+        return $this->displayAdminOrder($params);
+    }
+
+    public function hookDisplayAdminOrder($params)
+    {
+        return Tools::version_compare(_PS_VERSION_, '1.7.7.0', '>=') ? false : $this->displayAdminOrder($params);
+    }
+
+    public function hookActionOrderStatusPostUpdate($params)
+    {
+        $new_status_id = $params['newOrderStatus']->id;
+        $trigger_statuses = json_decode(\Configuration::get('CHECKOUTCOM_TRIGGER_STATUS'));
+        $order = new Order($params['id_order']);
+        $event = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_EVENT');
+        $action = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
+        $payment = new OrderPayment();
+        $payment = $payment->getByOrderId($params['id_order']);
+        $amountToCapture = (float) number_format( $order->total_paid_tax_incl, 2);
+
+        if (!$event && !$action && in_array($new_status_id, $trigger_statuses)) {
+            $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
+            $sql .= "VALUES ('CART_" . $order->id_cart . "', ".$amountToCapture.", 0)";
+            Db::getInstance()->execute($sql);
+
+            $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
+            try {
+                $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, $amountToCapture*100));
+            } catch (Exception $ex) {
+                //
+            }
         }
     }
 }
