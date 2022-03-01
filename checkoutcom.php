@@ -44,7 +44,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.1.6';
+        $this->version = '2.2.0';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -583,6 +583,7 @@ class CheckoutCom extends PaymentModule
             } 
      
             $this->context->smarty->assign([ 
+                'module_dir' => $this->_path,
                 'transaction' => $transaction 
             ]); 
 

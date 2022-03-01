@@ -14,6 +14,7 @@
 
 <div id="checkoutcom-admin-order" class="card panel">
 	<h3 class="card-header panel-heading">
+		<img src="{$module_dir|escape:'htmlall':'UTF-8'}/logo.png" alt="checkoutcom-logo" style="width:14px;display:inline-block;">
 		{l s='Checkout.com' mod='checkoutcom'}
 	</h3>
 	<div class="card-body">
