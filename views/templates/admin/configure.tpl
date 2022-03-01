@@ -153,13 +153,13 @@
 							</label>
 							<div class="col-lg-9">
 								<select name="CHECKOUTCOM_CARD_LANG_FALLBACK" class=" fixed-width-xl" id="CHECKOUTCOM_CARD_LANG_FALLBACK">
-									<option value="EN-GB" {if $fields_value.CHECKOUTCOM_CARD_IFRAME_STYLE=="EN-GB"}selected{/if}>English</option>
-									<option value="ES-ES" {if $fields_value.CHECKOUTCOM_CARD_IFRAME_STYLE=="ES-ES"}selected{/if}>Spanish</option>
-									<option value="DE-DE" {if $fields_value.CHECKOUTCOM_CARD_IFRAME_STYLE=="DE-DE"}selected{/if}>German</option>
-									<option value="KR-KR" {if $fields_value.CHECKOUTCOM_CARD_IFRAME_STYLE=="KR-KR"}selected{/if}>Korean</option>
-									<option value="FR-FR" {if $fields_value.CHECKOUTCOM_CARD_IFRAME_STYLE=="FR-FR"}selected{/if}>French</option>
-									<option value="IT-IT" {if $fields_value.CHECKOUTCOM_CARD_IFRAME_STYLE=="IT-IT"}selected{/if}>Italian</option>
-									<option value="NL-NL" {if $fields_value.CHECKOUTCOM_CARD_IFRAME_STYLE=="NL-NL"}selected{/if}>Dutch</option>
+									<option value="EN-GB" {if $fields_value.CHECKOUTCOM_CARD_LANG_FALLBACK=="EN-GB"}selected{/if}>English</option>
+									<option value="ES-ES" {if $fields_value.CHECKOUTCOM_CARD_LANG_FALLBACK=="ES-ES"}selected{/if}>Spanish</option>
+									<option value="DE-DE" {if $fields_value.CHECKOUTCOM_CARD_LANG_FALLBACK=="DE-DE"}selected{/if}>German</option>
+									<option value="KR-KR" {if $fields_value.CHECKOUTCOM_CARD_LANG_FALLBACK=="KR-KR"}selected{/if}>Korean</option>
+									<option value="FR-FR" {if $fields_value.CHECKOUTCOM_CARD_LANG_FALLBACK=="FR-FR"}selected{/if}>French</option>
+									<option value="IT-IT" {if $fields_value.CHECKOUTCOM_CARD_LANG_FALLBACK=="IT-IT"}selected{/if}>Italian</option>
+									<option value="NL-NL" {if $fields_value.CHECKOUTCOM_CARD_LANG_FALLBACK=="NL-NL"}selected{/if}>Dutch</option>
 								</select>
 							</div>
 						</div>
