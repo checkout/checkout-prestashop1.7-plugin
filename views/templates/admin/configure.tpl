@@ -50,7 +50,7 @@
 		</div>
 	</div>
 	<div class="tab-pane" id="template_2">
-		<form id="module_form_1" class="defaultForm form-horizontal" action="https://checkout176.evolutive.dev/boc176/index.php?controller=AdminModules&configure=checkoutcom&token=2f9828b473344d24c5195234278dcdb3" method="post" enctype="multipart/form-data" novalidate>
+		<form id="module_form_1" class="defaultForm form-horizontal" action="" method="post" enctype="multipart/form-data" novalidate>
 			<input type="hidden" name="submitCheckoutComModule" value="1" />
 			<div class="panel" id="fieldset_0_1">
 				<div class="panel-heading"></div>
