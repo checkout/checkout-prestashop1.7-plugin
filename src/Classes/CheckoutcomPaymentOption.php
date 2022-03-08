@@ -21,7 +21,7 @@ class CheckoutcomPaymentOption extends PaymentOption
      *
      * @return PaymentOption the card
      */
-    public static function getCard(&$module, &$params)
+    public static function getCard(&$module)
     {
 
         if (!Config::get('CHECKOUTCOM_CARD_ENABLED')) {
@@ -69,7 +69,7 @@ class CheckoutcomPaymentOption extends PaymentOption
      *
      * @return array
      */
-    public static function getAlternatives(&$module, &$params)
+    public static function getAlternatives(&$module)
     {
         // Load Context
         $context = \Context::getContext();
@@ -132,7 +132,7 @@ class CheckoutcomPaymentOption extends PaymentOption
      *
      * @return PaymentOption the card
      */
-    public static function getGoogle(&$module, &$params)
+    public static function getGoogle(&$module)
     {
         if (!Config::get('CHECKOUTCOM_GOOGLE_ENABLED')) {
             return;

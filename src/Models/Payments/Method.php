@@ -53,7 +53,7 @@ abstract class Method
      *
      * @return Payment
      */
-    public static function makePayment(MethodSource $source, array $params = array())
+    public static function makePayment(MethodSource $source, array $params = array(), bool $capture = true)
     {
         $context = \Context::getContext();
         $total = $context->cart->getOrderTotal();
@@ -207,7 +207,10 @@ abstract class Method
     public static function addCaptureOn(Payment $payment)
     {
         $time = (float) \Configuration::get('CHECKOUTCOM_CAPTURE_TIME');
-        if ($time && \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION')) {
+        $event = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_EVENT');
+        $action = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
+        if ($time && $event && !$action) {
+            $payment->capture = true;
             $payment->capture_on = Utilities::formatDate(time() + ($time >= 0.0027 ? $time : 0.0027) * 3600);
         }
     }
