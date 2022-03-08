@@ -38,7 +38,8 @@ class Card extends Method
             $source = new TokenSource($params['token']);
         }
 
-        $payment = static::makePayment($source);
+        $capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
+        $payment = static::makePayment($source, [], $capture);
         static::addMada($payment, Utilities::getValueFromArray($params, 'bin', 0));
         return static::request($payment);
     }
