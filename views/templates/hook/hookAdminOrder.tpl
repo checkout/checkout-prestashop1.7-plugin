@@ -85,7 +85,7 @@
 													method="post"
 													enctype="multipart/form-data">
 											<div class="form-group row">
-												<div class="col-lg-2 col-lg-offset-5">
+												<div class="col-lg-2 col-lg-offset-5 offset-lg-5">
 													<div class="input-group money-type">
 														<input type="text"
 																	 id=""

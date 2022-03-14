@@ -117,6 +117,15 @@ class CheckoutCom extends PaymentModule
      */
     public function getContent()
     {
+        $this->registerHook('paymentOptions') &&
+            $this->registerHook('header') &&
+            $this->registerHook('displayCustomerAccount') &&
+            $this->registerHook('actionOrderSlipAdd') &&
+            $this->registerHook('displayAdminOrderContentOrder') && 
+            $this->registerHook('displayBackOfficeHeader') &&
+            $this->registerHook('displayAdminOrderMainBottom') &&
+            $this->registerHook('displayAdminOrder') &&
+            $this->registerHook('actionOrderStatusPostUpdate');
         /*
          * If values have been submitted in the form, process.
          */
@@ -508,7 +517,7 @@ class CheckoutCom extends PaymentModule
      * @param array $params 
      * @return string 
      */ 
-    public function displayAdminOrder() 
+    public function displayAdminOrder($params) 
     {
         $order_id = Tools::getValue('id_order');
         $payment = new OrderPayment();
@@ -518,6 +527,9 @@ class CheckoutCom extends PaymentModule
         $transaction['transaction_id'] = "CART_" . $order->id_cart;
         $transaction['amount'] = number_format( $order->total_paid_tax_incl, 2);
         $transaction['payment_method'] = $order->payment;
+
+        $time = (float) \Configuration::get('CHECKOUTCOM_CAPTURE_TIME');
+        $event = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_EVENT');
         $action = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
      
         if(strpos($order->payment, '-card') !== false ){
@@ -533,7 +545,7 @@ class CheckoutCom extends PaymentModule
      
                 $transaction['isCapturable'] = false;
                 $transaction['isRefundable'] = false;
-            }elseif( !$action ){
+            }elseif( !$action && !$event ){
                 $transaction['amountCaptured'] = 0;
                 $transaction['capturableAmount'] = (float) $transaction['amount'];
      
@@ -617,7 +629,7 @@ class CheckoutCom extends PaymentModule
 
             $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
             try {
-                $checkout->payments()->capture(new Capture($payment[0]->transaction_id, $amountToCapture*100));
+                $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, $amountToCapture*100));
             } catch (Exception $ex) {
                 //
             }

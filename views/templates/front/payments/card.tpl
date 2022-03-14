@@ -120,7 +120,7 @@
         <div class="save-card-check">
             <label for="save-card-checkbox" >
                 <input type="checkbox" name="save-card-checkbox" id="save-card-checkbox" />
-                {l s='Save card for future payment' mod='checkoutcom'}
+                {l s='Save card for future payment.' mod='checkoutcom'}
             </label>
         </div>
 

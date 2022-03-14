@@ -53,7 +53,7 @@ abstract class Method
      *
      * @return Payment
      */
-    public static function makePayment(MethodSource $source, array $params = array())
+    public static function makePayment(MethodSource $source, array $params = array(), bool $capture = true)
     {
         $context = \Context::getContext();
         $total = $context->cart->getOrderTotal();
