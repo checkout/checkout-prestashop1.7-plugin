@@ -94,7 +94,7 @@
 									<p class="help-block">
 										<b>Delay: </b>Automatically triggered after a delay<br>
 										<b>Order status: </b>Automatically triggered on order status change<br>
-										Please note that order status option allows to trigger remittance also manually by using the action button in order detail.
+										Please note that order status option allows to trigger remittance also manually by using the action button in order details.
 									</p>
 								</div>
 							</div>
