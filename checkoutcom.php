@@ -125,15 +125,6 @@ class CheckoutCom extends PaymentModule
      */
     public function getContent()
     {
-        $this->registerHook('paymentOptions') &&
-            $this->registerHook('header') &&
-            $this->registerHook('displayCustomerAccount') &&
-            $this->registerHook('actionOrderSlipAdd') &&
-            $this->registerHook('displayAdminOrderContentOrder') && 
-            $this->registerHook('displayBackOfficeHeader') &&
-            $this->registerHook('displayAdminOrderMainBottom') &&
-            $this->registerHook('displayAdminOrder') &&
-            $this->registerHook('actionOrderStatusPostUpdate');
         /*
          * If values have been submitted in the form, process.
          */
