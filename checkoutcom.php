@@ -622,16 +622,16 @@ class CheckoutCom extends PaymentModule
         $amountToCapture = (float) number_format( $order->total_paid_tax_incl, 2);
 
         if (!$event && !$action && in_array($new_status_id, $trigger_statuses)) {
-            $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
-            $sql .= "VALUES ('CART_" . $order->id_cart . "', ".$amountToCapture.", 0)";
-            Db::getInstance()->execute($sql);
-
             $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
             try {
                 $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, $amountToCapture*100));
             } catch (Exception $ex) {
-                //
+                return;
             }
+
+            $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
+            $sql .= "VALUES ('CART_" . $order->id_cart . "', ".$amountToCapture.", 0)";
+            Db::getInstance()->execute($sql);
         }
     }
 }
