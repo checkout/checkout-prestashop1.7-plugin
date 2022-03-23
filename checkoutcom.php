@@ -82,9 +82,11 @@ class CheckoutCom extends PaymentModule
             `id_checkoutcom_adminorder` int(11) NOT NULL,
             `transaction_id` varchar(255) NOT NULL,
             `amount_captured` float(20,2) NOT NULL,
-            `amount_refunded` float(20,2) NOT NULL
+            `amount_refunded` float(20,2) NOT NULL,
+            PRIMARY KEY (id_checkoutcom_adminorder)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
-        Db::getInstance()->execute($sql);
+        Db::getInstance()
+                  ->execute($sql);
         
         Config::install();
         \PrestaShopLogger::addLog("The module has been installed.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
