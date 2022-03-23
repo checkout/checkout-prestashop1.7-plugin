@@ -33,6 +33,8 @@ class CheckoutcomPaymentHandler
 
     public static function execute(array $params)
     {
+        $module = \Module::getInstanceByName('checkoutcom');
+        $module->logger->info('Channel Payment Handler -- Execute Payment');
         // Basic
         foreach (static::COMMOM_METHODS as $method) {
             if ($params['source'] === $method['key']) {

@@ -37,6 +37,9 @@ use Checkout\Models\Payments\Capture;
 
 class CheckoutCom extends PaymentModule
 {
+    /** @var \Monolog\Logger $logger */
+    public $logger;
+    
     /**
      * Define module.
      */
@@ -54,7 +57,7 @@ class CheckoutCom extends PaymentModule
         $this->bootstrap = true;
 
         parent::__construct();
-
+        Debug::initLogger($this, 'checkoutcom', true);
         $this->displayName = $this->l('Checkout.com');
         $this->description = $this->l('Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.');
 
