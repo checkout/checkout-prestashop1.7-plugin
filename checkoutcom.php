@@ -563,19 +563,22 @@ class CheckoutCom extends PaymentModule
                     $amountToCapture = number_format( Tools::getValue('amountToCapture'), 2);
 
                     if ( $amountToCapture <= $transaction['capturableAmount']) {
-                        $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
-                        $sql .= "VALUES ('".$transaction['transaction_id']."', ".$amountToCapture.", 0)";
-
                         $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
                         try {
-                            $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, $amountToCapture*100));
+                            $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, (int) $amountToCapture*100));
                         } catch (Exception $ex) {
+                          
                             $details->http_code = $ex->getCode();
                             $details->message = $ex->getMessage();
                             $details->errors = $ex->getErrors();
+                            $caught = true;
                         }
 
-                        if (Db::getInstance()->execute($sql) && $details->http_code === 202) {
+                        if ($details->http_code === 202) {
+                            $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
+                            $sql .= "VALUES ('".$transaction['transaction_id']."', ".$amountToCapture.", 0)";
+                            Db::getInstance()->execute($sql);
+
                             $transaction['amountCaptured'] = $amountToCapture;
                             $transaction['capturableAmount'] = $transaction['capturableAmount'] - $amountToCapture;
                             $transaction['isCapturable'] = false;
