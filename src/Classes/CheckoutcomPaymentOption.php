@@ -49,6 +49,7 @@ class CheckoutcomPaymentOption extends PaymentOption
             'billingId' => $context->cart->id_address_invoice,
             'is_guest' =>$context->customer->is_guest,
             'img_dir' => _MODULE_DIR_.'checkoutcom/views/img/',
+            'js_dir' => _MODULE_DIR_.'checkoutcom/views/js/',
             'isSingleIframe' => Config::get('CHECKOUTCOM_CARD_IFRAME_STYLE') === 'singleIframe' ? true : false
         ]);
 
