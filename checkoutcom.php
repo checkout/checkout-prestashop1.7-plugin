@@ -37,6 +37,9 @@ use Checkout\Models\Payments\Capture;
 
 class CheckoutCom extends PaymentModule
 {
+    /** @var \Monolog\Logger $logger */
+    public $logger;
+    
     /**
      * Define module.
      */
@@ -54,7 +57,7 @@ class CheckoutCom extends PaymentModule
         $this->bootstrap = true;
 
         parent::__construct();
-
+        Debug::initLogger($this, 'checkoutcom', true);
         $this->displayName = $this->l('Checkout.com');
         $this->description = $this->l('Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.');
 
@@ -74,7 +77,16 @@ class CheckoutCom extends PaymentModule
             $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module.');
             return false;
         }
-
+        
+        $sql = "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."checkoutcom_adminorder` (
+            `id_checkoutcom_adminorder` int(11) NOT NULL,
+            `transaction_id` varchar(255) NOT NULL,
+            `amount_captured` float(20,2) NOT NULL,
+            `amount_refunded` float(20,2) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+        Db::getInstance()
+                  ->execute($sql);
+        
         Config::install();
         \PrestaShopLogger::addLog("The module has been installed.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
 
@@ -117,15 +129,6 @@ class CheckoutCom extends PaymentModule
      */
     public function getContent()
     {
-        $this->registerHook('paymentOptions') &&
-            $this->registerHook('header') &&
-            $this->registerHook('displayCustomerAccount') &&
-            $this->registerHook('actionOrderSlipAdd') &&
-            $this->registerHook('displayAdminOrderContentOrder') && 
-            $this->registerHook('displayBackOfficeHeader') &&
-            $this->registerHook('displayAdminOrderMainBottom') &&
-            $this->registerHook('displayAdminOrder') &&
-            $this->registerHook('actionOrderStatusPostUpdate');
         /*
          * If values have been submitted in the form, process.
          */
