@@ -66,9 +66,10 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
     {
         $response = CheckoutcomPaymentHandler::execute(Tools::getAllValues());
         if ($response->isSuccessful()) {
-
+            $this->module->logger->info('Channel Placeorder -- payment process : response isSuccessful');
             // Flag Order
             if($response->isFlagged() && !Utilities::addMessageToOrder($this->trans('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.' , [], 'Modules.Checkoutcom.Placeorder.php'), $this->context->order)) {
+				$this->module->logger->error('Channel Placeorder -- Failed to add payment flag note to order');
                 \PrestaShopLogger::addLog('Failed to add payment flag note to order.', 2, 0, 'CheckoutcomPlaceorderModuleFrontController' , $this->context->order->id, true);
             }
 
@@ -93,7 +94,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                 $cart = new Cart((int) $this->context->cart->id);
                 $customer = new Customer((int) $cart->id_customer);
                 $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
-                
+                $this->module->logger->info(sprintf('Channel Placeorder -- Create order for cart %s ', $cart->id));
                 if ($this->module->validateOrder(
                                                     $cart->id,
                                                     _PS_OS_PAYMENT_,
@@ -108,6 +109,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                 ) {
                     $this->context->order = new Order($this->module->currentOrder); // Add order to context. Experimental.
                 } else {
+					$this->module->logger->error(sprintf('Channel Placeorder -- Failed to create order for cart %s', $cart->id));
                     \PrestaShopLogger::addLog("Failed to create order.", 2, 0, 'Cart' , $cart_id, true);
                     // Set error message
                     $this->context->controller->errors[] = $this->module->l('Payment method not supported. (0004)');
@@ -145,14 +147,17 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
      * @param      \Checkout\Models\Response  $response  The response
      */
     protected function handleFail($response) {
-
+		
+        $this->module->logger->error('Channel Placeorder -- HandleFail Payment for order not processed');
         \PrestaShopLogger::addLog('Payment for order not processed.', 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
 
         if ($response->status === 'Declined' && $response->response_summary) {
+			$this->module->logger->error(sprintf('Channel Placeorder -- HandleFail An error has occured while processing your payment. Payment Declined : %s', $response->response_summary));
             $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment. Payment Declined. %errorMessage%', ['%errorMessage%' => $response->response_summary], 'Modules.Checkoutcom.Placeorder.php');
         } else {
 
             // Set error message
+			$this->module->logger->error(sprintf('Channel Placeorder -- HandleFail response : %s', $response->message));
             $this->context->controller->errors[] = $this->trans($response->message);
           
             foreach ($response->errors as $error) {
