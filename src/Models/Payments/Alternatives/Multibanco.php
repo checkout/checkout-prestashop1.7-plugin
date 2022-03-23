@@ -13,10 +13,10 @@ class Multibanco extends Alternative
 	 *
 	 * @return Response
 	 */
-	public static function pay()
+	public static function pay(array $params)
 	{
-		$payment_country = Tools::getValue('payment_country');
-		$account_holder_name = Tools::getValue('account_holder_name');
+		$payment_country = $_POST['payment_country'];
+		$account_holder_name = $_POST['account_holder_name'];
 
 		$source = new MultibancoSource($payment_country, $account_holder_name);
 		$payment = static::makePayment($source);

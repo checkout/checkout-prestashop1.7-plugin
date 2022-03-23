@@ -29,7 +29,7 @@ class Ideal extends Alternative
      */
     public static function checkBic($bicInputByCustomer) {
 
-        $bic = Tools::strlen($bicInputByCustomer) == 11 ? Tools::substr($bicInputByCustomer, 0, -3) : $bicInputByCustomer;
+        $bic = strlen($bicInputByCustomer) == 11 ? substr($bicInputByCustomer, 0, -3) : $bicInputByCustomer;
 
         return $bic;
     }

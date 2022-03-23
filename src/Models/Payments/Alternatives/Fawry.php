@@ -13,7 +13,7 @@ class Fawry extends Alternative
      * @return \Checkout\Models\Response|mixed
      * @throws \Exception
      */
-    public static function pay()
+    public static function pay(array $params)
     {
 
         $context = \Context::getContext();

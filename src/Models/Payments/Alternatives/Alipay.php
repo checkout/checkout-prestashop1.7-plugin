@@ -14,7 +14,7 @@ class Alipay extends Alternative
      *
      * @return Response
      */
-    public static function pay()
+    public static function pay(array $params)
     {
         $source = new AlipaySource();
         $payment = static::makePayment($source);

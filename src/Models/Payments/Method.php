@@ -131,7 +131,7 @@ abstract class Method
      *
      * @return Metadata the metadata
      */
-    protected static function getMetadata()
+    protected static function getMetadata(\Context $context)
     {
         $metadata = new Metadata();
 
@@ -153,7 +153,7 @@ abstract class Method
      *
      * @return Customer the metadata
      */
-    protected static function getCustomer(\Context $context)
+    protected static function getCustomer(\Context $context, array $params)
     {
         $customer = new Customer();
         $customer->email = $context->customer->email;

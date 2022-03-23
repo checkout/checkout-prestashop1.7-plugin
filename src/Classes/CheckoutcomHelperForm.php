@@ -217,7 +217,7 @@ class CheckoutcomHelperForm extends \HelperForm
                 $arr[] = array(
                     static::FIELD_ID => $option[static::FIELD_ID],
                     static::FIELD_VALUE => $option[static::FIELD_VALUE],
-                    static::FIELD_LABEL => $option[static::FIELD_LABEL],
+                    static::FIELD_LABEL => $this->l($option[static::FIELD_LABEL]),
                 );
             }
 

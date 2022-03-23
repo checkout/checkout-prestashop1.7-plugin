@@ -83,7 +83,7 @@ class Config extends \Configuration
         if ($name) {
             $forms = Config::$configs[$name];
         } else {
-            foreach (Config::$configs as $configuration) {
+            foreach (Config::$configs as $key => $configuration) {
                 $forms = array_merge($forms, $configuration);
             }
         }
@@ -114,7 +114,7 @@ class Config extends \Configuration
         if ($name) {
             $forms = Config::$configs[$name];
         } else {
-            foreach (Config::$configs as $configuration) {
+            foreach (Config::$configs as $key => $configuration) {
                 $forms = array_merge($forms, $configuration);
             }
         }
@@ -145,7 +145,7 @@ class Config extends \Configuration
         if ($name) {
             $forms = Config::$configs[$name];
         } else {
-            foreach (Config::$configs as $configuration) {
+            foreach (Config::$configs as $key => $configuration) {
                 $forms = array_merge($forms, $configuration);
             }
         }

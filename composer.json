@@ -3,9 +3,6 @@
   "description": "Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.",
   "version": "2.2.0",
   "type": "prestashop-module",
-  "config": {
-    "prepend-autoloader": false
-  },
   "require": {
     "checkout/checkout-sdk-php": "^1.0"
   },
