@@ -132,6 +132,6 @@
         </div>
     {/if}
 </form>
-<script type="text/javascript" async src="https://cdn.checkout.com/js/framesv2.min.js"></script>
-<script type="text/javascript" async src="{$js_dir|escape:'htmlall':'UTF-8'}card.js"></script>
+<script type="text/javascript" src="{$js_dir|escape:'htmlall':'UTF-8'}card.js"></script>
+<script type="text/javascript" async src="https://cdn.checkout.com/js/framesv2.min.js" onload="CheckoutcomFramesPay(document.getElementById('checkoutcom-card-form'));"></script>
 <br>
