@@ -25,6 +25,7 @@ class CheckoutcomFailureModuleFrontController extends ModuleFrontController
         }
 
         // Set error message
+        $this->module->logger->error('Channel Failure -- An error has occured while processing your payment.');
         $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment.', [], 'Modules.Checkoutcom.Failure.php');
         // Redirect to cartcontext
         $this->redirectWithNotifications('index.php?controller=order');

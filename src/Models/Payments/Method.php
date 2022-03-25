@@ -55,6 +55,11 @@ abstract class Method
      */
     public static function makePayment(MethodSource $source, array $params = array(), bool $capture = true)
     {
+        $module = \Module::getInstanceByName('checkoutcom');
+        $module->logger->info(
+                'Channel Method -- make Payment for source :',
+                array('obj' => $source)
+        );
         $context = \Context::getContext();
         $total = $context->cart->getOrderTotal();
         $payment = new Payment($source, $context->currency->iso_code);
@@ -167,7 +172,11 @@ abstract class Method
     protected static function request(Payment $payment)
     {
         $response = new Response();
-
+        $module = \Module::getInstanceByName('checkoutcom');
+        $module->logger->info(
+                'Channel Method -- Request Payment :',
+                array('obj' => $payment)
+        );
         try {
             $response = CheckoutApiHandler::api()->payments()->request($payment);
         } catch (CheckoutHttpException $ex) {
@@ -176,6 +185,10 @@ abstract class Method
             $response->errors = $ex->getErrors();
             \PrestaShopLogger::addLog($ex->getMessage(), 3, $ex->getCode(), 'checkoutcom' , 0, true);
         }
+        $module->logger->info(
+                'Channel Method -- Response Payment :',
+                array('obj' => $response)
+        );
 
         return $response;
     }

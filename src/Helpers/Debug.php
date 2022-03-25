@@ -1,6 +1,9 @@
 <?php
 
 namespace CheckoutCom\PrestaShop\Helpers;
+use Monolog\Handler\RotatingFileHandler;
+use Monolog\Logger;
+
 
 class Debug
 {
@@ -27,4 +30,32 @@ class Debug
     {
         file_put_contents(static::PATH . static::FILENAME, print_r($data, 1) . "\n", FILE_APPEND);
     }
+    
+    /**
+     * @param checkoutcom $module
+     * @param string  $name
+     * @param bool    $logsEnabled
+     */
+    public static function initLogger($module, $name = 'module', $logsEnabled = true)
+    {
+        $module->logger = new Logger($name);
+        $level = $logsEnabled ? Logger::DEBUG : Logger::INFO;
+        $fileHandler = new RotatingFileHandler(
+            $module->getLocalPath().sprintf('logs/%s.log', self::hash(_PS_MODULE_DIR_)),
+            3,
+            $level
+        );
+        $fileHandler->setFilenameFormat('{date}_{filename}', 'Ym');
+        $module->logger->pushHandler($fileHandler);
+    }
+    
+    /**
+     * @param string $value
+     * @return string
+     */
+    public static function hash($value)
+    {
+        return md5(_COOKIE_IV_.$value);
+    }
+
 }
