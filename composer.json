@@ -14,5 +14,8 @@
       "CheckoutCom\\PrestaShop\\": "src/"
     }
   },
+  "config": {
+        "prepend-autoloader": false
+  },
   "license": "MIT"
 }
