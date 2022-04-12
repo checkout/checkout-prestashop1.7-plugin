@@ -311,6 +311,30 @@
 					"label":"Disabled"
 				}
 			]
+		},
+		{
+			"name":"CHECKOUTCOM_ALTERNATIVE_PAYPAL",
+			"key": "paypal",
+			"title": "Paypal",
+			"currencies": ["EUR"],
+			"label":"Enable Paypal",
+			"class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Paypal",
+			"description":"",
+			"type":"bswitch",
+			"default":0,
+			"required":0,
+			"options":[
+				{
+					"id":"id_option",
+					"value":1,
+					"label":"Enabled"
+				},
+				{
+					"id":"id_option",
+					"value":0,
+					"label":"Disabled"
+				}
+			]
 		}
 	]
 ]
