@@ -97,7 +97,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
                         $history = new OrderHistory();
                         $history->id_order = $order->id;
-                        $history->changeIdOrderState($status, $order->id);
+                        $history->changeIdOrderState($status, $order->id, true);
                         $history->addWithemail();
                     }
                 }
