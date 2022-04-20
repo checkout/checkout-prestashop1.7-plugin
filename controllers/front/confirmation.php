@@ -126,7 +126,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
             $history = new OrderHistory();
             $history->id_order = $order_id;
-            $history->changeIdOrderState($orderStatus, $order_id);
+            $history->changeIdOrderState($orderStatus, $order_id, true);
             $history->add();
 
             // Flag Order
