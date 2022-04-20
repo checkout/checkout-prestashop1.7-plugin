@@ -105,7 +105,7 @@ class CheckoutcomPaymentOption extends PaymentOption
                         continue;
                     }
                 // Allow only Multibanco for portugal invoice address 
-                }else if( $country_invoice === 'Portugal' ){
+                }else if( $country_invoice === 'Portugal' && $field['key'] !== 'paypal' ){
                     continue;
                 }
                 
