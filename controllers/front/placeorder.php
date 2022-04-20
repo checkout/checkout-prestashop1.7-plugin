@@ -153,7 +153,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 
         if ($response->status === 'Declined' && $response->response_summary) {
 			$this->module->logger->error(sprintf('Channel Placeorder -- HandleFail An error has occured while processing your payment. Payment Declined : %s', $response->response_summary));
-            $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment. Payment Declined. %errorMessage%', ['%errorMessage%' => $response->response_summary], 'Modules.Checkoutcom.Placeorder.php');
+            $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment. Payment Declined.', [], 'Modules.Checkoutcom.Placeorder.php');
         } else {
 
             // Set error message
