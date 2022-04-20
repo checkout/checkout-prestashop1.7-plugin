@@ -31,7 +31,7 @@ use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomHelperForm;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
-use OrderState;
+//use OrderState; 
 use Checkout\CheckoutApi;
 use Checkout\Models\Payments\Capture;
 
