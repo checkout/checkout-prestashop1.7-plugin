@@ -175,6 +175,7 @@ class CheckoutCom extends PaymentModule
 
         $this->context->smarty->assign([
             'fields_value' => Config::values(),
+            'languages' => $this->context->controller->getLanguages(),
             'order_states' => OrderState::getOrderStates($this->context->language->id),
             'trigger_statuses' => json_decode(Configuration::get('CHECKOUTCOM_TRIGGER_STATUS')),
             'webhook_url' => _PS_BASE_URL_SSL_.'/index.php?fc=module&module=checkoutcom&controller=webhook',
@@ -194,9 +195,14 @@ class CheckoutCom extends PaymentModule
             }
 
             if ($value !== false) {
-                Configuration::updateValue($key, $value);
+                if (is_array($value)) {
+                    Configuration::updateValue($key, json_encode($value));
+                }else{
+                    Configuration::updateValue($key, $value);
+                }
             }
         }
+        $this->logger->info('Module configurations have been updated');
         \PrestaShopLogger::addLog("Module configurations have been updated.", 1, 0, 'checkoutcom' , 0, true, $this->context->employee->id);
 
         if ( Tools::getValue('trigger_statuses') === "no_status" ) { 
