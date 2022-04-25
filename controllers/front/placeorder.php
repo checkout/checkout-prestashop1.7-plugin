@@ -133,6 +133,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             $history->id_order = $this->context->order->id;
             $history->changeIdOrderState(\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'), $this->context->order->id, true);
             $history->add();
+            $this->module->logger->info('Channel Placeorder -- New order status : ' . $this->context->order->id);
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $this->context->cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
         } else {
