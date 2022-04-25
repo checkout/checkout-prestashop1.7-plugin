@@ -112,7 +112,6 @@
                 </div>
             </div>
         </div>
-        </div>
     {/if}
 
     {if $save_card_option == '1' and $is_guest == 0 }

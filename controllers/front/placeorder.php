@@ -131,8 +131,9 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 
             $history = new OrderHistory();
             $history->id_order = $this->context->order->id;
-            $history->changeIdOrderState(\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'), $this->context->order->id);
+            $history->changeIdOrderState(\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'), $this->context->order->id, true);
             $history->add();
+            $this->module->logger->info('Channel Placeorder -- New order status : ' . $this->context->order->id);
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $this->context->cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
         } else {
@@ -153,7 +154,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 
         if ($response->status === 'Declined' && $response->response_summary) {
 			$this->module->logger->error(sprintf('Channel Placeorder -- HandleFail An error has occured while processing your payment. Payment Declined : %s', $response->response_summary));
-            $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment. Payment Declined. %errorMessage%', ['%errorMessage%' => $response->response_summary], 'Modules.Checkoutcom.Placeorder.php');
+            $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment. Payment Declined.', [], 'Modules.Checkoutcom.Placeorder.php');
         } else {
 
             // Set error message
