@@ -6,7 +6,7 @@
          "description":"",
          "type":"text",
          "icon":"",
-         "default":"Pay by Google Pay with Checkout.com",
+         "default":"{'first':'','default':Pay by Google Pay with Checkout.com}",
          "required":1
       },
       {
