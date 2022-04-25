@@ -109,12 +109,14 @@ class CheckoutcomPaymentOption extends PaymentOption
                     continue;
                 }
                 
-                // iDeal : get iDeal banks
-                $bic = '';
-                $source = new IdealSource($bic, 'iDEAL payment');
-                $banks = Method::getBanks($source);
-                $issuers = $banks->countries[0]['issuers'];
-                $context->smarty->assign('idealBanks', $issuers);
+                if ( $field['key'] === 'ideal' ) {
+                    // iDeal : get iDeal banks
+                    $bic = '';
+                    $source = new IdealSource($bic, 'iDEAL payment');
+                    $banks = Method::getBanks($source);
+                    $issuers = $banks->countries[0]['issuers'];
+                    $context->smarty->assign('idealBanks', $issuers);
+                }
 
                 $option = new PaymentOption();
                 $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/alternatives/' . $field['key'] . '.tpl'))
