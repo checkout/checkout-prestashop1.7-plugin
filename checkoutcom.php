@@ -91,6 +91,8 @@ class CheckoutCom extends PaymentModule
         Config::install();
         \PrestaShopLogger::addLog("The module has been installed.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
 
+        Tools::clearSmartyCache();
+
         return parent::install() &&
             $this->addOrderState($this->l('Payment authorized, awaiting capture')) &&
             $this->registerHook('paymentOptions') &&
