@@ -18,7 +18,7 @@
 * needs please refer to http://www.prestashop.com for more information.
 *
 *  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2019 PrestaShop SA
+*  @copyright 2007-2022 PrestaShop SA
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
@@ -35,7 +35,7 @@
 <!-- Tab panes -->
 <div class="tab-content">
 	<div class="tab-pane active" id="template_1">
-		{$config_main}
+		{$config_main|escape:'htmlall':'UTF-8'}
 		<div class="webhook-url-container">
 			<div class="form-group">
 				<label class="control-label col-lg-3">
@@ -43,7 +43,7 @@
 				</label>
 				<div class="col-lg-9">
 					<span class="webhook-url">
-						{$webhook_url}
+						{$webhook_url|escape:'htmlall':'UTF-8'}
 					</span>
 				</div>
 			</div>
@@ -104,7 +104,7 @@
 										Delay (hours before remittance to bank)
 									</label>
 									<div class="col-lg-2">
-										<input type="number" class="form-control" name="CHECKOUTCOM_CAPTURE_TIME" id="CHECKOUTCOM_CAPTURE_TIME" value="{$fields_value.CHECKOUTCOM_CAPTURE_TIME}"/>
+										<input type="number" class="form-control" name="CHECKOUTCOM_CAPTURE_TIME" id="CHECKOUTCOM_CAPTURE_TIME" value="{$fields_value.CHECKOUTCOM_CAPTURE_TIME|escape:'htmlall':'UTF-8'}"/>
 									</div>
 								</div>
 							</div>
@@ -117,7 +117,7 @@
 										<input type="hidden" name="trigger_statuses" value="no_status">
 										<select name="trigger_statuses[]" class="trigger-statuses" id="CHECKOUTCOM_TRIGGER_STATUS" multiple="multiple">
 											{foreach from=$order_states item=order_state}
-												<option value="{$order_state.id_order_state}" {if $order_state.id_order_state|in_array:$trigger_statuses}selected{/if}>{$order_state.name}</option>
+												<option value="{$order_state.id_order_state|escape:'htmlall':'UTF-8'}" {if $order_state.id_order_state|in_array:$trigger_statuses}selected{/if}>{$order_state.name|escape:'htmlall':'UTF-8'}</option>
 											{/foreach}
 										</select>
 									</div>
