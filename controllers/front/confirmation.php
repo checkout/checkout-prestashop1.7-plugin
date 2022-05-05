@@ -126,8 +126,9 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
             $history = new OrderHistory();
             $history->id_order = $order_id;
-            $history->changeIdOrderState($orderStatus, $order_id);
+            $history->changeIdOrderState($orderStatus, $order_id, true);
             $history->add();
+            $this->module->logger->info('Channel Confirmation -- New order status : ' . $order_id);
 
             // Flag Order
             if($flagged && $threeDS && !Utilities::addMessageToOrder($this->trans('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.', [], 'Modules.Checkoutcom.Confirmation.php'), $order)) {

@@ -31,7 +31,7 @@ use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomHelperForm;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
-use OrderState;
+//use OrderState; 
 use Checkout\CheckoutApi;
 use Checkout\Models\Payments\Capture;
 
@@ -47,7 +47,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.2.1';
+        $this->version = '2.2.2';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -90,6 +90,8 @@ class CheckoutCom extends PaymentModule
         
         Config::install();
         \PrestaShopLogger::addLog("The module has been installed.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
+
+        Tools::clearSmartyCache();
 
         return parent::install() &&
             $this->addOrderState($this->l('Payment authorized, awaiting capture')) &&
@@ -175,6 +177,7 @@ class CheckoutCom extends PaymentModule
 
         $this->context->smarty->assign([
             'fields_value' => Config::values(),
+            'languages' => $this->context->controller->getLanguages(),
             'order_states' => OrderState::getOrderStates($this->context->language->id),
             'trigger_statuses' => json_decode(Configuration::get('CHECKOUTCOM_TRIGGER_STATUS')),
             'webhook_url' => _PS_BASE_URL_SSL_.'/index.php?fc=module&module=checkoutcom&controller=webhook',
@@ -194,9 +197,14 @@ class CheckoutCom extends PaymentModule
             }
 
             if ($value !== false) {
-                Configuration::updateValue($key, $value);
+                if (is_array($value)) {
+                    Configuration::updateValue($key, json_encode($value));
+                }else{
+                    Configuration::updateValue($key, $value);
+                }
             }
         }
+        $this->logger->info('Module configurations have been updated');
         \PrestaShopLogger::addLog("Module configurations have been updated.", 1, 0, 'checkoutcom' , 0, true, $this->context->employee->id);
 
         if ( Tools::getValue('trigger_statuses') === "no_status" ) { 

@@ -36,6 +36,18 @@ $(document).ready(function () {
 		checkDelayedPayment();
 	});
 
+	$(".multilang-field").on('change', function(){
+		var langIso = $(this).parent().parent().find('select').val();
+		$(".multilang-hidden[data-lang="+langIso+"]").val($(this).val());
+	});
+
+	$(".multilang-select").on('change', function(){
+		var langIso = $(this).parent().find('select').val();
+		var optionSelected = $("option:selected", this);
+		var hiddenValue = $(this).parent().find(".multilang-hidden[data-lang="+langIso+"]").val();
+		$(this).parent().parent().find(".multilang-field").val(hiddenValue);
+	});
+
 	function checkCardEnabled(){
 		if ( $("#CHECKOUTCOM_CARD_ENABLED_on").is(':checked') ) {
 			$(".card-enabled-container").slideDown();

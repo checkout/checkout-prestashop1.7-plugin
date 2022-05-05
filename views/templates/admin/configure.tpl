@@ -132,8 +132,21 @@
 							<label class="control-label col-lg-3 required">
 								Payment Option Title
 							</label>
+							{assign var=lang_val value=$fields_value.CHECKOUTCOM_CARD_TITLE|json_decode:1}
 							<div class="col-lg-2">
-								<input type="text" name="CHECKOUTCOM_CARD_TITLE" id="CHECKOUTCOM_CARD_TITLE" value="{$fields_value.CHECKOUTCOM_CARD_TITLE|escape:'htmlall':'UTF-8'}"/>
+								<input class="multilang-field" type="text" name="CHECKOUTCOM_CARD_TITLE" id="CHECKOUTCOM_CARD_TITLE" value="{$lang_val|reset}"/>
+							</div>
+							<div class="col-lg-1">
+								<select class="multilang-select">
+									{foreach from=$languages item=language}
+										<option value="{$language.iso_code}">{$language.iso_code}</option>
+									{/foreach}
+								</select>
+								{foreach from=$languages item=language}
+									{assign var="iso_code" value=$language.iso_code}
+									<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_CARD_TITLE[{$iso_code}]" data-lang="{$iso_code}" value="{$lang_val.$iso_code}">
+								{/foreach}
+								<input type="hidden" name="CHECKOUTCOM_CARD_TITLE[default]" value="Pay by Card with Checkout.com">
 							</div>
 						</div>
 						<div class="form-group">
@@ -232,7 +245,66 @@
 			</div>
 		</form>
 	</div>
-	<div class="tab-pane" id="template_3">{$config_alternatives|escape:'htmlall':'UTF-8'}</div>
-	<div class="tab-pane" id="template_4">{$config_google|escape:'htmlall':'UTF-8'}</div>
-	<div class="tab-pane" id="template_5">{$config_recurring|escape:'htmlall':'UTF-8'}</div>
+	<div class="tab-pane" id="template_3">{$config_alternatives}</div>
+	<div class="tab-pane" id="template_4">
+		<form id="module_form_2" class="defaultForm form-horizontal" action="" method="post" enctype="multipart/form-data" novalidate>
+			<input type="hidden" name="submitCheckoutComModule" value="1" />
+			<div class="panel" id="fieldset_0_2">
+				<div class="panel-heading"></div>
+				<div class="form-wrapper">
+					<div class="form-group">
+						<label class="control-label col-lg-3 required">
+							Payment Option Title
+						</label>
+						{assign var=lang_val value=$fields_value.CHECKOUTCOM_GOOGLE_TITLE|json_decode:1}
+						<div class="col-lg-2">
+							<input class="multilang-field" type="text" name="CHECKOUTCOM_GOOGLE_TITLE" id="CHECKOUTCOM_GOOGLE_TITLE" value="{$lang_val|reset}"/>
+						</div>
+						<div class="col-lg-1">
+							<select class="multilang-select">
+								{foreach from=$languages item=language}
+									<option value="{$language.iso_code}">{$language.iso_code}</option>
+								{/foreach}
+							</select>
+							{foreach from=$languages item=language}
+								{assign var="iso_code" value=$language.iso_code}
+								<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_GOOGLE_TITLE[{$iso_code}]" data-lang="{$iso_code}" value="{$lang_val.$iso_code}">
+							{/foreach}
+							<input type="hidden" name="CHECKOUTCOM_GOOGLE_TITLE[default]" value="Pay by Google Pay with Checkout.com">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-lg-3">
+							Enable Google Pay
+						</label>
+						<div class="col-lg-9">
+							<span class="switch prestashop-switch fixed-width-lg">
+								<input type="radio" name="CHECKOUTCOM_GOOGLE_ENABLED" id="CHECKOUTCOM_GOOGLE_ENABLED_on" value="1" {if $fields_value.CHECKOUTCOM_GOOGLE_ENABLED=="1"}checked="checked"{/if}/>
+								<label  for="CHECKOUTCOM_GOOGLE_ENABLED_on">Oui</label>
+								<input type="radio" name="CHECKOUTCOM_GOOGLE_ENABLED" id="CHECKOUTCOM_GOOGLE_ENABLED_off" value="0" {if $fields_value.CHECKOUTCOM_GOOGLE_ENABLED=="0"}checked="checked"{/if}/>
+								<label  for="CHECKOUTCOM_GOOGLE_ENABLED_off">Non</label>
+								<a class="slide-button btn"></a>
+							</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-lg-3 required">
+							Merchant ID
+						</label>
+						<div class="col-lg-2">
+							<input class="multilang-field" type="text" name="CHECKOUTCOM_GOOGLE_ID" id="CHECKOUTCOM_GOOGLE_ID" value="{$fields_value.CHECKOUTCOM_GOOGLE_ID}"/>
+							<p class="help-block">
+								Provide your Google Merchant ID.
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="panel-footer">
+					<button type="submit" value="1" id="module_form_submit_btn_2" name="submitCheckoutComModule" class="btn btn-default pull-right">
+						<i class="process-icon-save"></i> Enregistrer
+					</button>
+				</div>
+			</div>
+		</form>
+	</div>
 </div>

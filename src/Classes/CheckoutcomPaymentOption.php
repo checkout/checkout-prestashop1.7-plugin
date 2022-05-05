@@ -53,11 +53,16 @@ class CheckoutcomPaymentOption extends PaymentOption
             'isSingleIframe' => Config::get('CHECKOUTCOM_CARD_IFRAME_STYLE') === 'singleIframe' ? true : false
         ]);
 
+        $checkoutcom_card_title = json_decode(Config::get('CHECKOUTCOM_CARD_TITLE'), true)[$context->language->iso_code];
+        if (!$checkoutcom_card_title) {
+            $checkoutcom_card_title = json_decode(Config::get('CHECKOUTCOM_CARD_TITLE'), true)['default'];
+        }
+
         $option = new PaymentOption();
         $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/card.tpl'))
                 ->setModuleName($module->name . '-card-form')
                 ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/supported.svg'))
-                ->setCallToActionText($module->l(Config::get('CHECKOUTCOM_CARD_TITLE')));
+                ->setCallToActionText($checkoutcom_card_title);
 
         return $option;
     }
@@ -80,7 +85,6 @@ class CheckoutcomPaymentOption extends PaymentOption
 
         $address_invoice = new \Address($context->cart->id_address_invoice);
         $country_invoice = $address_invoice->country;
-
         foreach ($methods as $field) {
             if (Config::get($field['name']) &&
                 in_array($context->currency->iso_code,
@@ -101,16 +105,18 @@ class CheckoutcomPaymentOption extends PaymentOption
                         continue;
                     }
                 // Allow only Multibanco for portugal invoice address 
-                }else if( $country_invoice === 'Portugal' ){
+                }else if( $country_invoice === 'Portugal' && $field['key'] !== 'paypal' ){
                     continue;
                 }
                 
-                // iDeal : get iDeal banks
-                $bic = '';
-                $source = new IdealSource($bic, 'iDEAL payment');
-                $banks = Method::getBanks($source);
-                $issuers = $banks->countries[0]['issuers'];
-                $context->smarty->assign('idealBanks', $issuers);
+                if ( $field['key'] === 'ideal' ) {
+                    // iDeal : get iDeal banks
+                    $bic = '';
+                    $source = new IdealSource($bic, 'iDEAL payment');
+                    $banks = Method::getBanks($source);
+                    $issuers = $banks->countries[0]['issuers'];
+                    $context->smarty->assign('idealBanks', $issuers);
+                }
 
                 $option = new PaymentOption();
                 $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/alternatives/' . $field['key'] . '.tpl'))
@@ -150,11 +156,16 @@ class CheckoutcomPaymentOption extends PaymentOption
             'invoiceid' => $context->cart->id_address_invoice,
         ]);
 
+        $checkoutcom_google_title = json_decode(Config::get('CHECKOUTCOM_GOOGLE_TITLE'), true)[$context->language->iso_code];
+        if (!$checkoutcom_google_title) {
+            $checkoutcom_google_title = json_decode(Config::get('CHECKOUTCOM_GOOGLE_TITLE'), true)['default'];
+        }
+
         $option = new PaymentOption();
         $option->setForm($context->smarty->fetch($module->getLocalPath() . 'views/templates/front/payments/google.tpl'))
                 ->setModuleName($module->name . '-google-form')
                 ->setLogo(\Media::getMediaPath(_PS_MODULE_DIR_ . $module->name . '/views/img/googlepay.svg'))
-                ->setCallToActionText($module->l(Config::get('CHECKOUTCOM_GOOGLE_TITLE')));
+                ->setCallToActionText($checkoutcom_google_title);
 
         return $option;
     }
