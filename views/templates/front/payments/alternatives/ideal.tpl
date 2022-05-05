@@ -1,4 +1,4 @@
-{*
+|escape:'htmlall':'UTF-8'{*
  * Checkout.com
  * Authorised and regulated as an electronic money institution
  * by the UK Financial Conduct Authority (FCA) under number 900816.
@@ -13,12 +13,12 @@
  * @link      https://docs.checkout.com/
  *}
 
-<form name="{$module}" id="{$module}-{$key}-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" method="POST">
-    <input id="{$module}-{$key}-source" type="hidden" name="source" value="{$key}" required>
+<form name="{$module|escape:'htmlall':'UTF-8'}" id="{$module|escape:'htmlall':'UTF-8'}-{$key|escape:'htmlall':'UTF-8'}-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'htmlall':'UTF-8'}" method="POST">
+    <input id="{$module|escape:'htmlall':'UTF-8'}-{$key|escape:'htmlall':'UTF-8'}-source" type="hidden" name="source" value="{$key|escape:'htmlall':'UTF-8'}" required>
     <ul class="form-list" >
         <li>
             <label for="name" class="required">{l s='Select iDeal Bank' mod='checkoutcom'}</label>
-            <select class="form-control cvv required-entry validate-cc-cvn" id="{$module}-{$key}-bic" name="bic">
+            <select class="form-control cvv required-entry validate-cc-cvn" id="{$module|escape:'htmlall':'UTF-8'}-{$key|escape:'htmlall':'UTF-8'}-bic" name="bic">
                 {foreach $idealBanks as $bank}
                     <option value="{$bank['bic']|escape:'html':'UTF-8'}">
                             {$bank['name']|escape:'html':'UTF-8'}

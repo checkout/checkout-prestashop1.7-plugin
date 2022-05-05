@@ -24,22 +24,22 @@
     <div class="sepa-mandate-content">
         <div class="sepa-creditor">
             <h2 style="margin: unset;">{l s='Creditor' mod='checkoutcom'}</h2>
-            <h3 style="margin: unset; font-weight: bold; ">{$shop_name}</h3>
-            <p style="margin: unset;" class="ng-star-inserted">{$shop_address1}</p>
-            <p style="margin: unset;">{$shop_address2}</p>
-            <p style="margin: unset;">{$shop_postcode}</p>
-            <p style="margin: unset;">{$shop_country}</p>
+            <h3 style="margin: unset; font-weight: bold; ">{$shop_name|escape:'htmlall':'UTF-8'}</h3>
+            <p style="margin: unset;" class="ng-star-inserted">{$shop_address1|escape:'htmlall':'UTF-8'}</p>
+            <p style="margin: unset;">{$shop_address2|escape:'htmlall':'UTF-8'}</p>
+            <p style="margin: unset;">{$shop_postcode|escape:'htmlall':'UTF-8'}</p>
+            <p style="margin: unset;">{$shop_country|escape:'htmlall':'UTF-8'}</p>
             <br>
-            <p style="margin: unset;" class="monospace">{l s='Creditor ID: ' mod='checkoutcom'}{$mandate_reference}</p>
+            <p style="margin: unset;" class="monospace">{l s='Creditor ID: ' mod='checkoutcom'}{$mandate_reference|escape:'htmlall':'UTF-8'}</p>
         </div>
         <div class="sepa-debitor">
             <h2 style="margin: unset;">{l s='Debitor' mod='checkoutcom'}</h2>
-            <h3 style="margin: unset; font-weight: bold; ">{$customer_firstname} {$customer_lastname}</h3>
+            <h3 style="margin: unset; font-weight: bold; ">{$customer_firstname|escape:'htmlall':'UTF-8'} {$customer_lastname|escape:'htmlall':'UTF-8'}</h3>
             <div class="address" style="margin: unset;">
-                <p style="margin: unset;" class="ng-star-inserted">{$customer_address1}</p>
-                <p style="margin: unset;">{$customer_address2}</p>
-                <p style="margin: unset;">{$customer_postcode} {$customer_city}</p>
-                <p style="margin: unset;">{$customer_country}</p>
+                <p style="margin: unset;" class="ng-star-inserted">{$customer_address1|escape:'htmlall':'UTF-8'}</p>
+                <p style="margin: unset;">{$customer_address2|escape:'htmlall':'UTF-8'}</p>
+                <p style="margin: unset;">{$customer_postcode|escape:'htmlall':'UTF-8'} {$customer_city|escape:'htmlall':'UTF-8'}</p>
+                <p style="margin: unset;">{$customer_country|escape:'htmlall':'UTF-8'}</p>
             </div>
             <br>
             <p class="monospace" style="margin: unset;" id="sepa-dd-bic"></p>
@@ -55,8 +55,8 @@
                 <div class="sepa-checkbox-inner-container">
                     <input style="margin-right: 10px;" class="sepa-checkbox-input" type="checkbox" id="checkoutcom-sepa-accept-terms" name="accepted" required>
                     <h4 style="font-size: 12px;display: inline;">{l s='I accept the mandate for a single payment' mod='checkoutcom'}</h4>
-                    <input type="hidden" name="id" value="{$mandate_src}" required>
-                    <input type="hidden" name="customer_id" value="{$customer_id}" required>
+                    <input type="hidden" name="id" value="{$mandate_src|escape:'htmlall':'UTF-8'}" required>
+                    <input type="hidden" name="customer_id" value="{$customer_id|escape:'htmlall':'UTF-8'}" required>
                 </div>
             </label>
         </div>

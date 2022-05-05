@@ -13,15 +13,15 @@
  * @link      https://docs.checkout.com/
  *}
 
-<form name="{$module}" id="{$module}-{$key}-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" method="POST">
-	<input id="{$module}-{$key}-source" type="hidden" name="source" value="{$key}" required>
+<form name="{$module|escape:'htmlall':'UTF-8'}" id="{$module|escape:'htmlall':'UTF-8'}-{$key|escape:'htmlall':'UTF-8'}-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'htmlall':'UTF-8'}" method="POST">
+	<input id="{$module|escape:'htmlall':'UTF-8'}-{$key|escape:'htmlall':'UTF-8'}-source" type="hidden" name="source" value="{$key|escape:'htmlall':'UTF-8'}" required>
 	{assign var="id_address_invoice" value=$cart.id_address_invoice}
-	<input type="hidden" name="payment_country" value="{$customer.addresses.$id_address_invoice.country_iso}" required>
+	<input type="hidden" name="payment_country" value="{$customer.addresses.$id_address_invoice.country_iso|escape:'htmlall':'UTF-8'}" required>
 	<div class="additional-information">
 		<ul class="form-list" >
 			<li>
 				<label for="account_holder_name" class="required">{l s='Account holder name*' mod='checkoutcom'}</label>
-				<input type="text" id="account_holder_name" name="account_holder_name" class="form-control input-text required-entry" value="{$customer.firstname} {$customer.lastname}" required>
+				<input type="text" id="account_holder_name" name="account_holder_name" class="form-control input-text required-entry" value="{$customer.firstname|escape:'htmlall':'UTF-8'} {$customer.lastname|escape:'htmlall':'UTF-8'}" required>
 			</li>
 		</ul>
 	</div>

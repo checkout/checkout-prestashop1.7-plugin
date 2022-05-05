@@ -13,6 +13,7 @@
  * @link      https://docs.checkout.com/
  *}
 
+{literal}
 <script>
 
     /**
@@ -31,3 +32,4 @@
         }
     });
 </script>
+{/literal}
