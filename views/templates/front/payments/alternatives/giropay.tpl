@@ -1,4 +1,4 @@
-|escape:'htmlall':'UTF-8'{*
+{*
  * Checkout.com
  * Authorised and regulated as an electronic money institution
  * by the UK Financial Conduct Authority (FCA) under number 900816.
