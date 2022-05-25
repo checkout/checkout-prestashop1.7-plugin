@@ -31,7 +31,6 @@ use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomHelperForm;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
-//use OrderState; 
 use Checkout\CheckoutApi;
 use Checkout\Models\Payments\Capture;
 
@@ -47,7 +46,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.2.2';
+        $this->version = '2.2.3';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -73,24 +72,29 @@ class CheckoutCom extends PaymentModule
     {
 
         if (extension_loaded('curl') == false) {
-            \PrestaShopLogger::addLog("cURL is not enabled.", 2, 0, 'checkoutcom' , 0);
+            $this->logger->error('Install : cURL extension is not enabled.');
             $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module.');
             return false;
         }
         
-        $sql = "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."checkoutcom_adminorder` (
+        $sql = "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."checkoutcom_adminorder`(
             `id_checkoutcom_adminorder` int(11) NOT NULL,
             `transaction_id` varchar(255) NOT NULL,
             `amount_captured` float(20,2) NOT NULL,
             `amount_refunded` float(20,2) NOT NULL,
             PRIMARY KEY (id_checkoutcom_adminorder)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
-        Db::getInstance()
-                  ->execute($sql);
-        
+        $db = Db::getInstance();
+        if (!$db->execute($sql)){
+            $this->logger->error('Install : Error has occured while creating checkoutcom_adminorder table');
+            throw new Exception($this->l('Cannot create checkoutcom_adminorder table'));
+        }
+        Configuration::updateValue('CHECKOUTCOM_TRIGGER_STATUS', null);
+        $this->logger->info('Install : Table checkoutcom_adminorder created.');
         Config::install();
+        $this->logger->info('Install : The module has been installed.');
         \PrestaShopLogger::addLog("The module has been installed.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
-
+ 
         Tools::clearSmartyCache();
 
         return parent::install() &&
@@ -114,6 +118,7 @@ class CheckoutCom extends PaymentModule
     public function uninstall()
     {
         Config::uninstall();
+        $this->logger->info('The module has been uninstalled.');
         \PrestaShopLogger::addLog("The module has been uninstalled.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
         return parent::uninstall();
     }
@@ -164,13 +169,13 @@ class CheckoutCom extends PaymentModule
         $helper->submit_action = 'submitCheckoutComModule';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false) . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
-
+        $triggerStatus = Configuration::get('CHECKOUTCOM_TRIGGER_STATUS');
         $helper->tpl_vars = array(
             'fields_value' => Config::values(),
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
             'order_states' => OrderState::getOrderStates($this->context->language->id),
-            'trigger_statuses' => json_decode(Configuration::get('CHECKOUTCOM_TRIGGER_STATUS')),
+            'trigger_statuses' => $triggerStatus ? json_decode($triggerStatus, true) : [],
         );
 
         $helper->addToSmarty($smarty);
@@ -179,7 +184,7 @@ class CheckoutCom extends PaymentModule
             'fields_value' => Config::values(),
             'languages' => $this->context->controller->getLanguages(),
             'order_states' => OrderState::getOrderStates($this->context->language->id),
-            'trigger_statuses' => json_decode(Configuration::get('CHECKOUTCOM_TRIGGER_STATUS')),
+            'trigger_statuses' =>  $triggerStatus ? json_decode($triggerStatus, true) : [],
             'webhook_url' => _PS_BASE_URL_SSL_.'/index.php?fc=module&module=checkoutcom&controller=webhook',
         ]);
     }
@@ -230,7 +235,6 @@ class CheckoutCom extends PaymentModule
                 break;
             }
         }
- 
         // If the state does not exist, we create it.
         if (!$state_exist) {
             // create new order state
@@ -243,9 +247,12 @@ class CheckoutCom extends PaymentModule
             foreach ($languages as $language){
                 $order_state->name[ $language['id_lang'] ] = $name;
             }
- 
             // Update object
-            $order_state->add();
+           //$order_state->add();
+            if (!$order_state->add()) {
+                $this->logger->error('Install : Cannot create order state : '. $name);
+                throw new Exception($this->l('Cannot create order state'));
+            }
         }
  
         return true;
@@ -539,15 +546,13 @@ class CheckoutCom extends PaymentModule
         $transaction['transaction_id'] = "CART_" . $order->id_cart;
         $transaction['amount'] = number_format( $order->total_paid_tax_incl, 2);
         $transaction['payment_method'] = $order->payment;
-
+        $transaction['id_currency'] = $order->id_currency;
         $time = (float) \Configuration::get('CHECKOUTCOM_CAPTURE_TIME');
         $event = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_EVENT');
         $action = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
-     
         if(strpos($order->payment, '-card') !== false ){
             $sql = 'SELECT * FROM '._DB_PREFIX_."checkoutcom_adminorder WHERE `transaction_id` = '" . $transaction['transaction_id'] . "'"; 
             $row = Db::getInstance()->executeS($sql);
-     
             if ( !empty($row) ) {
                 $transaction['amountCaptured'] = $row[0]['amount_captured'];
                 $transaction['capturableAmount'] = $transaction['amount'] - $row[0]['amount_captured'];
@@ -636,7 +641,7 @@ class CheckoutCom extends PaymentModule
         $payment = new OrderPayment();
         $payment = $payment->getByOrderId($params['id_order']);
         $amountToCapture = (float) number_format( $order->total_paid_tax_incl, 2);
-
+        $trigger_statuses = $trigger_statuses ? $trigger_statuses : [];
         if (!$event && !$action && in_array($new_status_id, $trigger_statuses)) {
             $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
             try {

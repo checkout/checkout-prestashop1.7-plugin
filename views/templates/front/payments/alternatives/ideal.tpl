@@ -1,4 +1,4 @@
-|escape:'htmlall':'UTF-8'{*
+{*
  * Checkout.com
  * Authorised and regulated as an electronic money institution
  * by the UK Financial Conduct Authority (FCA) under number 900816.
@@ -25,7 +25,6 @@
                     </option>
                 {/foreach}
             </select>
-            {* <input type="text" id="{$module}-{$key}-bic" name="bic" class="form-control input-text cvv required-entry validate-cc-cvn" required >*}
         </li>
     </ul>
 </form>
