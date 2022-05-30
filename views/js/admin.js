@@ -21,6 +21,7 @@ $(document).ready(function () {
 	checkCardEnabled();
 	checkDeferredPayment();
 	checkDelayedPayment();
+	checkServiceName();
 
 	$('.trigger-statuses').select2();
 
@@ -48,6 +49,10 @@ $(document).ready(function () {
 		$(this).parent().parent().find(".multilang-field").val(hiddenValue);
 	});
 
+	$("#CHECKOUTCOM_SERVICE").on('change', function(){
+		checkServiceName();
+	});
+
 	function checkCardEnabled(){
 		if ( $("#CHECKOUTCOM_CARD_ENABLED_on").is(':checked') ) {
 			$(".card-enabled-container").slideDown();
@@ -71,6 +76,16 @@ $(document).ready(function () {
 		}else{
 			$(".delayed-payment-container").slideUp();
 			$(".status-payment-container").slideDown();
+		}
+	}
+
+	function checkServiceName(){
+		if ( $("#CHECKOUTCOM_PAYMENT_ACTION").val() == "1" ) {
+			$("#CHECKOUTCOM_SIGNATURE_KEY").slideUp();
+			$("#CHECKOUTCOM_AUTHENTIFICATION_KEY").slideUp();
+		}else{
+			$("#CHECKOUTCOM_SIGNATURE_KEY").slideDown();
+			$("#CHECKOUTCOM_AUTHENTIFICATION_KEY").slideDown();
 		}
 	}
 });
