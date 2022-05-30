@@ -43,7 +43,7 @@
 						</div>
 						<div id="" class="col-sm col-sm-4 text-center">
 							<p class="text-muted mb-0"><strong>{l s='Total' mod='checkoutcom'}</strong></p>
-							<strong id="">{displayPrice price=$transaction.amount|floatval currency=$id_currency_euro|intval}</strong>
+							<strong id="">{displayPrice price=$transaction.amount|floatval currency=$transaction.id_currency|intval}</strong>
 						</div>
 						<div id="" class="col-sm col-sm-4 text-center">
 							<p class="text-muted mb-0"><strong>{l s='Payment method' mod='checkoutcom'}</strong></p>
@@ -60,7 +60,8 @@
 			</div>
 		</div>
 		<p></p>
-		{if !$is_contract_access}
+                
+		{if isset($transaction.isCapturable)}
 			<div class="row">
 				<div class="col-xl-12">
 					<div class="card">
@@ -70,11 +71,11 @@
 									<h4 class="text-center">{l s='Capture' mod='checkoutcom'}</h4>
 									<div class="row mb-1">
 										<div class="col-6 col-sm-6 text-right">{l s='Amount captured' mod='checkoutcom'}</div>
-										<div class="col-6 col-sm-6">{displayPrice price=$transaction.amountCaptured|floatval currency=$id_currency_euro|intval}</div>
+										<div class="col-6 col-sm-6">{displayPrice price=$transaction.amountCaptured|floatval currency=$transaction.id_currency|intval}</div>
 									</div>
 									<div class="row mb-1">
 										<div class="col-6 col-sm-6 text-right">{l s='Amount that can be captured' mod='checkoutcom'}</div>
-										<div class="col-6 col-sm-6">{displayPrice price=$transaction.capturableAmount|floatval currency=$id_currency_euro|intval}</div>
+										<div class="col-6 col-sm-6">{displayPrice price=$transaction.capturableAmount|floatval currency=$transaction.id_currency|intval}</div>
 									</div>
 									{if $transaction.isCapturable}
 										<hr>

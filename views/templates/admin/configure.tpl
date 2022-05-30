@@ -35,7 +35,7 @@
 <!-- Tab panes -->
 <div class="tab-content">
 	<div class="tab-pane active" id="template_1">
-		{$config_main|escape:'htmlall':'UTF-8'}
+		{$config_main}
 		<div class="webhook-url-container">
 			<div class="form-group">
 				<label class="control-label col-lg-3">
@@ -134,7 +134,7 @@
 							</label>
 							{assign var=lang_val value=$fields_value.CHECKOUTCOM_CARD_TITLE|json_decode:1}
 							<div class="col-lg-2">
-								<input class="multilang-field" type="text" name="CHECKOUTCOM_CARD_TITLE" id="CHECKOUTCOM_CARD_TITLE" value="{$lang_val|reset}"/>
+								<input class="multilang-field" type="text" name="CHECKOUTCOM_CARD_TITLE" id="CHECKOUTCOM_CARD_TITLE" {if $lang_val}value="{$lang_val|reset}{/if}"/>
 							</div>
 							<div class="col-lg-1">
 								<select class="multilang-select">
@@ -144,7 +144,7 @@
 								</select>
 								{foreach from=$languages item=language}
 									{assign var="iso_code" value=$language.iso_code}
-									<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_CARD_TITLE[{$iso_code}]" data-lang="{$iso_code}" value="{$lang_val.$iso_code}">
+									<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_CARD_TITLE[{$iso_code}]" data-lang="{$iso_code}" {if $lang_val}value="{$lang_val.$iso_code}{/if}">
 								{/foreach}
 								<input type="hidden" name="CHECKOUTCOM_CARD_TITLE[default]" value="Pay by Card with Checkout.com">
 							</div>
@@ -258,7 +258,7 @@
 						</label>
 						{assign var=lang_val value=$fields_value.CHECKOUTCOM_GOOGLE_TITLE|json_decode:1}
 						<div class="col-lg-2">
-							<input class="multilang-field" type="text" name="CHECKOUTCOM_GOOGLE_TITLE" id="CHECKOUTCOM_GOOGLE_TITLE" value="{$lang_val|reset}"/>
+							<input class="multilang-field" type="text" name="CHECKOUTCOM_GOOGLE_TITLE" id="CHECKOUTCOM_GOOGLE_TITLE" {if $lang_val}value="{$lang_val|reset}{/if}"/>
 						</div>
 						<div class="col-lg-1">
 							<select class="multilang-select">
@@ -268,7 +268,7 @@
 							</select>
 							{foreach from=$languages item=language}
 								{assign var="iso_code" value=$language.iso_code}
-								<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_GOOGLE_TITLE[{$iso_code}]" data-lang="{$iso_code}" value="{$lang_val.$iso_code}">
+								<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_GOOGLE_TITLE[{$iso_code}]" data-lang="{$iso_code}" {if $lang_val}value="{$lang_val.$iso_code}{/if}">
 							{/foreach}
 							<input type="hidden" name="CHECKOUTCOM_GOOGLE_TITLE[default]" value="Pay by Google Pay with Checkout.com">
 						</div>
