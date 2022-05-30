@@ -1,6 +1,26 @@
 [
    [
       {
+         "name":"CHECKOUTCOM_SERVICE",
+         "label":"Service",
+         "desc":"",
+         "type":"select",
+         "default":1,
+         "required":0,
+         "options":[
+            {
+               "id":"id_option",
+               "value":1,
+               "label":"ABC"
+            },
+            {
+               "id":"id_option",
+               "value":0,
+               "label":"NAS"
+            }
+         ]
+      },
+      {
          "name":"CHECKOUTCOM_LIVE_MODE",
          "label":"Environment",
          "desc":"Use this module in live mode.",
@@ -21,41 +41,43 @@
          ]
       },
       {
-         "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE",
-         "label":"Enable Dynamic Descriptor",
-         "desc":"",
-         "type":"bswitch",
-         "default":0,
-         "required":0,
-         "options":[
-            {
-               "id":"id_option",
-               "value":1,
-               "label":"Enabled"
-            },
-            {
-               "id":"id_option",
-               "value":0,
-               "label":"Disabled"
-            }
-         ]
-      },
-      {
-         "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_NAME",
-         "label":"Descriptor Name",
-         "desc":"",
+         "name":"CHECKOUTCOM_SECRET_KEY",
+         "label":"Secret Key",
+         "description":"",
          "type":"text",
+         "icon":"",
          "default":"",
-         "required":0,
+         "required":1,
          "col":2
       },
       {
-         "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY",
-         "label":"Descriptor City",
-         "desc":"",
+         "name":"CHECKOUTCOM_PUBLIC_KEY",
+         "label":"Public Key",
+         "description":"",
          "type":"text",
+         "icon":"",
          "default":"",
-         "required":0,
+         "required":1,
+         "col":2
+      },
+      {
+         "name":"CHECKOUTCOM_SIGNATURE_KEY",
+         "label":"Signature Key",
+         "description":"",
+         "type":"text",
+         "icon":"",
+         "default":"",
+         "required":1,
+         "col":2
+      },
+      {
+         "name":"CHECKOUTCOM_AUTHENTIFICATION_KEY",
+         "label":"Authentification Key",
+         "description":"",
+         "type":"text",
+         "icon":"",
+         "default":"",
+         "required":1,
          "col":2
       }
    ],
@@ -95,23 +117,41 @@
    ],
    [
       {
-         "name":"CHECKOUTCOM_SECRET_KEY",
-         "label":"Secret Key",
-         "description":"",
+         "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE",
+         "label":"Enable Dynamic Descriptor",
+         "desc":"",
+         "type":"bswitch",
+         "default":0,
+         "required":0,
+         "options":[
+            {
+               "id":"id_option",
+               "value":1,
+               "label":"Enabled"
+            },
+            {
+               "id":"id_option",
+               "value":0,
+               "label":"Disabled"
+            }
+         ]
+      },
+      {
+         "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_NAME",
+         "label":"Descriptor Name",
+         "desc":"",
          "type":"text",
-         "icon":"",
          "default":"",
-         "required":1,
+         "required":0,
          "col":2
       },
       {
-         "name":"CHECKOUTCOM_PUBLIC_KEY",
-         "label":"Public Key",
-         "description":"",
+         "name":"CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY",
+         "label":"Descriptor City",
+         "desc":"",
          "type":"text",
-         "icon":"",
          "default":"",
-         "required":1,
+         "required":0,
          "col":2
       }
    ]
