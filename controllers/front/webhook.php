@@ -73,7 +73,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
             if ($status) {
                 //log status
-                $this->module->logger->info('Channel Webhook -- Handle order -- Order status: ' .  $status);
+                $this->module->logger->info('Channel Webhook -- Handle order -- Order status for  above order reference: ' .  $status);
 
                 foreach ($list as $order) {
 
@@ -81,7 +81,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
                     //log current status
                     $this->module->logger->info('Channel Webhook -- Begin order processing:'. $order->id);
-                    $this->module->logger->info('Channel Webhook -- Handle order -- current status : ' .   $currentStatus);
+                    $this->module->logger->info('Channel Webhook -- Handle order -- current order status : ' .   $currentStatus);
   
                     if($currentStatus !== $status && $this->preventAuthAfterCapture($currentStatus, $status)) {
 
