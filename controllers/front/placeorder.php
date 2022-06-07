@@ -75,6 +75,9 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 
             $url = $response->getRedirection();
             if ($url) {
+                //log redirect url
+                $this->module->logger->info('Channel Placeorder -- Redirection to : ' . $url);
+
                 if(Tools::getIsset('save-card-checkbox')){
                     $context = \Context::getContext();
                     $context->cookie->__set('save-card-checkbox', '1');
@@ -87,6 +90,10 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
 
             // check if save card option was checked on checkout page
             if(Tools::getIsset('save-card-checkbox')){
+
+                //log customer id
+                $this->module->logger->info('Channel Placeorder -- save card  -- Customer id : ' . $customer->id);
+
                 CheckoutcomCustomerCard::saveCard($response, $customer->id);
             }
 
@@ -94,7 +101,13 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                 $cart = new Cart((int) $this->context->cart->id);
                 $customer = new Customer((int) $cart->id_customer);
                 $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
+
+                //log cart and customer info
                 $this->module->logger->info(sprintf('Channel Placeorder -- Create order for cart %s ', $cart->id));
+                $this->module->logger->info('Channel Placeorder --  Create order for Customer id : ' . $cart->id_customer);
+                $this->module->logger->info('Channel Placeorder --  Create order for amount : ' .  $total);
+
+
                 if ($this->module->validateOrder(
                                                     $cart->id,
                                                     _PS_OS_PAYMENT_,
@@ -125,6 +138,10 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             $payments[0]->transaction_id = $response->id;
             $payments[0]->update();
 
+            //log payment transaction id
+            $this->module->logger->info('Channel Placeorder --  payment transaction id : ' .  $response->id);
+           
+
             // Reset order history
             $sql = 'DELETE FROM `'._DB_PREFIX_.'order_history` WHERE `id_order`='.$this->context->order->id;
             Db::getInstance()->execute($sql);
@@ -133,10 +150,18 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
             $history->id_order = $this->context->order->id;
             $history->changeIdOrderState(\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'), $this->context->order->id, true);
             $history->add();
-            $this->module->logger->info('Channel Placeorder -- New order status : ' . $this->context->order->id);
+            
+            //Log order history
+            $this->module->logger->info('Channel Placeorder -- New order id : ' . $this->context->order->id);
+            $this->module->logger->info('Channel Placeorder -- New order status : ' .  \Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS'));
+           
+
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $this->context->cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
         } else {
+            //log failure
+            $this->module->logger->info('Channel Placeorder -- payment process : response failed');
+            
             $this->handleFail($response);
         }
 

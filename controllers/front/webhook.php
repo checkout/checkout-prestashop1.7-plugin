@@ -59,20 +59,38 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             $sql = 'SELECT `reference` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
             $order_reference = Db::getInstance()->getValue($sql);
 
+            //log event details
+            $this->module->logger->info('Channel Webhook -- Handle order -- Event Type : ' . $event['type']);
+            $this->module->logger->info('Channel Webhook -- Handle order -- Event action id : ' . $event['data']['action_id']);
+            $this->module->logger->info('Channel Webhook -- Handle order -- Event amount : ' . $event['data']['amount']);
+            $this->module->logger->info('Channel Webhook -- Handle order -- Event currency : ' . $event['data']['currency']);
+            $this->module->logger->info('Channel Webhook -- Handle order -- Cart id : ' .  $cart_id);
+            $this->module->logger->info('Channel Webhook -- Handle order -- Order reference : ' .  order_reference);
+  
             $orders = Order::getByReference($order_reference);
             $list = $orders->getAll();
             $status = +Utilities::getOrderStatus($event['type'], $order_reference, $event['data']['action_id']);
 
             if ($status) {
+                //log status
+                $this->module->logger->info('Channel Webhook -- Handle order -- Order status: ' .  $status);
 
                 foreach ($list as $order) {
 
                     $currentStatus = $order->getCurrentOrderState()->id;
+
+                    //log current status
+                    $this->module->logger->info('Channel Webhook -- Begin order processing:'. $order->id);
+                    $this->module->logger->info('Channel Webhook -- Handle order -- current status : ' .   $currentStatus);
+  
                     if($currentStatus !== $status && $this->preventAuthAfterCapture($currentStatus, $status)) {
 
                         $isPartial = $this->_isPartialAmount($event, $order);
                         $amount = Method::fixAmount($event['data']['amount'], $event['data']['currency'], true);
                         $currency = $event['data']['currency'];
+                        
+                        //log is partial
+                        $this->module->logger->info('Channel Webhook -- Handle order -- is partial amount? : ' .   $isPartial);
 
                         if($isPartial) {
 
@@ -99,8 +117,13 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                         $history->id_order = $order->id;
                         $history->changeIdOrderState($status, $order->id, true);
                         $history->addWithemail();
-                        $this->module->logger->info('Channel Webhook -- New order status : ' . $order->id);
+
+                        //log new order history and status
+                        $this->module->logger->info('Channel Webhook -- New order id : ' . $order->id);
+                        $this->module->logger->info('Channel Webhook -- New order status : ' . $status);
                     }
+                    //log end of processing for each order
+                    $this->module->logger->info('-- -- Channel Webhook -- End of order processing:'. $order->id);
                 }
             }
         }
