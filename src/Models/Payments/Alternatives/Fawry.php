@@ -40,8 +40,8 @@ class Fawry extends Alternative
         $productPrice = 0;
         
         foreach ($context->cart->getProducts() as $item) {
-            
-            $productPrice += (int) ('' . ($item['total_wt'] * 100));
+
+            $productPrice += (int) ('' . (round($item['price_wt'], 2) * 100));
         }
    
         $discount = static::fixAmount($context->cart->getOrderTotal(true, \Cart::ONLY_DISCOUNTS));
@@ -54,12 +54,9 @@ class Fawry extends Alternative
         $product->description = \Configuration::get('PS_SHOP_NAME');
 
         $products[] = $product;
-
-        /*if(+$context->order->total_shipping){
-            $products [] = Fawry::getShipping($context);
-        }*/
-        if (static::fixAmount($context->cart->getOrderTotal(true, \Cart::ONLY_SHIPPING))){
-            $products [] = Fawry::getShipping($context);
+        $shipping = static::getShipping($context);
+        if ($shipping && $shipping->price > 0) {
+              $products [] = Fawry::getShipping($context);
         }
         return $products;
     }

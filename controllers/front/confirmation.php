@@ -37,10 +37,17 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
         $cart = new Cart((int) $cart_id);
         $customer = new Customer((int) $cart->id_customer);
+        if (Tools::isSubmit('cko-session-id') || strpos($secure_key, '?cko-session-id=') !== false) {
 
-        if (Tools::isSubmit('cko-session-id')) {
+            if (Tools::isSubmit('cko-session-id')) {
+                $cko_session_id = $_REQUEST['cko-session-id'];
+            }else{
+                $separated_url = explode('?cko-session-id=', $secure_key);
+                $secure_key = $separated_url[0];
+                $cko_session_id = $separated_url[1];
+            }
 
-            $response = $this->_verifySession($_REQUEST['cko-session-id']);
+            $response = $this->_verifySession($cko_session_id);
 
             if ($response->isSuccessful() && !$response->isPending()) {
                 $suffix = '';
