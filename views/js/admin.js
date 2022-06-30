@@ -17,6 +17,9 @@ $(document).ready(function () {
 	var webhook_url = $('.webhook-url-container').html();
 	$("#CHECKOUTCOM_PUBLIC_KEY").parent().parent().parent().append(webhook_url);
 	$('.webhook-url-container').remove();
+
+	$('#CHECKOUTCOM_AUTHENTIFICATION_KEY').attr('readonly', true);
+	$('#CHECKOUTCOM_SIGNATURE_KEY').attr('readonly', true);
 	
 	checkCardEnabled();
 	checkDeferredPayment();
@@ -51,6 +54,14 @@ $(document).ready(function () {
 
 	$("#CHECKOUTCOM_SERVICE").on('change', function(){
 		checkServiceName();
+
+		if ( $("#CHECKOUTCOM_SERVICE").val() == "1" ) {
+			$("#CHECKOUTCOM_SECRET_KEY").val( $("#CHECKOUTCOM_SECRET_KEY_ABC").val() );
+			$("#CHECKOUTCOM_PUBLIC_KEY").val( $("#CHECKOUTCOM_PUBLIC_KEY_ABC").val() );
+		}else{
+			$("#CHECKOUTCOM_SECRET_KEY").val( $("#CHECKOUTCOM_SECRET_KEY_NAS").val() );
+			$("#CHECKOUTCOM_PUBLIC_KEY").val( $("#CHECKOUTCOM_PUBLIC_KEY_NAS").val() );
+		}
 	});
 
 	function checkCardEnabled(){
@@ -80,12 +91,30 @@ $(document).ready(function () {
 	}
 
 	function checkServiceName(){
-		if ( $("#CHECKOUTCOM_PAYMENT_ACTION").val() == "1" ) {
-			$("#CHECKOUTCOM_SIGNATURE_KEY").slideUp();
-			$("#CHECKOUTCOM_AUTHENTIFICATION_KEY").slideUp();
+		var services = [
+			'SEPA',
+			'KLARNA',
+			'KNET',
+			'BOLETO'
+		];
+
+		if ( $("#CHECKOUTCOM_SERVICE").val() == "1" ) {
+			$("#CHECKOUTCOM_SIGNATURE_KEY").parent().parent().slideUp();
+			$("#CHECKOUTCOM_AUTHENTIFICATION_KEY").parent().parent().slideUp();
+			$(".set-webhook-container").slideUp();
+
+			$.each(services, function(index, value) {
+				$("#CHECKOUTCOM_ALTERNATIVE_"+value+"_on").parent().parent().parent().show();
+			});
 		}else{
-			$("#CHECKOUTCOM_SIGNATURE_KEY").slideDown();
-			$("#CHECKOUTCOM_AUTHENTIFICATION_KEY").slideDown();
+			$("#CHECKOUTCOM_SIGNATURE_KEY").parent().parent().slideDown();
+			$("#CHECKOUTCOM_AUTHENTIFICATION_KEY").parent().parent().slideDown();
+			$(".set-webhook-container").slideDown();
+
+			$.each(services, function(index, value) {
+				$("#CHECKOUTCOM_ALTERNATIVE_"+value+"_on").removeAttr('checked').parent().parent().parent().hide();
+				$("#CHECKOUTCOM_ALTERNATIVE_"+value+"_off").attr('checked', 'checked');
+			});
 		}
 	}
 });
