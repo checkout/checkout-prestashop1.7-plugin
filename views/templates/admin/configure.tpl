@@ -18,7 +18,7 @@
 * needs please refer to http://www.prestashop.com for more information.
 *
 *  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2019 PrestaShop SA
+*  @copyright 2007-2022 PrestaShop SA
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
@@ -37,17 +37,28 @@
 	<div class="tab-pane active" id="template_1">
 		{$config_main}
 		<div class="webhook-url-container">
+			<input type="hidden" name="webhook_url" value="{$webhook_url|escape:'htmlall':'UTF-8'}">
+			<div class="form-group set-webhook-container">
+				<label class="col-lg-3"></label>
+				<div class="col-lg-9">
+					<button type="submit" name="set_webhook">Set webhook</button>
+				</div>
+			</div>
 			<div class="form-group">
 				<label class="control-label col-lg-3">
 					Webhook
 				</label>
 				<div class="col-lg-9">
 					<span class="webhook-url">
-						{$webhook_url}
+						{$webhook_url|escape:'htmlall':'UTF-8'}
 					</span>
 				</div>
 			</div>
 		</div>
+		<input type="hidden" id="CHECKOUTCOM_SECRET_KEY_ABC" value="{if 'CHECKOUTCOM_SECRET_KEY_ABC'|array_key_exists:$fields_value}{$fields_value.CHECKOUTCOM_SECRET_KEY_ABC}{/if}"/>
+		<input type="hidden" id="CHECKOUTCOM_PUBLIC_KEY_ABC" value="{if 'CHECKOUTCOM_PUBLIC_KEY_ABC'|array_key_exists:$fields_value}{$fields_value.CHECKOUTCOM_PUBLIC_KEY_ABC}{/if}"/>
+		<input type="hidden" id="CHECKOUTCOM_SECRET_KEY_NAS" value="{if 'CHECKOUTCOM_SECRET_KEY_NAS'|array_key_exists:$fields_value}{$fields_value.CHECKOUTCOM_SECRET_KEY_NAS}{/if}"/>
+		<input type="hidden" id="CHECKOUTCOM_PUBLIC_KEY_NAS" value="{if 'CHECKOUTCOM_PUBLIC_KEY_NAS'|array_key_exists:$fields_value}{$fields_value.CHECKOUTCOM_PUBLIC_KEY_NAS}{/if}"/>
 	</div>
 	<div class="tab-pane" id="template_2">
 		<form id="module_form_1" class="defaultForm form-horizontal" action="" method="post" enctype="multipart/form-data" novalidate>
@@ -104,7 +115,7 @@
 										Delay (hours before remittance to bank)
 									</label>
 									<div class="col-lg-2">
-										<input type="number" class="form-control" name="CHECKOUTCOM_CAPTURE_TIME" id="CHECKOUTCOM_CAPTURE_TIME" value="{$fields_value.CHECKOUTCOM_CAPTURE_TIME}"/>
+										<input type="number" class="form-control" name="CHECKOUTCOM_CAPTURE_TIME" id="CHECKOUTCOM_CAPTURE_TIME" value="{$fields_value.CHECKOUTCOM_CAPTURE_TIME|escape:'htmlall':'UTF-8'}"/>
 									</div>
 								</div>
 							</div>
@@ -117,7 +128,7 @@
 										<input type="hidden" name="trigger_statuses" value="no_status">
 										<select name="trigger_statuses[]" class="trigger-statuses" id="CHECKOUTCOM_TRIGGER_STATUS" multiple="multiple">
 											{foreach from=$order_states item=order_state}
-												<option value="{$order_state.id_order_state}" {if $order_state.id_order_state|in_array:$trigger_statuses}selected{/if}>{$order_state.name}</option>
+												<option value="{$order_state.id_order_state|escape:'htmlall':'UTF-8'}" {if $order_state.id_order_state|in_array:$trigger_statuses}selected{/if}>{$order_state.name|escape:'htmlall':'UTF-8'}</option>
 											{/foreach}
 										</select>
 									</div>
@@ -134,7 +145,7 @@
 							</label>
 							{assign var=lang_val value=$fields_value.CHECKOUTCOM_CARD_TITLE|json_decode:1}
 							<div class="col-lg-2">
-								<input class="multilang-field" type="text" name="CHECKOUTCOM_CARD_TITLE" id="CHECKOUTCOM_CARD_TITLE" value="{$lang_val|reset}"/>
+								<input class="multilang-field" type="text" name="CHECKOUTCOM_CARD_TITLE" id="CHECKOUTCOM_CARD_TITLE" {if $lang_val}value="{$lang_val|reset}{/if}"/>
 							</div>
 							<div class="col-lg-1">
 								<select class="multilang-select">
@@ -144,7 +155,7 @@
 								</select>
 								{foreach from=$languages item=language}
 									{assign var="iso_code" value=$language.iso_code}
-									<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_CARD_TITLE[{$iso_code}]" data-lang="{$iso_code}" value="{$lang_val.$iso_code}">
+									<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_CARD_TITLE[{$iso_code}]" data-lang="{$iso_code}" {if $lang_val}value="{$lang_val.$iso_code}{/if}">
 								{/foreach}
 								<input type="hidden" name="CHECKOUTCOM_CARD_TITLE[default]" value="Pay by Card with Checkout.com">
 							</div>
@@ -258,7 +269,7 @@
 						</label>
 						{assign var=lang_val value=$fields_value.CHECKOUTCOM_GOOGLE_TITLE|json_decode:1}
 						<div class="col-lg-2">
-							<input class="multilang-field" type="text" name="CHECKOUTCOM_GOOGLE_TITLE" id="CHECKOUTCOM_GOOGLE_TITLE" value="{$lang_val|reset}"/>
+							<input class="multilang-field" type="text" name="CHECKOUTCOM_GOOGLE_TITLE" id="CHECKOUTCOM_GOOGLE_TITLE" {if $lang_val}value="{$lang_val|reset}{/if}"/>
 						</div>
 						<div class="col-lg-1">
 							<select class="multilang-select">
@@ -268,7 +279,7 @@
 							</select>
 							{foreach from=$languages item=language}
 								{assign var="iso_code" value=$language.iso_code}
-								<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_GOOGLE_TITLE[{$iso_code}]" data-lang="{$iso_code}" value="{$lang_val.$iso_code}">
+								<input class="multilang-hidden" type="hidden" name="CHECKOUTCOM_GOOGLE_TITLE[{$iso_code}]" data-lang="{$iso_code}" {if $lang_val}value="{$lang_val.$iso_code}{/if}">
 							{/foreach}
 							<input type="hidden" name="CHECKOUTCOM_GOOGLE_TITLE[default]" value="Pay by Google Pay with Checkout.com">
 						</div>

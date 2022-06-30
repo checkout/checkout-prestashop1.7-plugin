@@ -16,12 +16,12 @@ class Fawry extends Alternative
     public static function pay(array $params)
     {
 
-        $context = \Context::getContext();
-        $billing = new \Address($context->order->id_address_invoice);
+       $context = \Context::getContext();
+       $billing = new \Address((int) $context->cart->id_address_invoice);
 
         $source = new FawrySource(  $context->customer->email,
                                     $billing->phone,
-                                    \Configuration::get('PS_SHOP_NAME') . ' ' . $context->order->getUniqReference(),
+                                    \Configuration::get('PS_SHOP_NAME'),
                                     Fawry::getProducts($context));
 
         $payment = static::makePayment($source);
@@ -38,27 +38,26 @@ class Fawry extends Alternative
     {
         $products = array();
         $productPrice = 0;
+        
+        foreach ($context->cart->getProducts() as $item) {
 
-        foreach ($context->order->getProducts() as $item) {
-
-            $productPrice += (int) ('' . ($item['total_price_tax_incl'] * 100));
+            $productPrice += (int) ('' . (round($item['price_wt'], 2) * 100));
         }
-
-        $discount = static::fixAmount($context->order->total_discounts);
+   
+        $discount = static::fixAmount($context->cart->getOrderTotal(true, \Cart::ONLY_DISCOUNTS));
         $totalProductPrice = $productPrice - $discount;
-
+        
         $product = new Product();
-        $product->product_id = $context->order->id;
+        $product->product_id = $context->cart->id;
         $product->quantity = 1;
         $product->price = $totalProductPrice;
-        $product->description = \Configuration::get('PS_SHOP_NAME'). ' - Order reference :'. $context->order->getUniqReference();
+        $product->description = \Configuration::get('PS_SHOP_NAME');
 
         $products[] = $product;
-
-        if(+$context->order->total_shipping){
-            $products [] = Fawry::getShipping($context);
+        $shipping = static::getShipping($context);
+        if ($shipping && $shipping->price > 0) {
+              $products [] = Fawry::getShipping($context);
         }
-
         return $products;
     }
 
@@ -70,17 +69,15 @@ class Fawry extends Alternative
     public static function getShipping(\Context $context)
     {
         $description = 'No carrier';
-        if($context->order->id_carrier) {
-            $carrier = new \Carrier($context->order->id_carrier, $context->order->id_lang);
+        if($context->cart->id_carrier) {
+            $carrier = new \Carrier($context->cart->id_carrier, $context->cart->id_lang);
             $description = $carrier->name . ' Fee';
         }
-
         $product = new Product();
         $product->product_id = 0;
         $product->quantity = 1;
-        $product->price = static::fixAmount($context->order->total_shipping);
+        $product->price = static::fixAmount($context->cart->getOrderTotal(true, \Cart::ONLY_SHIPPING));//static::fixAmount($context->order->total_shipping);
         $product->description = $description;
-
         return $product;
     }
 

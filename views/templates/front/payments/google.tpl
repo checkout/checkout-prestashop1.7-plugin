@@ -1,6 +1,21 @@
-<form name="{$module}" id="{$module}-google-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-merchantid="{$merchantid}" data-live="{$live}" data-invoiceid="{$invoiceid}" method="POST">
-	<input id="{$module}-google-source" type="hidden" name="source" value="google" required>
-	<input type="hidden" id="{$module}-google-token" name="token" value="" />
+{*
+ * Checkout.com
+ * Authorised and regulated as an electronic money institution
+ * by the UK Financial Conduct Authority (FCA) under number 900816.
+ *
+ * PrestaShop v1.7
+ *
+ * @category  prestashop-module
+ * @package   Checkout.com
+ * @author    Platforms Development Team <platforms@checkout.com>
+ * @copyright 2010-2022 Checkout.com
+ * @license   https://opensource.org/licenses/mit-license.html MIT License
+ * @link      https://docs.checkout.com/
+ *}
+
+ <form name="{$module|escape:'htmlall':'UTF-8'}" id="{$module|escape:'htmlall':'UTF-8'}-google-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'htmlall':'UTF-8'}" data-key="{$CHECKOUTCOM_PUBLIC_KEY|escape:'htmlall':'UTF-8'}" data-merchantid="{$merchantid|escape:'htmlall':'UTF-8'}" data-live="{$live|escape:'htmlall':'UTF-8'}" data-invoiceid="{$invoiceid|escape:'htmlall':'UTF-8'}" method="POST">
+	<input id="{$module|escape:'htmlall':'UTF-8'}-google-source" type="hidden" name="source" value="google" required>
+	<input type="hidden" id="{$module|escape:'htmlall':'UTF-8'}-google-token" name="token" value="" />
 </form>
 {literal}
 <script type="text/javascript">

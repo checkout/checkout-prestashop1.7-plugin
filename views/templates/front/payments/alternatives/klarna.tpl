@@ -1,7 +1,22 @@
-<form name="{$module}" id="{$module}-{$key}-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" method="POST">
-    <div id="{$module}-{$key}-frame" data-url="{$link->getModuleLink($module, 'klarna', [], true)|escape:'html'}" data-module="{$module}"></div>
-    <input id="{$module}-{$key}-source" type="hidden" name="source" value="{$key}" required>
-    <input id="{$module}-{$key}-auth-token" type="hidden" name="authorization_token" value="" required>
+{*
+ * Checkout.com
+ * Authorised and regulated as an electronic money institution
+ * by the UK Financial Conduct Authority (FCA) under number 900816.
+ *
+ * PrestaShop v1.7
+ *
+ * @category  prestashop-module
+ * @package   Checkout.com
+ * @author    Platforms Development Team <platforms@checkout.com>
+ * @copyright 2010-2022 Checkout.com
+ * @license   https://opensource.org/licenses/mit-license.html MIT License
+ * @link      https://docs.checkout.com/
+ *}
+
+<form name="{$module|escape:'htmlall':'UTF-8'}" id="{$module|escape:'htmlall':'UTF-8'}-{$key|escape:'htmlall':'UTF-8'}-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'htmlall':'UTF-8'}" method="POST">
+    <div id="{$module|escape:'htmlall':'UTF-8'}-{$key|escape:'htmlall':'UTF-8'}-frame" data-url="{$link->getModuleLink($module, 'klarna', [], true)|escape:'htmlall':'UTF-8'}" data-module="{$module|escape:'htmlall':'UTF-8'}"></div>
+    <input id="{$module|escape:'htmlall':'UTF-8'}-{$key|escape:'htmlall':'UTF-8'}-source" type="hidden" name="source" value="{$key|escape:'htmlall':'UTF-8'}" required>
+    <input id="{$module|escape:'htmlall':'UTF-8'}-{$key|escape:'htmlall':'UTF-8'}-auth-token" type="hidden" name="authorization_token" value="" required>
 </form>
 {literal}
 <script type="text/javascript" src="https://x.klarnacdn.net/kp/lib/v1/api.js"></script>

@@ -31,7 +31,6 @@ use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomHelperForm;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
-//use OrderState; 
 use Checkout\CheckoutApi;
 use Checkout\Models\Payments\Capture;
 
@@ -47,7 +46,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.2.2';
+        $this->version = '2.3.0';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -73,28 +72,33 @@ class CheckoutCom extends PaymentModule
     {
 
         if (extension_loaded('curl') == false) {
-            \PrestaShopLogger::addLog("cURL is not enabled.", 2, 0, 'checkoutcom' , 0);
+            $this->logger->error('Install : cURL extension is not enabled.');
             $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module.');
             return false;
         }
         
-        $sql = "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."checkoutcom_adminorder` (
+        $sql = "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."checkoutcom_adminorder`(
             `id_checkoutcom_adminorder` int(11) NOT NULL,
             `transaction_id` varchar(255) NOT NULL,
             `amount_captured` float(20,2) NOT NULL,
             `amount_refunded` float(20,2) NOT NULL,
             PRIMARY KEY (id_checkoutcom_adminorder)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
-        Db::getInstance()
-                  ->execute($sql);
-        
+        $db = Db::getInstance();
+        if (!$db->execute($sql)){
+            $this->logger->error('Install : Error has occured while creating checkoutcom_adminorder table');
+            throw new Exception($this->l('Cannot create checkoutcom_adminorder table'));
+        }
+        Configuration::updateValue('CHECKOUTCOM_TRIGGER_STATUS', null);
+        $this->logger->info('Install : Table checkoutcom_adminorder created.');
         Config::install();
+        $this->logger->info('Install : The module has been installed.');
         \PrestaShopLogger::addLog("The module has been installed.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
-
+ 
         Tools::clearSmartyCache();
 
         return parent::install() &&
-            $this->addOrderState($this->l('Payment authorized, awaiting capture')) &&
+            $this->addOrderState($this->l('Payment authorized by CKO, awaiting capture')) &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('header') &&
             $this->registerHook('displayCustomerAccount') &&
@@ -114,6 +118,7 @@ class CheckoutCom extends PaymentModule
     public function uninstall()
     {
         Config::uninstall();
+        $this->logger->info('The module has been uninstalled.');
         \PrestaShopLogger::addLog("The module has been uninstalled.", 1, 0, 'checkoutcom' , 0, false, $this->context->employee->id);
         return parent::uninstall();
     }
@@ -164,22 +169,34 @@ class CheckoutCom extends PaymentModule
         $helper->submit_action = 'submitCheckoutComModule';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false) . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
+        $triggerStatus = Configuration::get('CHECKOUTCOM_TRIGGER_STATUS');
+        $config_values = Config::values();
+
+        if (Configuration::get('CHECKOUTCOM_SERVICE') == 0) {
+            $config_values['CHECKOUTCOM_SECRET_KEY'] = str_replace('Bearer ', '', $config_values['CHECKOUTCOM_SECRET_KEY']);
+            $config_values['CHECKOUTCOM_PUBLIC_KEY'] = str_replace('Bearer ', '', $config_values['CHECKOUTCOM_PUBLIC_KEY']);
+        }
+
+        $config_values['CHECKOUTCOM_SECRET_KEY_NAS'] = Configuration::get('CHECKOUTCOM_SECRET_KEY_NAS');
+        $config_values['CHECKOUTCOM_PUBLIC_KEY_NAS'] = Configuration::get('CHECKOUTCOM_PUBLIC_KEY_NAS');
+        $config_values['CHECKOUTCOM_SECRET_KEY_ABC'] = Configuration::get('CHECKOUTCOM_SECRET_KEY_ABC');
+        $config_values['CHECKOUTCOM_PUBLIC_KEY_ABC'] = Configuration::get('CHECKOUTCOM_PUBLIC_KEY_ABC');
 
         $helper->tpl_vars = array(
-            'fields_value' => Config::values(),
+            'fields_value' => $config_values,
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
             'order_states' => OrderState::getOrderStates($this->context->language->id),
-            'trigger_statuses' => json_decode(Configuration::get('CHECKOUTCOM_TRIGGER_STATUS')),
+            'trigger_statuses' => $triggerStatus ? json_decode($triggerStatus, true) : [],
         );
 
         $helper->addToSmarty($smarty);
 
         $this->context->smarty->assign([
-            'fields_value' => Config::values(),
+            'fields_value' => $config_values,
             'languages' => $this->context->controller->getLanguages(),
             'order_states' => OrderState::getOrderStates($this->context->language->id),
-            'trigger_statuses' => json_decode(Configuration::get('CHECKOUTCOM_TRIGGER_STATUS')),
+            'trigger_statuses' =>  $triggerStatus ? json_decode($triggerStatus, true) : [],
             'webhook_url' => _PS_BASE_URL_SSL_.'/index.php?fc=module&module=checkoutcom&controller=webhook',
         ]);
     }
@@ -192,18 +209,97 @@ class CheckoutCom extends PaymentModule
         foreach (Config::keys() as $key) {
             $value = Tools::getValue($key);
 
-            if (!$value && in_array($key, array('CHECKOUTCOM_SECRET_KEY', 'CHECKOUTCOM_PUBLIC_KEY', 'CHECKOUTCOM_SHARED_KEY'))) {
-                $value = Configuration::get($key);
-            }
+            // if (!$value && in_array($key, array('CHECKOUTCOM_SECRET_KEY', 'CHECKOUTCOM_PUBLIC_KEY', 'CHECKOUTCOM_SHARED_KEY'))) {
+            //     $value = Configuration::get($key);
+            // }
 
             if ($value !== false) {
                 if (is_array($value)) {
                     Configuration::updateValue($key, json_encode($value));
+                }elseif ( in_array($key, array('CHECKOUTCOM_SECRET_KEY', 'CHECKOUTCOM_PUBLIC_KEY'))) {
+                    if (Configuration::get('CHECKOUTCOM_SERVICE') == 0) {
+                        Configuration::updateValue($key, 'Bearer '.str_replace('Bearer ', '',$value));
+                        Configuration::updateValue($key.'_NAS', $value);
+                    }else{
+                        Configuration::updateValue($key, $value);
+                        Configuration::updateValue($key.'_ABC', $value);
+                    }
                 }else{
                     Configuration::updateValue($key, $value);
                 }
             }
         }
+        
+        if (Tools::isSubmit('set_webhook')) {
+            $authorization_key = md5(uniqid(rand(), true));
+            $signature_key = md5(uniqid(rand(), true));
+
+            $data = [
+               "name" => $this->context->shop->name." Prestashop NAS", 
+               "conditions" => [
+                    [
+                        "type" => "event", 
+                        "events" => [
+                           "gateway" => [
+                                "payment_approved", 
+                                "payment_declined", 
+                                "card_verification_declined", 
+                                "card_verified", 
+                                "payment_authorization_incremented", 
+                                "payment_authorization_increment_declined", 
+                                "payment_capture_declined", 
+                                "payment_captured", 
+                                "payment_refund_declined", 
+                                "payment_refunded", 
+                                "payment_void_declined", 
+                                "payment_voided" 
+                           ], 
+                           "dispute" => [
+                                "dispute_canceled", 
+                                "dispute_evidence_required", 
+                                "dispute_expired", 
+                                "dispute_lost", 
+                                "dispute_resolved", 
+                                "dispute_won" 
+                            ], 
+                           "marketplace" => [
+                                "payments_disabled", 
+                                "payments_enabled", 
+                                "vmss_failed", 
+                                "vmss_passed", 
+                                "match_failed", 
+                                "match_passed", 
+                                "sub_entity_created" 
+                            ] 
+                        ] 
+                    ] 
+                ], 
+               "actions" => [
+                    [
+                        "type" => "webhook", 
+                        "url" => _PS_BASE_URL_SSL_."/index.php?fc=module&module=checkoutcom&controller=webhook", 
+                        "headers" => [
+                            "Authorization" => $authorization_key
+                        ], 
+                        "signature" => [
+                          "key" => $signature_key
+                        ] 
+                    ] 
+                ] 
+            ];
+
+            $url = 'https://api.sandbox.checkout.com/workflows';
+            $secret_key = Configuration::get('CHECKOUTCOM_SECRET_KEY');
+
+            $this->curlCall($url, $data, $secret_key);
+
+            Configuration::updateValue('CHECKOUTCOM_AUTHENTIFICATION_KEY', $authorization_key);
+            Configuration::updateValue('CHECKOUTCOM_SIGNATURE_KEY', $signature_key);
+
+            $this->context->controller->confirmations[] = 'Your Webhook has been successfully set.';
+            return;
+        }
+
         $this->logger->info('Module configurations have been updated');
         \PrestaShopLogger::addLog("Module configurations have been updated.", 1, 0, 'checkoutcom' , 0, true, $this->context->employee->id);
 
@@ -218,6 +314,21 @@ class CheckoutCom extends PaymentModule
         }
     }
 
+    public function curlCall($url, $data, $secret_key)
+    {
+        $ch = curl_init($url);
+        $payload = json_encode($data);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        $headers = array(
+            'Content-Type:application/json',
+            'Authorization:'.$secret_key,
+        );
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        curl_close($ch);
+    }
+
     public function addOrderState($name)
     {
         $state_exist = false;
@@ -230,7 +341,6 @@ class CheckoutCom extends PaymentModule
                 break;
             }
         }
- 
         // If the state does not exist, we create it.
         if (!$state_exist) {
             // create new order state
@@ -243,9 +353,12 @@ class CheckoutCom extends PaymentModule
             foreach ($languages as $language){
                 $order_state->name[ $language['id_lang'] ] = $name;
             }
- 
             // Update object
-            $order_state->add();
+           //$order_state->add();
+            if (!$order_state->add()) {
+                $this->logger->error('Install : Cannot create order state : '. $name);
+                throw new Exception($this->l('Cannot create order state'));
+            }
         }
  
         return true;
@@ -539,25 +652,16 @@ class CheckoutCom extends PaymentModule
         $transaction['transaction_id'] = "CART_" . $order->id_cart;
         $transaction['amount'] = number_format( $order->total_paid_tax_incl, 2);
         $transaction['payment_method'] = $order->payment;
-
+        $transaction['id_currency'] = $order->id_currency;
         $time = (float) \Configuration::get('CHECKOUTCOM_CAPTURE_TIME');
         $event = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_EVENT');
         $action = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
-     
+        $trigger_statuses = json_decode(\Configuration::get('CHECKOUTCOM_TRIGGER_STATUS'));
+        
         if(strpos($order->payment, '-card') !== false ){
             $sql = 'SELECT * FROM '._DB_PREFIX_."checkoutcom_adminorder WHERE `transaction_id` = '" . $transaction['transaction_id'] . "'"; 
             $row = Db::getInstance()->executeS($sql);
-     
-            if ( !empty($row) ) {
-                $transaction['amountCaptured'] = $row[0]['amount_captured'];
-                $transaction['capturableAmount'] = $transaction['amount'] - $row[0]['amount_captured'];
-     
-                $transaction['amountRefunded'] = $row[0]['amount_refunded'];
-                $transaction['refundableAmount'] = $transaction['amount'] - $row[0]['amount_refunded'];
-     
-                $transaction['isCapturable'] = false;
-                $transaction['isRefundable'] = false;
-            }elseif( !$action && !$event ){
+            if( !$action && !$event ){
                 $transaction['amountCaptured'] = 0;
                 $transaction['capturableAmount'] = (float) $transaction['amount'];
      
@@ -567,13 +671,36 @@ class CheckoutCom extends PaymentModule
                 $transaction['isCapturable'] = true;
                 $transaction['isRefundable'] = false;
 
-                if (Tools::isSubmit('amountToCapture')) { 
-                    $amountToCapture = number_format( Tools::getValue('amountToCapture'), 2);
+                if ( !empty($row) ) {
+                    $transaction['amountCaptured'] = $row[0]['amount_captured'];
+                    $transaction['capturableAmount'] = $transaction['amount'] - $row[0]['amount_captured'];
+         
+                    $transaction['amountRefunded'] = $row[0]['amount_refunded'];
+                    $transaction['refundableAmount'] = $transaction['amount'] - $row[0]['amount_refunded'];
+         
+                    $transaction['isCapturable'] = false;
+                    $transaction['isRefundable'] = false;
 
-                    if ( $amountToCapture <= $transaction['capturableAmount']) {
+                    if ( $transaction['amount'] > $row[0]['amount_captured']) {
+                        $transaction['isCapturable'] = true;
+                    }
+                }
+
+
+                if (Tools::isSubmit('amountToCapture')) { 
+                    $amountToCapture = (float) number_format( Tools::getValue('amountToCapture'), 2);
+                    $amountToCaptureInt = $amountToCapture*100;
+
+                    if ($amountToCapture <= $transaction['capturableAmount']) {
                         $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
+
+                        $capture_type = "NonFinal";
+                        if ($amountToCapture == $transaction['capturableAmount']) {
+                            $capture_type = "Final";
+                        }
+
                         try {
-                            $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, (int) $amountToCapture*100));
+                            $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, (int) $amountToCaptureInt, $capture_type));
                         } catch (Exception $ex) {
                           
                             $details->http_code = $ex->getCode();
@@ -583,13 +710,23 @@ class CheckoutCom extends PaymentModule
                         }
 
                         if ($details->http_code === 202) {
-                            $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
-                            $sql .= "VALUES ('".$transaction['transaction_id']."', ".$amountToCapture.", 0)";
-                            Db::getInstance()->execute($sql);
+                            if ( empty($row) ) {
+                                $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
+                                $sql .= "VALUES ('".$transaction['transaction_id']."', ".$amountToCapture.", 0)";
+                                Db::getInstance()->execute($sql);
+                            }else{
+                                $sql  = "UPDATE "._DB_PREFIX_."checkoutcom_adminorder";
+                                $sql .= " SET `amount_captured`=".($transaction['amountCaptured']+$amountToCapture);
+                                $sql .= " WHERE `transaction_id`='".$transaction['transaction_id']."'";
+                                Db::getInstance()->execute($sql);
+                            }
 
-                            $transaction['amountCaptured'] = $amountToCapture;
+                            $transaction['amountCaptured'] = $transaction['amountCaptured']+$amountToCapture;
                             $transaction['capturableAmount'] = $transaction['capturableAmount'] - $amountToCapture;
                             $transaction['isCapturable'] = false;
+                            if ( $transaction['amount'] > $transaction['amountCaptured']) {
+                                $transaction['isCapturable'] = true;
+                            }
 
                             $this->context->smarty->assign([ 
                                 'capture_confirmation' => true
@@ -636,7 +773,7 @@ class CheckoutCom extends PaymentModule
         $payment = new OrderPayment();
         $payment = $payment->getByOrderId($params['id_order']);
         $amountToCapture = (float) number_format( $order->total_paid_tax_incl, 2);
-
+        $trigger_statuses = $trigger_statuses ? $trigger_statuses : [];
         if (!$event && !$action && in_array($new_status_id, $trigger_statuses)) {
             $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
             try {

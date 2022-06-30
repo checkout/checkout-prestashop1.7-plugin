@@ -6,13 +6,14 @@
  *
  * PrestaShop v1.7
  *
+ * @author    Platforms Development Team <platforms@checkout.com>
+ * @copyright 2010-2020 Checkout.com
+ * @license   https://opensource.org/licenses/mit-license.html MIT License
  * @category  prestashop-module
  * @package   Checkout.com
- * @author    Platforms Development Team <platforms@checkout.com>
- * @copyright 2010-2022 Checkout.com
- * @license   https://opensource.org/licenses/mit-license.html MIT License
  * @link      https://docs.checkout.com/
  */
+
 header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 

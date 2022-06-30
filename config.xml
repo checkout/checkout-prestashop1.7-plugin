@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
-	<name>checkoutcom</name>
-	<displayName><![CDATA[Checkout.com]]></displayName>
-	<version><![CDATA[2.2.2]]></version>
-	<description><![CDATA[Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.]]></description>
-	<author><![CDATA[Checkout.com]]></author>
-	<tab><![CDATA[payments_gateways]]></tab>
-	<is_configurable>1</is_configurable>
-	<need_instance>1</need_instance>
+    <name>checkoutcom</name>
+    <displayName><![CDATA[Checkout.com]]></displayName>
+    <version><![CDATA[2.3.0]]></version>
+    <description><![CDATA[Checkout.com is an international provider of online payment solutions. We support 150+ currencies and access to all international cards and popular local payment methods.]]></description>
+    <author><![CDATA[Checkout.com]]></author>
+    <tab><![CDATA[payments_gateways]]></tab>
+	<confirmUninstall><![CDATA[Are you sure you want to stop accepting payments?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>1</need_instance>
+	<limited_countries></limited_countries>
 </module>
