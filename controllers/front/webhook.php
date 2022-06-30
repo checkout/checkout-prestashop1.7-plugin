@@ -55,8 +55,12 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
     {
 
         foreach ($this->events as $event) {
-            $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
-            $sql = 'SELECT `reference` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
+            // $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
+            // $sql = 'SELECT `reference` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
+            // $order_reference = Db::getInstance()->getValue($sql);
+
+            $payment_id =  $event['data']['id'] );
+            $sql = 'SELECT `order_reference` FROM `'._DB_PREFIX_.'order_payments` WHERE `transaction_id`='.$payment_id;
             $order_reference = Db::getInstance()->getValue($sql);
 
             //log event details
