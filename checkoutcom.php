@@ -46,7 +46,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.2.3';
+        $this->version = '2.3.0';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -674,9 +674,9 @@ class CheckoutCom extends PaymentModule
                 if ( !empty($row) ) {
                     $transaction['amountCaptured'] = $row[0]['amount_captured'];
                     $transaction['capturableAmount'] = $transaction['amount'] - $row[0]['amount_captured'];
-     
-                $transaction['amountRefunded'] = $row[0]['amount_refunded'];
-                $transaction['refundableAmount'] = $transaction['amount'] - $row[0]['amount_refunded'];
+         
+                    $transaction['amountRefunded'] = $row[0]['amount_refunded'];
+                    $transaction['refundableAmount'] = $transaction['amount'] - $row[0]['amount_refunded'];
          
                     $transaction['isCapturable'] = false;
                     $transaction['isRefundable'] = false;
