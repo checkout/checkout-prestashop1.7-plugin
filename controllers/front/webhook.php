@@ -31,9 +31,12 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
         }
 
         $post = file_get_contents('php://input');
+
         if (Utilities::getValueFromArray($_SERVER, 'HTTP_CKO_SIGNATURE', '') !== hash_hmac('sha256', $post, Configuration::get('CHECKOUTCOM_SECRET_KEY'))) {
             \PrestaShopLogger::addLog('Invalid inbound webhook.', 1, 0, 'CheckoutcomWebhookModuleFrontController' , 0, true);
-            die();
+            if (strpos(Configuration::get('CHECKOUTCOM_SECRET_KEY'), 'Bearer ') === false) {
+                die();
+            }
         }
 
         $data = null;
