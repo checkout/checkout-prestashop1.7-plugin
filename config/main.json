@@ -61,8 +61,8 @@
          "col":2
       },
       {
-         "name":"CHECKOUTCOM_SIGNATURE_KEY",
-         "label":"Signature Key",
+         "name":"CHECKOUTCOM_AUTHENTIFICATION_KEY",
+         "label":"Authorization header Key",
          "description":"",
          "type":"text",
          "icon":"",
@@ -71,8 +71,8 @@
          "col":2
       },
       {
-         "name":"CHECKOUTCOM_AUTHENTIFICATION_KEY",
-         "label":"Authentification Key",
+         "name":"CHECKOUTCOM_SIGNATURE_KEY",
+         "label":"Signature Key",
          "description":"",
          "type":"text",
          "icon":"",

@@ -222,14 +222,6 @@
          "default":"",
          "required":0,
          "col":2
-      },
-      {
-         "name":"CHECKOUTCOM_TRIGGER_STATUS",
-         "label":"Order statuses that trigger capture",
-         "desc":"",
-         "type":"text",
-         "default":"",
-         "required":0
       }
    ]
 ]
