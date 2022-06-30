@@ -37,6 +37,13 @@
 	<div class="tab-pane active" id="template_1">
 		{$config_main}
 		<div class="webhook-url-container">
+			<input type="hidden" name="webhook_url" value="{$webhook_url|escape:'htmlall':'UTF-8'}">
+			<div class="form-group set-webhook-container">
+				<label class="col-lg-3"></label>
+				<div class="col-lg-9">
+					<button type="submit" name="set_webhook">Set webhook</button>
+				</div>
+			</div>
 			<div class="form-group">
 				<label class="control-label col-lg-3">
 					Webhook
@@ -48,6 +55,10 @@
 				</div>
 			</div>
 		</div>
+		<input type="hidden" id="CHECKOUTCOM_SECRET_KEY_ABC" value="{if 'CHECKOUTCOM_SECRET_KEY_ABC'|array_key_exists:$fields_value}{$fields_value.CHECKOUTCOM_SECRET_KEY_ABC}{/if}"/>
+		<input type="hidden" id="CHECKOUTCOM_PUBLIC_KEY_ABC" value="{if 'CHECKOUTCOM_PUBLIC_KEY_ABC'|array_key_exists:$fields_value}{$fields_value.CHECKOUTCOM_PUBLIC_KEY_ABC}{/if}"/>
+		<input type="hidden" id="CHECKOUTCOM_SECRET_KEY_NAS" value="{if 'CHECKOUTCOM_SECRET_KEY_NAS'|array_key_exists:$fields_value}{$fields_value.CHECKOUTCOM_SECRET_KEY_NAS}{/if}"/>
+		<input type="hidden" id="CHECKOUTCOM_PUBLIC_KEY_NAS" value="{if 'CHECKOUTCOM_PUBLIC_KEY_NAS'|array_key_exists:$fields_value}{$fields_value.CHECKOUTCOM_PUBLIC_KEY_NAS}{/if}"/>
 	</div>
 	<div class="tab-pane" id="template_2">
 		<form id="module_form_1" class="defaultForm form-horizontal" action="" method="post" enctype="multipart/form-data" novalidate>
