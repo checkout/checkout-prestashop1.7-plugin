@@ -98,7 +98,7 @@ class CheckoutCom extends PaymentModule
         Tools::clearSmartyCache();
 
         return parent::install() &&
-            $this->addOrderState($this->l('Payment authorized, awaiting capture')) &&
+            $this->addOrderState($this->l('Payment authorized by CKO, awaiting capture')) &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('header') &&
             $this->registerHook('displayCustomerAccount') &&
