@@ -55,12 +55,16 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
     {
 
         foreach ($this->events as $event) {
-            // $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
+            $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
+            $this->module->logger->info('Channel Webhook -- Handle order -- Webhook with payment_id approach');
+            $this->module->logger->info('Channel Webhook -- Handle order -- Cart id : ' .  $cart_id);
             // $sql = 'SELECT `reference` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
             // $order_reference = Db::getInstance()->getValue($sql);
-
-            $payment_id =  $event['data']['id'] );
-            $sql = 'SELECT `order_reference` FROM `'._DB_PREFIX_.'order_payments` WHERE `transaction_id`='.$payment_id;
+            $this->module->logger->info('Channel Webhook -- Handle order -- Event Type : ' . $event['type']);
+            $payment_id =  $event['data']['id'];
+            $this->module->logger->info('Channel Webhook -- Handle order -- Payement_id : ' . $event['data']['id']);
+            $sql = 'SELECT `order_reference` FROM `'._DB_PREFIX_.'order_payment` WHERE `transaction_id`='.'"'.$payment_id.'"';
+            // $this->module->logger->info('Channel Webhook -- Handle order -- sql : ' . $sql );
             $order_reference = Db::getInstance()->getValue($sql);
 
             //log event details
@@ -69,7 +73,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             $this->module->logger->info('Channel Webhook -- Handle order -- Event amount : ' . $event['data']['amount']);
             $this->module->logger->info('Channel Webhook -- Handle order -- Event currency : ' . $event['data']['currency']);
             $this->module->logger->info('Channel Webhook -- Handle order -- Cart id : ' .  $cart_id);
-            $this->module->logger->info('Channel Webhook -- Handle order -- Order reference : ' .  order_reference);
+            $this->module->logger->info('Channel Webhook -- Handle order -- Order reference : ' .  $order_reference);
   
             $orders = Order::getByReference($order_reference);
             $list = $orders->getAll();
