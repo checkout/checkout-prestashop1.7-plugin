@@ -177,7 +177,7 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         $this->module->logger->error('Channel Placeorder -- HandleFail Payment for order not processed');
         \PrestaShopLogger::addLog('Payment for order not processed.', 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
 
-        if ($response->status === 'Declined' && $response->response_summary) {
+        if (isset($response->status) && $response->status === 'Declined' && $response->response_summary) {
 			$this->module->logger->error(sprintf('Channel Placeorder -- HandleFail An error has occured while processing your payment. Payment Declined : %s', $response->response_summary));
             $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment. Payment Declined.', [], 'Modules.Checkoutcom.Placeorder.php');
         } else {

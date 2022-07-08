@@ -1,3 +1,18 @@
+{*
+ * Checkout.com
+ * Authorised and regulated as an electronic money institution
+ * by the UK Financial Conduct Authority (FCA) under number 900816.
+ *
+ * PrestaShop v1.7
+ *
+ * @category  prestashop-module
+ * @package   Checkout.com
+ * @author    Platforms Development Team <platforms@checkout.com>
+ * @copyright 2010-2022 Checkout.com
+ * @license   https://opensource.org/licenses/mit-license.html MIT License
+ * @link      https://docs.checkout.com/
+ *}
+
 {extends 'customer/page.tpl'}
 
 {block name='page_title'}
@@ -6,7 +21,7 @@
 
 {block name='page_content'}
     <div class="content" style="box-shadow: 2px 2px 8px 0 rgba(0,0,0,.2);background: #fff;padding: 1rem;font-size: .875rem;color: #7a7a7a;">
-        <form name="checkoutcom_form" id="checkoutcom_form" action="{$link->getModuleLink('checkoutcom', 'customer', [], true)|escape:'html'}" method="post">
+        <form name="checkoutcom_form" id="checkoutcom_form" action="{$link->getModuleLink('checkoutcom', 'customer', [], true)|escape:'htmlall':'UTF-8'}" method="post">
             <ul class="payment_methods">
                 {if !empty($cardLists)}
                     {foreach name=outer item=last_four from=$cardLists}
@@ -27,8 +42,8 @@
 
                         <div class="out">
                             <li>
-                                <input id="{$entity_id}" type="checkbox" name="checkoutcom-saved-card[]" value="{$entity_id}"/>
-                                <label for="{$entity_id}" style="padding-left: 15px;">xxxx-{$last_four}-{$card_scheme}</label>
+                                <input id="{$entity_id|escape:'htmlall':'UTF-8'}" type="checkbox" name="checkoutcom-saved-card[]" value="{$entity_id|escape:'htmlall':'UTF-8'}"/>
+                                <label for="{$entity_id|escape:'htmlall':'UTF-8'}" style="padding-left: 15px;">xxxx-{$last_four|escape:'htmlall':'UTF-8'}-{$card_scheme|escape:'htmlall':'UTF-8'}</label>
                             </li>
                         </div>
                     {/foreach}

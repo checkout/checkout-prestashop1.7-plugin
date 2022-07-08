@@ -4,6 +4,7 @@ namespace CheckoutCom\PrestaShop\Models;
 
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use PrestaShop\PrestaShop\Adapter\Entity\Db;
+use Checkout\Library\Exceptions\CheckoutException;
 
 class Config extends \Configuration
 {
@@ -180,6 +181,7 @@ class Config extends \Configuration
      */
     public static function createCkoSaveCardTable()
     {
+        $module = \Module::getInstanceByName('checkoutcom');
         $sql = "CREATE TABLE  IF NOT EXISTS "._DB_PREFIX_."cko_cards
              (
                 entity_id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -192,7 +194,10 @@ class Config extends \Configuration
              ";
 
         $db = Db::getInstance();
-        if (!$db->execute($sql))
-            die('Error has occured while creating your table. Please try again.');
+        if (!$db->execute($sql)) {
+            $module->logger->error('Install : Error has occured while creating cko_cards table');
+            throw new CheckoutException($module->l('Error has occured while creating cko_cards table. Please try again.'));
+           // die('Error has occured while creating your table. Please try again.');
+        }
     }
 }

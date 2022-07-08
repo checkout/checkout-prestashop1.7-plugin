@@ -49,30 +49,6 @@
 			]
 		},
 		{
-			"name":"CHECKOUTCOM_ALTERNATIVE_POLI",
-			"key": "poli",
-			"title": "POLi",
-			"label":"Enable POLi",
-			"currencies": ["AUD", "NZD"],
-			"class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Poli",
-			"description":"",
-			"type":"bswitch",
-			"default":0,
-			"required":0,
-			"options":[
-				{
-					"id":"id_option",
-					"value":1,
-					"label":"Enabled"
-				},
-				{
-					"id":"id_option",
-					"value":0,
-					"label":"Disabled"
-				}
-			]
-		},
-		{
 			"name":"CHECKOUTCOM_ALTERNATIVE_SEPA",
 			"key": "sepa",
 			"title": "SEPA",
@@ -223,30 +199,6 @@
 			"label":"Enable KNet",
 			"currencies": ["KWD"],
 			"class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Knet",
-			"description":"",
-			"type":"bswitch",
-			"default":0,
-			"required":0,
-			"options":[
-				{
-					"id":"id_option",
-					"value":1,
-					"label":"Enabled"
-				},
-				{
-					"id":"id_option",
-					"value":0,
-					"label":"Disabled"
-				}
-			]
-		},
-		{
-			"name":"CHECKOUTCOM_ALTERNATIVE_ALIPAY",
-			"key": "alipay",
-			"title": "Alipay",
-			"label":"Enable Alipay",
-			"currencies": ["USD"],
-			"class":"CheckoutCom\\PrestaShop\\Models\\Payments\\Alternatives\\Alipay",
 			"description":"",
 			"type":"bswitch",
 			"default":0,

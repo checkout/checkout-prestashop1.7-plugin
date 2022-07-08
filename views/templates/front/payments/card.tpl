@@ -1,8 +1,23 @@
-<form name="{$module}" id="{$module}-card-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'html'}" method="POST">
+{*
+ * Checkout.com
+ * Authorised and regulated as an electronic money institution
+ * by the UK Financial Conduct Authority (FCA) under number 900816.
+ *
+ * PrestaShop v1.7
+ *
+ * @category  prestashop-module
+ * @package   Checkout.com
+ * @author    Platforms Development Team <platforms@checkout.com>
+ * @copyright 2010-2022 Checkout.com
+ * @license   https://opensource.org/licenses/mit-license.html MIT License
+ * @link      https://docs.checkout.com/
+ *}
 
-    <input id="{$module}-card-source" type="hidden" name="source" value="card" required>
-    <input id="{$module}-card-token" type="hidden" name="token" value="" required>
-    <input id="{$module}-card-bin" type="hidden" name="bin" value="">
+ <form name="{$module|escape:'htmlall':'UTF-8'}" id="{$module|escape:'htmlall':'UTF-8'}-card-form" action="{$link->getModuleLink($module, 'placeorder', [], true)|escape:'htmlall':'UTF-8'}" method="POST">
+
+    <input id="{$module|escape:'htmlall':'UTF-8'}-card-source" type="hidden" name="source" value="card" required>
+    <input id="{$module|escape:'htmlall':'UTF-8'}-card-token" type="hidden" name="token" value="" required>
+    <input id="{$module|escape:'htmlall':'UTF-8'}-card-bin" type="hidden" name="bin" value="">
 
     {if $save_card_option == '1' and $is_guest == 0  }
 
@@ -31,16 +46,16 @@
                     {if $is_mada}
                         <li>
                             <label>
-                                <input  class="{$module}-saved-card-mada" type="radio" name="{$module}-saved-card" value="{$entity_id}"/>
-                                <img class="card-logo" src="{$img_dir}{strtoLower($card_scheme)}.svg"> ●●●● {$last_four}
+                                <input  class="{$module|escape:'htmlall':'UTF-8'}-saved-card-mada" type="radio" name="{$module|escape:'htmlall':'UTF-8'}-saved-card" value="{$entity_id|escape:'htmlall':'UTF-8'}"/>
+                                <img class="card-logo" src="{$img_dir|escape:'htmlall':'UTF-8'}{$card_scheme|lower|escape:'htmlall':'UTF-8'}.svg"> ●●●● {$last_four|escape:'htmlall':'UTF-8'}
                             </label>
                         </li>
 
                     {else}
                         <li>
                             <label>
-                                <input  class="{$module}-saved-card" type="radio" name="{$module}-saved-card" value="{$entity_id}"/>
-                                <img class="card-logo" src="{$img_dir}{strtoLower($card_scheme)}.svg"> ●●●● {$last_four}
+                                <input  class="{$module|escape:'htmlall':'UTF-8'}-saved-card" type="radio" name="{$module|escape:'htmlall':'UTF-8'}-saved-card" value="{$entity_id|escape:'htmlall':'UTF-8'}"/>
+                                <img class="card-logo" src="{$img_dir|escape:'htmlall':'UTF-8'}{$card_scheme|lower|escape:'htmlall':'UTF-8'}.svg"> ●●●● {$last_four|escape:'htmlall':'UTF-8'}
                             </label>
                         </li>
                     {/if}
@@ -49,8 +64,8 @@
 
                 <li>
                     <label>
-                        <input  class= "{$module}-new-card" type="radio" name="{$module}-saved-card"  value="new_card"/>
-                        <img class="card-logo" src="{$img_dir}addcard.svg"> {l s='New card' mod='checkoutcom' }
+                        <input  class= "{$module|escape:'htmlall':'UTF-8'}-new-card" type="radio" name="{$module|escape:'htmlall':'UTF-8'}-saved-card"  value="new_card"/>
+                        <img class="card-logo" src="{$img_dir|escape:'htmlall':'UTF-8'}addcard.svg"> {l s='New card' mod='checkoutcom' }
                     </label>
                 </li>
 
@@ -60,14 +75,14 @@
 
     {if $isSingleIframe}
         {*frames will be added here*}
-        <div id="{$module}-card-frame" class="card-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-billing="{$billingId}" data-debug="{$debug}" data-lang="{$lang}" data-module="{$module}" data-saveCard="{$save_card_option}"  ></div>
+        <div id="{$module|escape:'htmlall':'UTF-8'}-card-frame" class="card-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY|escape:'htmlall':'UTF-8'}" data-billing="{$billingId|escape:'htmlall':'UTF-8'}" data-debug="{$debug|escape:'htmlall':'UTF-8'}" data-lang="{$lang|escape:'htmlall':'UTF-8'}" data-module="{$module|escape:'htmlall':'UTF-8'}" data-saveCard="{$save_card_option|escape:'htmlall':'UTF-8'}"  ></div>
     {else}
-        <div id="{$module}-multi-frame" class="multi-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY}" data-billing="{$billingId}" data-debug="{$debug}" data-lang="{$lang}" data-module="{$module}" data-saveCard="{$save_card_option}" data-imagedir="{$img_dir}">
+        <div id="{$module|escape:'htmlall':'UTF-8'}-multi-frame" class="multi-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY|escape:'htmlall':'UTF-8'}" data-billing="{$billingId|escape:'htmlall':'UTF-8'}" data-debug="{$debug|escape:'htmlall':'UTF-8'}" data-lang="{$lang|escape:'htmlall':'UTF-8'}" data-module="{$module|escape:'htmlall':'UTF-8'}" data-saveCard="{$save_card_option|escape:'htmlall':'UTF-8'}" data-imagedir="{$img_dir|escape:'htmlall':'UTF-8'}">
             {*frames will be added here*}
             <div class="input-container card-number">
                 <div class="icon-container">
                     <img id="icon-card-number"
-                        src="{$img_dir}card-icons/card.svg"
+                        src="{$img_dir|escape:'htmlall':'UTF-8'}card-icons/card.svg"
                         alt="PAN" />
                 </div>
                 <div class="card-number-frame"></div>
@@ -76,7 +91,7 @@
                 </div>
                 <div class="icon-container">
                     <img id="icon-card-number-error"
-                        src="{$img_dir}card-icons/error.svg">
+                        src="{$img_dir|escape:'htmlall':'UTF-8'}card-icons/error.svg">
                 </div>
             </div>
 
@@ -85,13 +100,13 @@
                     <div class="input-container expiry-date">
                         <div class="icon-container">
                             <img id="icon-expiry-date"
-                                src="{$img_dir}card-icons/exp-date.svg"
+                                src="{$img_dir|escape:'htmlall':'UTF-8'}card-icons/exp-date.svg"
                                 alt="Expiry date" />
                         </div>
                         <div class="expiry-date-frame"></div>
                         <div class="icon-container">
                             <img id="icon-expiry-date-error"
-                                src="{$img_dir}card-icons/error.svg" />
+                                src="{$img_dir|escape:'htmlall':'UTF-8'}card-icons/error.svg" />
                         </div>
                     </div>
                 </div>
@@ -100,13 +115,13 @@
                     <div class="input-container cvv">
                         <div class="icon-container">
                             <img id="icon-cvv"
-                                src="{$img_dir}card-icons/cvv.svg"
+                                src="{$img_dir|escape:'htmlall':'UTF-8'}card-icons/cvv.svg"
                                 alt="CVV" />
                         </div>
                         <div class="cvv-frame"></div>
                         <div class="icon-container">
                             <img id="icon-cvv-error"
-                                src="{$img_dir}card-icons/error.svg" />
+                                src="{$img_dir|escape:'htmlall':'UTF-8'}card-icons/error.svg" />
                         </div>
                     </div>
                 </div>
@@ -124,9 +139,9 @@
         </div>
 
         <div class="cvvVerification">
-            <label for="{$module}-cko-cvv">
+            <label for="{$module|escape:'htmlall':'UTF-8'}-cko-cvv">
                 <em>* </em>{l s='Card Verification Number' mod='checkoutcom'}
-                <input id="{$module}-cko-cvv" type="number" name="cko-cvv" min="3" max="4" autocomplete="off"/>
+                <input id="{$module|escape:'htmlall':'UTF-8'}-cko-cvv" type="number" name="cko-cvv" min="3" max="4" autocomplete="off"/>
             </label>
         </div>
     {/if}
