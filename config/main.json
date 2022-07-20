@@ -91,6 +91,14 @@
          "type":"dynamic",
          "default":7,
          "required":0
+      },
+      {
+         "name":"CHECKOUTCOM_CAPTURE_BACKORDER_STATUS",
+         "label":"Capture back order status",
+         "desc":"Select the status that should be used for back orders with successful payment capture.",
+         "type":"dynamic",
+         "default":9,
+         "required":0
       }
    ],
    [

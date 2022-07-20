@@ -121,6 +121,10 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
                         }
 
+                        if ($event['type'] == 'payment_captured' && $this->isOrderBackOrder($order->id)) {
+                            $status = \Configuration::get('CHECKOUTCOM_CAPTURE_BACKORDER_STATUS');
+                        }
+
                         $history = new OrderHistory();
                         $history->id_order = $order->id;
                         $history->changeIdOrderState($status, $order->id, true);
@@ -144,7 +148,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
     protected function preventAuthAfterCapture($current, $target) {
 
         $allow = true;
-        if($current === +\Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') && $target === +\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS') ) {
+        if(($current === +\Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') || $current === +\Configuration::get('CHECKOUTCOM_CAPTURE_BACKORDER_STATUS')) && $target === +\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS') ) {
             $allow = false;
         }
 
@@ -164,6 +168,28 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
         if($webhookAmount < $amountTotalCent){
             return true;
+        }
+
+        return false;
+    }
+
+      /**
+     * @param $orderId
+     * @return bool
+     */
+    private function isOrderBackOrder($orderId)
+    {
+        $order = new Order($orderId);
+        $orderDetails = $order->getOrderDetailList();
+        /** @var OrderDetail $detail */
+        foreach ($orderDetails as $detail) {
+            $orderDetail = new OrderDetail($detail['id_order_detail']);
+            if (
+                \Configuration::get('PS_STOCK_MANAGEMENT') &&
+                ($orderDetail->getStockState() || $orderDetail->product_quantity_in_stock <= 0)
+            ) {
+                return true;
+            }
         }
 
         return false;
