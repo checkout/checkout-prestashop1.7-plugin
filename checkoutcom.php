@@ -46,7 +46,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.3.0';
+        $this->version = '2.3.1';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -78,7 +78,7 @@ class CheckoutCom extends PaymentModule
         }
         
         $sql = "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."checkoutcom_adminorder`(
-            `id_checkoutcom_adminorder` int(11) NOT NULL,
+            `id_checkoutcom_adminorder` int(11) NOT NULL AUTO_INCREMENT,
             `transaction_id` varchar(255) NOT NULL,
             `amount_captured` float(20,2) NOT NULL,
             `amount_refunded` float(20,2) NOT NULL,
@@ -98,7 +98,7 @@ class CheckoutCom extends PaymentModule
         Tools::clearSmartyCache();
 
         return parent::install() &&
-            $this->addOrderState($this->l('Payment authorized by CKO, awaiting capture')) &&
+            $this->addOrderState('Payment authorized by CKO, awaiting capture') &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('header') &&
             $this->registerHook('displayCustomerAccount') &&
@@ -772,12 +772,12 @@ class CheckoutCom extends PaymentModule
         $action = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
         $payment = new OrderPayment();
         $payment = $payment->getByOrderId($params['id_order']);
-        $amountToCapture = (float) number_format( $order->total_paid_tax_incl, 2);
+        $amountToCapture = round($order->total_paid_tax_incl, 2);
         $trigger_statuses = $trigger_statuses ? $trigger_statuses : [];
         if (!$event && !$action && in_array($new_status_id, $trigger_statuses)) {
             $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
             try {
-                $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, $amountToCapture*100));
+                $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, intval(round($amountToCapture*100))));
             } catch (Exception $ex) {
                 return;
             }

@@ -65,12 +65,12 @@ class Utilities
      *
      * @return     mixed  The order status.
      */
-    public static function getOrderStatus($event, $reference, $id) {
+    public static function getOrderStatus($event, $reference, $id, $id_shop = null) {
 
         switch ($event) {
             case 'card_verified':
             case 'payment_approved':
-                return \Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
+                return \Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS', null, null, $id_shop);
             case 'card_verification_declined':
             case 'payment_declined':
             case 'payment_expired':
@@ -80,14 +80,14 @@ class Utilities
                 \PrestaShopLogger::addLog('The `' . $event .'` was triggered for order ' . $reference . '.', 2, 0, 'CheckoutcomWebhookModuleFrontController' , $id, false);
                 return _PS_OS_ERROR_;
             case 'payment_voided':
-                return \Configuration::get('CHECKOUTCOM_VOID_ORDER_STATUS');
+                return \Configuration::get('CHECKOUTCOM_VOID_ORDER_STATUS', null, null, $id_shop);
             case 'payment_canceled':
                  \PrestaShopLogger::addLog('The `' . $event .'` was triggered for order ' . $reference . '.', 2, 0, 'CheckoutcomWebhookModuleFrontController' , $id, false);
                 return _PS_OS_CANCELED_;
             case 'payment_captured':
-                return \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
+                return \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS', null, null, $id_shop);
             case 'payment_refunded':
-                return \Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS');
+                return \Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS', null, null, $id_shop);
             default:
                 return null;
         }

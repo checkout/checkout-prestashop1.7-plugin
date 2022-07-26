@@ -76,9 +76,11 @@
     {if $isSingleIframe}
         {*frames will be added here*}
         <div id="{$module|escape:'htmlall':'UTF-8'}-card-frame" class="card-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY|escape:'htmlall':'UTF-8'}" data-billing="{$billingId|escape:'htmlall':'UTF-8'}" data-debug="{$debug|escape:'htmlall':'UTF-8'}" data-lang="{$lang|escape:'htmlall':'UTF-8'}" data-module="{$module|escape:'htmlall':'UTF-8'}" data-saveCard="{$save_card_option|escape:'htmlall':'UTF-8'}"  ></div>
+        <div class="scheme-choice-frame"></div>
     {else}
         <div id="{$module|escape:'htmlall':'UTF-8'}-multi-frame" class="multi-frame" data-key="{$CHECKOUTCOM_PUBLIC_KEY|escape:'htmlall':'UTF-8'}" data-billing="{$billingId|escape:'htmlall':'UTF-8'}" data-debug="{$debug|escape:'htmlall':'UTF-8'}" data-lang="{$lang|escape:'htmlall':'UTF-8'}" data-module="{$module|escape:'htmlall':'UTF-8'}" data-saveCard="{$save_card_option|escape:'htmlall':'UTF-8'}" data-imagedir="{$img_dir|escape:'htmlall':'UTF-8'}">
             {*frames will be added here*}
+
             <div class="input-container card-number">
                 <div class="icon-container">
                     <img id="icon-card-number"
@@ -93,7 +95,9 @@
                     <img id="icon-card-number-error"
                         src="{$img_dir|escape:'htmlall':'UTF-8'}card-icons/error.svg">
                 </div>
+                <div class="scheme-choice-frame"></div>
             </div>
+            
 
             <div class="date-and-code">
                 <div>
