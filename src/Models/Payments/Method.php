@@ -257,6 +257,9 @@ abstract class Method
         if ($payment->threeDs->enabled) {
             $payment->threeDs->attempt_n3d = (bool) \Configuration::get('CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D');
         }
+
+        $threeDs = '3ds';
+        $payment->$threeDs = $payment->threeDs;
     }
 
     /**

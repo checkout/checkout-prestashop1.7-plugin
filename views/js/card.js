@@ -60,6 +60,9 @@ function CheckoutcomFramesPay($form) {
                 country:      prestashop.customer.addresses[$frames.dataset.billing].country_iso
             },
             phone: customerPhone,
+        },
+        schemeChoice: {
+            frameSelector: ".scheme-choice-frame"
         }
     });
 
@@ -109,9 +112,9 @@ function CheckoutcomFramesPay($form) {
         var pm = event.paymentMethod;
         let container = document.querySelector(".icon-container.payment-method");
 
-        if (!pm) {
+        if (!pm && document.getElementById("checkoutcom-multi-frame") !== null) {
             clearPaymentMethodIcon(container);
-        } else {
+        } else if(document.getElementById("checkoutcom-multi-frame") !== null) {
             clearErrorIcon("card-number");
             showPaymentMethodIcon(container, pm);
         }
