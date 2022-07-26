@@ -59,16 +59,34 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
         foreach ($this->events as $event) {
             $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
-            $sql = 'SELECT `reference` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
-            $order_reference = Db::getInstance()->getValue($sql);
+            $sql = 'SELECT `reference`,`id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
+            $order_result = Db::getInstance()->executeS($sql);
+            $order_reference = $order_result[0]['reference'];
+            $order_id_shop = $order_result[0]['id_shop'];
 
             $orders = Order::getByReference($order_reference);
             $list = $orders->getAll();
-            $status = +Utilities::getOrderStatus($event['type'], $order_reference, $event['data']['action_id']);
+            $status = +Utilities::getOrderStatus($event['type'], $order_reference, $event['data']['action_id'], $order_id_shop);
 
             if ($status) {
 
                 foreach ($list as $order) {
+
+                    if($event['type'] == 'payment_captured'){
+                        $sql = 'SELECT * FROM '._DB_PREFIX_."checkoutcom_adminorder WHERE `transaction_id` = '".$event['data']['reference']."'"; 
+                        $row = Db::getInstance()->getRow($sql);
+
+                        if ( empty($row) ) {
+                            $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
+                            $sql .= "VALUES ('".$event['data']['reference']."', ".($event['data']['balances']['total_captured']/100).", 0)";
+                            Db::getInstance()->execute($sql);
+                        }else{
+                            $sql  = "UPDATE "._DB_PREFIX_."checkoutcom_adminorder";
+                            $sql .= " SET `amount_captured`=".($event['data']['balances']['total_captured']/100);
+                            $sql .= " WHERE `transaction_id`='".$event['data']['reference']."'";
+                            Db::getInstance()->execute($sql);
+                        }
+                    }
 
                     $currentStatus = $order->getCurrentOrderState()->id;
                     if($currentStatus !== $status && $this->preventAuthAfterCapture($currentStatus, $status)) {
