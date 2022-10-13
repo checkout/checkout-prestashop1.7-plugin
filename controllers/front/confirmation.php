@@ -37,14 +37,17 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
         $cart = new Cart((int) $cart_id);
         $customer = new Customer((int) $cart->id_customer);
+        if (Tools::isSubmit('cko-session-id') || strpos($secure_key, '?cko-session-id=') !== false) {
 
-        //Log cart and customer info
-        $this->module->logger->info('Channel Confirmation -- Cart id : ' . $cart_id);
-        $this->module->logger->info('Channel Confirmation -- Customer id : ' . id_customer);
+            if (Tools::isSubmit('cko-session-id')) {
+                $cko_session_id = $_REQUEST['cko-session-id'];
+            }else{
+                $separated_url = explode('?cko-session-id=', $secure_key);
+                $secure_key = $separated_url[0];
+                $cko_session_id = $separated_url[1];
+            }
 
-        if (Tools::isSubmit('cko-session-id')) {
-
-            $response = $this->_verifySession($_REQUEST['cko-session-id']);
+            $response = $this->_verifySession($cko_session_id);
 
             if ($response->isSuccessful() && !$response->isPending()) {
                 $suffix = '';
@@ -80,10 +83,6 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 $transaction_id = $response->id;
                 $status = $response->status;
 
-                 //Log transaction id and status
-                $this->module->logger->info('Channel Confirmation -- Transaction id : ' . $transaction_id);
-                $this->module->logger->info('Channel Confirmation -- Transaction  status : ' . $status);
-
                 $context = \Context::getContext();
 
                 if($context->cookie->__isset('save-card-checkbox') ){
@@ -112,10 +111,6 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
              * The order has been placed so we redirect the customer on the confirmation page.
              */
             $module_id = $this->module->id;
-
-             //Log cart and customer info
-            $this->module->logger->info('Channel Confirmation -- Cart id : ' . $cart->id);
-            $this->module->logger->info('Channel Confirmation -- Order id : ' . $order_id);
 			$this->module->logger->info('Channel Confirmation -- Order has been placed.');
 
             /**
@@ -140,10 +135,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $history->id_order = $order_id;
             $history->changeIdOrderState($orderStatus, $order_id, true);
             $history->add();
-
-            //Log order id and status
-            $this->module->logger->info('Channel Confirmation -- New order id : ' . $order_id);
-            $this->module->logger->info('Channel Confirmation -- New order status  : ' . $orderStatus);
+            $this->module->logger->info('Channel Confirmation -- New order status : ' . $order_id);
 
             // Flag Order
             if($flagged && $threeDS && !Utilities::addMessageToOrder($this->trans('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.', [], 'Modules.Checkoutcom.Confirmation.php'), $order)) {

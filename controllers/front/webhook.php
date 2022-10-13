@@ -31,9 +31,12 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
         }
 
         $post = file_get_contents('php://input');
+
         if (Utilities::getValueFromArray($_SERVER, 'HTTP_CKO_SIGNATURE', '') !== hash_hmac('sha256', $post, Configuration::get('CHECKOUTCOM_SECRET_KEY'))) {
             \PrestaShopLogger::addLog('Invalid inbound webhook.', 1, 0, 'CheckoutcomWebhookModuleFrontController' , 0, true);
-            die();
+            if (strpos(Configuration::get('CHECKOUTCOM_SECRET_KEY'), 'Bearer ') === false) {
+                die();
+            }
         }
 
         $data = null;
@@ -56,49 +59,62 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
         foreach ($this->events as $event) {
             $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
-            $this->module->logger->info('Channel Webhook -- Handle order -- Webhook with payment_id approach');
-            $this->module->logger->info('Channel Webhook -- Handle order -- Cart id : ' .  $cart_id);
-            // $sql = 'SELECT `reference` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
-            // $order_reference = Db::getInstance()->getValue($sql);
-            $this->module->logger->info('Channel Webhook -- Handle order -- Event Type : ' . $event['type']);
             $payment_id =  $event['data']['id'];
-            $this->module->logger->info('Channel Webhook -- Handle order -- Payement_id : ' . $event['data']['id']);
             $sql = 'SELECT `order_reference` FROM `'._DB_PREFIX_.'order_payment` WHERE `transaction_id`='.'"'.$payment_id.'"';
-            // $this->module->logger->info('Channel Webhook -- Handle order -- sql : ' . $sql );
-            $order_reference = Db::getInstance()->getValue($sql);
+            $order_result =  Db::getInstance()->getValue($sql);
+            $order_reference = $order_result[0]['order_reference'];
 
-            //log event details
-            $this->module->logger->info('Channel Webhook -- Handle order -- Event Type : ' . $event['type']);
-            $this->module->logger->info('Channel Webhook -- Handle order -- Event action id : ' . $event['data']['action_id']);
-            $this->module->logger->info('Channel Webhook -- Handle order -- Event amount : ' . $event['data']['amount']);
-            $this->module->logger->info('Channel Webhook -- Handle order -- Event currency : ' . $event['data']['currency']);
-            $this->module->logger->info('Channel Webhook -- Handle order -- Cart id : ' .  $cart_id);
-            $this->module->logger->info('Channel Webhook -- Handle order -- Order reference : ' .  $order_reference);
-  
+            // TODO - Check if the order object has id_shop and skip the following query
+            $sql = 'SELECT `id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `reference`='.$order_reference;
+            $order_result = Db::getInstance()->executeS($sql);
+            // $order_reference = $order_result[0]['reference'];
+            $order_id_shop = $order_result[0]['id_shop'];
+
             $orders = Order::getByReference($order_reference);
             $list = $orders->getAll();
-            $status = +Utilities::getOrderStatus($event['type'], $order_reference, $event['data']['action_id']);
+            $status = +Utilities::getOrderStatus($event['type'], $order_reference, $event['data']['action_id'], $order_id_shop);
 
             if ($status) {
-                //log status
-                $this->module->logger->info('Channel Webhook -- Handle order -- Order status for  above order reference: ' .  $status);
 
                 foreach ($list as $order) {
-
                     $currentStatus = $order->getCurrentOrderState()->id;
+                    if($event['type'] == 'payment_captured'){
+                        $sql = 'SELECT * FROM '._DB_PREFIX_."checkoutcom_adminorder WHERE `transaction_id` = '".$event['data']['reference']."'"; 
+                        $row = Db::getInstance()->getRow($sql);
 
-                    //log current status
-                    $this->module->logger->info('Channel Webhook -- Begin order processing:'. $order->id);
-                    $this->module->logger->info('Channel Webhook -- Handle order -- current order status : ' .   $currentStatus);
-  
+                        if ( empty($row) ) {
+                            $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
+                            $sql .= "VALUES ('".$event['data']['reference']."', ".($event['data']['balances']['total_captured']/100).", 0)";
+                            Db::getInstance()->execute($sql);
+                        }else{
+                            $sql  = "UPDATE "._DB_PREFIX_."checkoutcom_adminorder";
+                            $sql .= " SET `amount_captured`=".($event['data']['balances']['total_captured']/100);
+                            $sql .= " WHERE `transaction_id`='".$event['data']['reference']."'";
+                            Db::getInstance()->execute($sql);
+                        }
+
+                        if ($this->isOrderBackOrder($order->id)) {
+                            $status = \Configuration::get('CHECKOUTCOM_CAPTURE_BACKORDER_STATUS');
+                        }
+                    }
+                    else if($event['type'] == 'payment_refunded'){
+
+                        //Check if all the items in order have been refunded
+                        $isFullRefund = $this->_isFullRefund($order);
+                        if($isFullRefund){
+                            $status = \Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS');
+                        }
+                        else{
+                            $status = $currentStatus;
+                        }
+                        
+                    }
+
                     if($currentStatus !== $status && $this->preventAuthAfterCapture($currentStatus, $status)) {
 
                         $isPartial = $this->_isPartialAmount($event, $order);
                         $amount = Method::fixAmount($event['data']['amount'], $event['data']['currency'], true);
                         $currency = $event['data']['currency'];
-                        
-                        //log is partial
-                        $this->module->logger->info('Channel Webhook -- Handle order -- is partial amount? : ' .   $isPartial);
 
                         if($isPartial) {
 
@@ -106,10 +122,10 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                             ['%currency%' => $currency, '%amount%' => $amount], 
                             'Modules.Checkoutcom.Webhook.php');
 
-                            if($event['type'] == 'payment_refunded'){
-                                $message .= "has been partially refunded";
-                                $status = \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
-                            }
+                            // if($event['type'] == 'payment_refunded'){
+                            //     $message .= "has been partially refunded";
+                            //     $status = \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
+                            // }
 
                             if($event['type'] == 'payment_captured'){
                                 $message .= "has been partially captured";
@@ -121,21 +137,12 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
                         }
 
-                        if ($event['type'] == 'payment_captured' && $this->isOrderBackOrder($order->id)) {
-                            $status = \Configuration::get('CHECKOUTCOM_CAPTURE_BACKORDER_STATUS');
-                        }
-
                         $history = new OrderHistory();
                         $history->id_order = $order->id;
                         $history->changeIdOrderState($status, $order->id, true);
                         $history->addWithemail();
-
-                        //log new order history and status
-                        $this->module->logger->info('Channel Webhook -- New order id : ' . $order->id);
-                        $this->module->logger->info('Channel Webhook -- New order status : ' . $status);
+                        $this->module->logger->info('Channel Webhook -- New order status : ' . $order->id);
                     }
-                    //log end of processing for each order
-                    $this->module->logger->info('-- -- Channel Webhook -- End of order processing:'. $order->id);
                 }
             }
         }
@@ -149,6 +156,10 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
         $allow = true;
         if(($current === +\Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') || $current === +\Configuration::get('CHECKOUTCOM_CAPTURE_BACKORDER_STATUS')) && $target === +\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS') ) {
+            $allow = false;
+        }
+
+        if($current === +\Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS') && $target === +\Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') ) {
             $allow = false;
         }
 
@@ -173,7 +184,8 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
         return false;
     }
 
-      /**
+     /**
+     * Check if the order is a back order
      * @param $orderId
      * @return bool
      */
@@ -192,6 +204,29 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             }
         }
 
+        return false;
+    }
+
+     /**
+     * Check if all the items in the order are refunded (to mark the overall status of the order) 
+     * @param $order
+     * @return bool
+     */
+    private function _isFullRefund($order)
+    {
+        $refunded_products=0;
+        $sql = 'SELECT * FROM '._DB_PREFIX_."order_detail  WHERE `id_order` = '" .$order->id . "'"; 
+        $orderDetails = Db::getInstance()->executeS($sql);
+        $totalProducts = 0;
+        foreach($orderDetails as $orderdetail){
+
+            $refunded_products += $orderdetail['product_quantity_return']+ $orderdetail['product_quantity_refunded'];
+            $totalProducts += $orderdetail['product_quantity'];
+        }
+       
+        if($totalProducts === $refunded_products){
+            return true;
+        }
         return false;
     }
 }

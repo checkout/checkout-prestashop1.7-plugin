@@ -511,7 +511,7 @@ iframe{width:100%}
 .token{color:#b35e14;font-size:0.9rem;font-family:monospace}
 @media screen and (min-width: 31rem){
     .one-liner{flex-direction:row}
-    .card-frame{width:500px;margin-bottom:0}}
+    .card-frame{margin-bottom:0}}
 
 
 
@@ -543,7 +543,6 @@ iframe{width:100%}
 .input-container {
   position: relative;
   display: flex;
-  height: 40px;
 }
 .icon-container:last-child {
   right: 0;
@@ -594,7 +593,8 @@ div + button {
   transform: translateY(-50%) rotateY(90deg);
   transition: opacity 0.15s ease-out;
   opacity: 0;
-  top: 50%;
+  top: 20px;
+  height: 16px;
 }
 
 .icon-container.payment-method.show {
@@ -605,6 +605,10 @@ div + button {
 
 .icon-container.payment-method img {
   width: 100%;
+}
+
+#icon-card-number {
+  height: 40px;
 }
 
 [id$="-error"] {
@@ -640,6 +644,24 @@ div + button {
   font-weight: 300;
 }
 
+.scheme-choice-frame{
+  position: relative;
+  z-index: 1;
+  padding-bottom: 10px;
+}
+
+#checkout-frames-scheme-choice-button-wrapper{
+    display: none;
+}
+
+#checkout-frames-scheme-choice-select-wrapper{
+    display: block;
+}
+
+.choices__inner{
+    border-radius: 2px !important;
+}
+
 /**
 IE11-targeted optimisations
 */
@@ -666,10 +688,6 @@ _:-ms-fullscreen,
 
 #checkout-frames-card-number::-ms-clear {
   display: none;
-}
-
-.multi-frame {
-  height: 90px;
 }
 
 .payment-option,

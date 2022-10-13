@@ -33,6 +33,10 @@ class Google extends Method
 
         if ($token) {
             $payment = static::makePayment(new TokenSource($token->getTokenId()));
+
+            $threeDs = '3ds';
+            $payment->$threeDs->enabled = true;
+
             $response = static::request($payment);
         }
 

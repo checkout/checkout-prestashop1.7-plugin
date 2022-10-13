@@ -33,6 +33,7 @@ use CheckoutCom\PrestaShop\Classes\CheckoutcomHelperForm;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
 use Checkout\CheckoutApi;
 use Checkout\Models\Payments\Capture;
+use Checkout\Models\Payments\Refund;
 
 class CheckoutCom extends PaymentModule
 {
@@ -46,7 +47,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.2.3';
+        $this->version = '2.3.1';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -78,7 +79,7 @@ class CheckoutCom extends PaymentModule
         }
         
         $sql = "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."checkoutcom_adminorder`(
-            `id_checkoutcom_adminorder` int(11) NOT NULL,
+            `id_checkoutcom_adminorder` int(11) NOT NULL AUTO_INCREMENT,
             `transaction_id` varchar(255) NOT NULL,
             `amount_captured` float(20,2) NOT NULL,
             `amount_refunded` float(20,2) NOT NULL,
@@ -98,7 +99,7 @@ class CheckoutCom extends PaymentModule
         Tools::clearSmartyCache();
 
         return parent::install() &&
-            $this->addOrderState($this->l('Payment authorized, awaiting capture')) &&
+            $this->addOrderState('Payment authorized by CKO, awaiting capture') &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('header') &&
             $this->registerHook('displayCustomerAccount') &&
@@ -107,7 +108,8 @@ class CheckoutCom extends PaymentModule
             $this->registerHook('displayBackOfficeHeader') &&
             $this->registerHook('displayAdminOrderMainBottom') &&
             $this->registerHook('displayAdminOrder') &&
-            $this->registerHook('actionOrderStatusPostUpdate');
+            $this->registerHook('actionOrderStatusPostUpdate') &&
+            $this->registerHook('actionProductCancel');
     }
 
     /**
@@ -170,8 +172,20 @@ class CheckoutCom extends PaymentModule
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false) . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $triggerStatus = Configuration::get('CHECKOUTCOM_TRIGGER_STATUS');
+        $config_values = Config::values();
+
+        if (Configuration::get('CHECKOUTCOM_SERVICE') == 0) {
+            $config_values['CHECKOUTCOM_SECRET_KEY'] = str_replace('Bearer ', '', $config_values['CHECKOUTCOM_SECRET_KEY']);
+            $config_values['CHECKOUTCOM_PUBLIC_KEY'] = str_replace('Bearer ', '', $config_values['CHECKOUTCOM_PUBLIC_KEY']);
+        }
+
+        $config_values['CHECKOUTCOM_SECRET_KEY_NAS'] = Configuration::get('CHECKOUTCOM_SECRET_KEY_NAS');
+        $config_values['CHECKOUTCOM_PUBLIC_KEY_NAS'] = Configuration::get('CHECKOUTCOM_PUBLIC_KEY_NAS');
+        $config_values['CHECKOUTCOM_SECRET_KEY_ABC'] = Configuration::get('CHECKOUTCOM_SECRET_KEY_ABC');
+        $config_values['CHECKOUTCOM_PUBLIC_KEY_ABC'] = Configuration::get('CHECKOUTCOM_PUBLIC_KEY_ABC');
+
         $helper->tpl_vars = array(
-            'fields_value' => Config::values(),
+            'fields_value' => $config_values,
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
             'order_states' => OrderState::getOrderStates($this->context->language->id),
@@ -181,7 +195,7 @@ class CheckoutCom extends PaymentModule
         $helper->addToSmarty($smarty);
 
         $this->context->smarty->assign([
-            'fields_value' => Config::values(),
+            'fields_value' => $config_values,
             'languages' => $this->context->controller->getLanguages(),
             'order_states' => OrderState::getOrderStates($this->context->language->id),
             'trigger_statuses' =>  $triggerStatus ? json_decode($triggerStatus, true) : [],
@@ -197,18 +211,97 @@ class CheckoutCom extends PaymentModule
         foreach (Config::keys() as $key) {
             $value = Tools::getValue($key);
 
-            if (!$value && in_array($key, array('CHECKOUTCOM_SECRET_KEY', 'CHECKOUTCOM_PUBLIC_KEY', 'CHECKOUTCOM_SHARED_KEY'))) {
-                $value = Configuration::get($key);
-            }
+            // if (!$value && in_array($key, array('CHECKOUTCOM_SECRET_KEY', 'CHECKOUTCOM_PUBLIC_KEY', 'CHECKOUTCOM_SHARED_KEY'))) {
+            //     $value = Configuration::get($key);
+            // }
 
             if ($value !== false) {
                 if (is_array($value)) {
                     Configuration::updateValue($key, json_encode($value));
+                }elseif ( in_array($key, array('CHECKOUTCOM_SECRET_KEY', 'CHECKOUTCOM_PUBLIC_KEY'))) {
+                    if (Configuration::get('CHECKOUTCOM_SERVICE') == 0) {
+                        Configuration::updateValue($key, 'Bearer '.str_replace('Bearer ', '',$value));
+                        Configuration::updateValue($key.'_NAS', $value);
+                    }else{
+                        Configuration::updateValue($key, $value);
+                        Configuration::updateValue($key.'_ABC', $value);
+                    }
                 }else{
                     Configuration::updateValue($key, $value);
                 }
             }
         }
+        
+        if (Tools::isSubmit('set_webhook')) {
+            $authorization_key = md5(uniqid(rand(), true));
+            $signature_key = md5(uniqid(rand(), true));
+
+            $data = [
+               "name" => $this->context->shop->name." Prestashop NAS", 
+               "conditions" => [
+                    [
+                        "type" => "event", 
+                        "events" => [
+                           "gateway" => [
+                                "payment_approved", 
+                                "payment_declined", 
+                                "card_verification_declined", 
+                                "card_verified", 
+                                "payment_authorization_incremented", 
+                                "payment_authorization_increment_declined", 
+                                "payment_capture_declined", 
+                                "payment_captured", 
+                                "payment_refund_declined", 
+                                "payment_refunded", 
+                                "payment_void_declined", 
+                                "payment_voided" 
+                           ], 
+                           "dispute" => [
+                                "dispute_canceled", 
+                                "dispute_evidence_required", 
+                                "dispute_expired", 
+                                "dispute_lost", 
+                                "dispute_resolved", 
+                                "dispute_won" 
+                            ], 
+                           "marketplace" => [
+                                "payments_disabled", 
+                                "payments_enabled", 
+                                "vmss_failed", 
+                                "vmss_passed", 
+                                "match_failed", 
+                                "match_passed", 
+                                "sub_entity_created" 
+                            ] 
+                        ] 
+                    ] 
+                ], 
+               "actions" => [
+                    [
+                        "type" => "webhook", 
+                        "url" => _PS_BASE_URL_SSL_."/index.php?fc=module&module=checkoutcom&controller=webhook", 
+                        "headers" => [
+                            "Authorization" => $authorization_key
+                        ], 
+                        "signature" => [
+                          "key" => $signature_key
+                        ] 
+                    ] 
+                ] 
+            ];
+
+            $url = 'https://api.sandbox.checkout.com/workflows';
+            $secret_key = Configuration::get('CHECKOUTCOM_SECRET_KEY');
+
+            $this->curlCall($url, $data, $secret_key);
+
+            Configuration::updateValue('CHECKOUTCOM_AUTHENTIFICATION_KEY', $authorization_key);
+            Configuration::updateValue('CHECKOUTCOM_SIGNATURE_KEY', $signature_key);
+
+            $this->context->controller->confirmations[] = 'Your Webhook has been successfully set.';
+            return;
+        }
+
         $this->logger->info('Module configurations have been updated');
         \PrestaShopLogger::addLog("Module configurations have been updated.", 1, 0, 'checkoutcom' , 0, true, $this->context->employee->id);
 
@@ -221,6 +314,21 @@ class CheckoutCom extends PaymentModule
         if ( Tools::isSubmit('submitCheckoutComModule') ) { 
             $this->context->controller->confirmations[] = 'Configuration has been successfully saved.'; 
         }
+    }
+
+    public function curlCall($url, $data, $secret_key)
+    {
+        $ch = curl_init($url);
+        $payload = json_encode($data);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        $headers = array(
+            'Content-Type:application/json',
+            'Authorization:'.$secret_key,
+        );
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        curl_close($ch);
     }
 
     public function addOrderState($name)
@@ -317,6 +425,8 @@ class CheckoutCom extends PaymentModule
     }
 
 
+
+
     /**
      * used to create refunds on cko
      *
@@ -326,56 +436,206 @@ class CheckoutCom extends PaymentModule
      * @throws PrestaShopException
      */
     public function hookActionOrderSlipAdd($params)
-    {
+    {   
+        
+        $data = Tools::getValue('cancel_product',[]);
         $order_id = $params['order']->id;
         $order = new Order((int)$order_id);
         $order_payment = OrderPayment::getByOrderId($order_id);
         $payment_id = $order_payment[0]->transaction_id;
-
-        if(empty($payment_id)){
-            $this->context->controller->errors[] = $this->l('An error has occured. No cko payment id found');
-            return false;
+        $amount  = 0;
+        if (! $this->active || ($order->module != $this->name)) {
+            return;
         }
 
-        $currency = new CurrencyCore($params['order']->id_currency);
-        $currency_code = $currency->iso_code;
+        //Conditional block for ps >= 1.7.7
+        if(count($data) > 0){
 
-        $param = array(
-            'payment_id' => $payment_id,
-            'currency_code' => $currency_code,
-        );
+            //Check if the payment is valid
+            if(empty($payment_id)){
+                $this->context->controller->errors[] = $this->l('An error has occured. No cko payment id found');
+                return false;
+            }
+            $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );  
+            if(strlen($payment_id)>0)
+            {
+                $returnedQuantity = 0;
+                if(count($params['productList'])==0){
+                //Add code here if any extra handling is needed just for shipping refund
+                }
+                else{
+                    foreach($params['productList'] as $product){
+                        $amount+= $product['total_refunded_tax_incl'];
+                        $returnedQuantity += $product['quantity'];
+                    }
+                }
 
-        // Check if a partial refund is made
-        if (true === Tools::isSubmit('partialRefund')) {
+                //Don't process payment if voucher option is enabled
+                if(isset($data["voucher"]) &&  $data["voucher"]==1){
+                    $isFullRefund = $this->_isFullRefund($order, $returnedQuantity);
+                    
+                    //Change order state if all items are
+                    if($isFullRefund){
+                        $this->_updateOrderState($order);
+                    }
+                    return;
+                }       
+            
+                //Add shipping amount from param for partial refund
+                if(isset($data['shipping']) && $data['shipping']){
+                    $shippingRefunded = $this->_getShippingAmount($order_id);   
+                    $amount += $shippingRefunded;
+                }
 
-            $amount = $this->_getPartialRefundAmount($order);
+                //Calculate pending shipping cost from order slip for standard refund
+                else if(isset($data['shipping_amount']) && $data['shipping_amount']>0){
+                    $amount += $data['shipping_amount'];
+                }
 
-            if(!$amount){
-                $this->context->controller->errors[] = $this->l('An error has occured. Invalid refund amount');
+                //Deduct voucher from refund based on merchan't input
+                $amount -= $this->calculateDiscount($data,$order);
+            }       
+        }
+
+        // Conditional block for ps < 1.7.7
+        else{
+            
+            if(empty($payment_id)){
+                $this->context->controller->errors[] = $this->l('An error has occured. No cko payment id found');
                 return false;
             }
 
-            $param['amount'] = $amount;
-        } else {
-
-            $amount = $this->_getStandardRefundAmount($order);
-
-            if(!$amount) {
-                $this->context->controller->errors[] = $this->l('An error has occured. Invalid refund amount');
-                return false;
+            // Do nothing if it a voucher refund
+            if(Tools::getValue('generateDiscount', "off") === "on"){
+                return;
             }
 
-            $param['amount'] = $amount;
+            // Check if a partial refund is made
+            if (true === Tools::isSubmit('partialRefund')) {
+
+                $amount = $this->_getPartialRefundAmount($order);
+
+                if(!$amount){
+                    $this->context->controller->errors[] = $this->l('An error has occured. Invalid refund amount');
+                    return false;
+                }
+
+            } 
+             // Check if a standard refund is made
+            else {
+                $this->logger->info('Hook : Refund 1.7.5 standard refund');
+                $amount = $this->_getStandardRefundAmount($order);
+               
+                if(!$amount) {
+                    $this->context->controller->errors[] = $this->l('An error has occured. Invalid refund amount');
+                    return false;
+                }
+              
+            }
+            
         }
 
-        $refund = Method::makeRefund($param);
-
+        //Refund the amount using sdk.
+        $refund = $this->_refund($payment_id, $amount);
         if(!$refund){
             $this->context->controller->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
+            $this->logger->error('Refund failure : true');
+            // No refund, so get back refunded products quantities, and available products stock quantities.
+            $this->_rollbackOrder($order);
         } else {
             $this->context->controller->success[] = $this->l('Payment refunded successfully on checkout.com.');
         }
     }
+
+
+
+
+    /**
+     * Rollback order quantities 
+     * @param $order
+     * @return bool
+     */
+    private function _rollbackOrder($order){
+        $id_order_details = Tools::isSubmit('generateCreditSlip') ? Tools::getValue('cancelQuantity')
+                : Tools::getValue('partialRefundProductQuantity');
+            if (is_array($id_order_details) && ! empty($id_order_details)) {
+                // Prestashop versions < 1.7.7.
+                foreach ($id_order_details as $id_order_detail => $quantity) {
+                    // Update order detail.
+                    $order_detail = new OrderDetail($id_order_detail);
+                    $order_detail->product_quantity_refunded -= $quantity;
+                    $order_detail->update();
+
+                    // Update product available quantity.
+                    StockAvailable::updateQuantity($order_detail->product_id, $order_detail->product_attribute_id, -$quantity, $order->id_shop);
+                }
+            }
+
+            if (Tools::isSubmit('token')) {
+                $this->logger->error('PS < 1.7.7');
+                // Prestashop versions < 1.7.7.
+                Tools::redirectAdmin(AdminController::$currentIndex . '&id_order=' . $order->id . '&vieworder&token=' . Tools::getValue('token'));
+            } else {
+                $this->logger->error('PS > 1.7.7');
+                // Display warning to customer if any for Prestashop versions >= 1.7.7.
+                $this->get('session')->getFlashBag()->set('error', 'An error has occured while processing your refund on checkout.com.');
+                    
+                // Prestashop versions >= 1.7.7.
+                $url_admin_orders = $this->context->link->getAdminLink('AdminOrders');
+                $url_admin_order = str_replace('/?_token=', '/' . $order->id . '/view?_token=', $url_admin_orders);
+
+                Tools::redirectAdmin($url_admin_order);
+            }
+            return true;
+    }
+
+
+
+     /**
+     * Update order status to refunded
+     * @param $order
+     * @return bool
+     */
+    private function _updateOrderState($order){
+        $currentStatus = $order->getCurrentOrderState()->id;
+        $status = \Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS');
+        if($currentStatus !== $status){ 
+            $history = new OrderHistory();
+            $history->id_order = $order->id;
+            $history->changeIdOrderState($status, $order->id, true);
+            $this->logger->info('Hook : order status'. $status);
+            $history->addWithemail();
+        }
+        return true;
+    }
+
+
+
+    /**
+     * Refund via cko sdk
+     * @param $payment_id
+     * @param $amount
+     * @return bool
+     */
+    private function _refund($payment_id, $amount){
+        $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );  
+        try{
+            $amount = (int) round( $amount * 100,0);
+            $request = new Refund($payment_id,$amount);
+            $refund = $checkout->payments()->refund($request);
+            return $refund;
+        }
+        catch (Checkout\Library\Exceptions\CheckoutHttpException $ex) {
+
+            $this->logger->error('Refund error : '.$ex->getBody());
+            $this->context->controller->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
+            $this->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
+            return false;
+        }
+       return false;
+    }
+
+
 
     /**
      * Get standard refund amount
@@ -550,19 +810,12 @@ class CheckoutCom extends PaymentModule
         $time = (float) \Configuration::get('CHECKOUTCOM_CAPTURE_TIME');
         $event = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_EVENT');
         $action = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
+        $trigger_statuses = json_decode(\Configuration::get('CHECKOUTCOM_TRIGGER_STATUS'));
+        
         if(strpos($order->payment, '-card') !== false ){
             $sql = 'SELECT * FROM '._DB_PREFIX_."checkoutcom_adminorder WHERE `transaction_id` = '" . $transaction['transaction_id'] . "'"; 
             $row = Db::getInstance()->executeS($sql);
-            if ( !empty($row) ) {
-                $transaction['amountCaptured'] = $row[0]['amount_captured'];
-                $transaction['capturableAmount'] = $transaction['amount'] - $row[0]['amount_captured'];
-     
-                $transaction['amountRefunded'] = $row[0]['amount_refunded'];
-                $transaction['refundableAmount'] = $transaction['amount'] - $row[0]['amount_refunded'];
-     
-                $transaction['isCapturable'] = false;
-                $transaction['isRefundable'] = false;
-            }elseif( !$action && !$event ){
+            if( !$action && !$event ){
                 $transaction['amountCaptured'] = 0;
                 $transaction['capturableAmount'] = (float) $transaction['amount'];
      
@@ -572,13 +825,36 @@ class CheckoutCom extends PaymentModule
                 $transaction['isCapturable'] = true;
                 $transaction['isRefundable'] = false;
 
-                if (Tools::isSubmit('amountToCapture')) { 
-                    $amountToCapture = number_format( Tools::getValue('amountToCapture'), 2);
+                if ( !empty($row) ) {
+                    $transaction['amountCaptured'] = $row[0]['amount_captured'];
+                    $transaction['capturableAmount'] = $transaction['amount'] - $row[0]['amount_captured'];
+         
+                    $transaction['amountRefunded'] = $row[0]['amount_refunded'];
+                    $transaction['refundableAmount'] = $transaction['amount'] - $row[0]['amount_refunded'];
+         
+                    $transaction['isCapturable'] = false;
+                    $transaction['isRefundable'] = false;
 
-                    if ( $amountToCapture <= $transaction['capturableAmount']) {
+                    if ( $transaction['amount'] > $row[0]['amount_captured']) {
+                        $transaction['isCapturable'] = true;
+                    }
+                }
+
+
+                if (Tools::isSubmit('amountToCapture')) { 
+                    $amountToCapture = (float) number_format( Tools::getValue('amountToCapture'), 2);
+                    $amountToCaptureInt = $amountToCapture*100;
+
+                    if ($amountToCapture <= $transaction['capturableAmount']) {
                         $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
+
+                        $capture_type = "NonFinal";
+                        if ($amountToCapture == $transaction['capturableAmount']) {
+                            $capture_type = "Final";
+                        }
+
                         try {
-                            $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, (int) $amountToCapture*100));
+                            $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, (int) $amountToCaptureInt, $capture_type));
                         } catch (Exception $ex) {
                           
                             $details->http_code = $ex->getCode();
@@ -588,13 +864,23 @@ class CheckoutCom extends PaymentModule
                         }
 
                         if ($details->http_code === 202) {
-                            $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
-                            $sql .= "VALUES ('".$transaction['transaction_id']."', ".$amountToCapture.", 0)";
-                            Db::getInstance()->execute($sql);
+                            if ( empty($row) ) {
+                                $sql  = "INSERT INTO "._DB_PREFIX_."checkoutcom_adminorder (`transaction_id`, `amount_captured`, `amount_refunded`)";
+                                $sql .= "VALUES ('".$transaction['transaction_id']."', ".$amountToCapture.", 0)";
+                                Db::getInstance()->execute($sql);
+                            }else{
+                                $sql  = "UPDATE "._DB_PREFIX_."checkoutcom_adminorder";
+                                $sql .= " SET `amount_captured`=".($transaction['amountCaptured']+$amountToCapture);
+                                $sql .= " WHERE `transaction_id`='".$transaction['transaction_id']."'";
+                                Db::getInstance()->execute($sql);
+                            }
 
-                            $transaction['amountCaptured'] = $amountToCapture;
+                            $transaction['amountCaptured'] = $transaction['amountCaptured']+$amountToCapture;
                             $transaction['capturableAmount'] = $transaction['capturableAmount'] - $amountToCapture;
                             $transaction['isCapturable'] = false;
+                            if ( $transaction['amount'] > $transaction['amountCaptured']) {
+                                $transaction['isCapturable'] = true;
+                            }
 
                             $this->context->smarty->assign([ 
                                 'capture_confirmation' => true
@@ -640,12 +926,12 @@ class CheckoutCom extends PaymentModule
         $action = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
         $payment = new OrderPayment();
         $payment = $payment->getByOrderId($params['id_order']);
-        $amountToCapture = (float) number_format( $order->total_paid_tax_incl, 2);
+        $amountToCapture = round($order->total_paid_tax_incl, 2);
         $trigger_statuses = $trigger_statuses ? $trigger_statuses : [];
         if (!$event && !$action && in_array($new_status_id, $trigger_statuses)) {
             $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );
             try {
-                $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, $amountToCapture*100));
+                $details = $checkout->payments()->capture(new Capture($payment[0]->transaction_id, intval(round($amountToCapture*100))));
             } catch (Exception $ex) {
                 return;
             }
@@ -654,5 +940,69 @@ class CheckoutCom extends PaymentModule
             $sql .= "VALUES ('CART_" . $order->id_cart . "', ".$amountToCapture.", 0)";
             Db::getInstance()->execute($sql);
         }
+    }
+
+
+    /**
+     * Calculate the shipping amount refunded on the order using credit slip
+     * @param $order_id
+     * @return float
+     */
+    private function _getShippingAmount($order_id){
+        //calculate the already paid shipping
+        $sql = 'SELECT total_shipping_tax_incl as total_shipping_tax_incl FROM '._DB_PREFIX_."order_slip   WHERE `id_order` = '" .$order_id . "' order by id_order_slip desc limit 1"; 
+        $OrderSlips = Db::getInstance()->executeS($sql);
+        $shippingRefunded =0;
+        foreach($OrderSlips as $OrderSlip){
+            $shippingRefunded +=$OrderSlip['total_shipping_tax_incl'];
+        }
+
+        return $shippingRefunded;
+    }
+
+
+     /**
+     * Calculate discount/voucher amount used for the order
+     * @param $params
+     * @param $order
+     * @return float
+     */
+    public function calculateDiscount($params,$order)
+    {
+        //Calculate the discount on the items
+        $amount = 0;
+
+        if (false == empty($params['voucher_refund_type'])) {
+            if ($params['voucher_refund_type'] == 1) {
+                    return (float) $order->total_discounts_tax_incl;
+            }
+        }
+
+        return $amount;
+    }
+
+    /**
+     * Check if all the items in the order are refunded (to mark the overall status of the order) 
+     * @param $order
+     * @param $currentRefundedCount
+     * @return bool
+     */
+    private function _isFullRefund($order, $currentRefundedCount)
+    {
+        $refunded_products=$currentRefundedCount;
+        
+        $sql = 'SELECT * FROM '._DB_PREFIX_."order_detail  WHERE `id_order` = '" .$order->id . "'"; 
+        $orderDetails = Db::getInstance()->executeS($sql);
+        $totalProducts = 0;
+        foreach($orderDetails as $orderdetail){
+
+            $refunded_products += $orderdetail['product_quantity_return']+ $orderdetail['product_quantity_refunded'];
+            $totalProducts += $orderdetail['product_quantity'];
+        }
+      
+        if($totalProducts === $refunded_products){
+            return true;
+        }
+        return false;
     }
 }
