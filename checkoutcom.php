@@ -33,6 +33,7 @@ use CheckoutCom\PrestaShop\Classes\CheckoutcomHelperForm;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
 use Checkout\CheckoutApi;
 use Checkout\Models\Payments\Capture;
+use Checkout\Models\Payments\Refund;
 
 class CheckoutCom extends PaymentModule
 {
@@ -940,7 +941,7 @@ class CheckoutCom extends PaymentModule
             Db::getInstance()->execute($sql);
         }
     }
-    
+
 
     /**
      * Calculate the shipping amount refunded on the order using credit slip
