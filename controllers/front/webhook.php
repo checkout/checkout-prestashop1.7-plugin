@@ -65,7 +65,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             $order_reference = $order_result[0]['order_reference'];
 
             // TODO - Check if the order object has id_shop and skip the following query
-            $sql = 'SELECT `id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `reference`='.$order_reference;
+            $sql = 'SELECT `id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `reference`="'.$order_reference.'"';
             $order_result = Db::getInstance()->executeS($sql);
             // $order_reference = $order_result[0]['reference'];
             $order_id_shop = $order_result[0]['id_shop'];
