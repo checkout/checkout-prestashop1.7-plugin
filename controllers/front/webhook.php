@@ -90,7 +90,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                             $sql .= " WHERE `transaction_id`='".$event['data']['reference']."'";
                             Db::getInstance()->execute($sql);
                         }
-
+                       
                         if ($this->isOrderBackOrder($order->id)) {
                             $status = \Configuration::get('CHECKOUTCOM_CAPTURE_BACKORDER_STATUS');
                         }
@@ -107,13 +107,13 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                         }
                         
                     }
-
+                   
                     if($currentStatus !== $status && $this->preventAuthAfterCapture($currentStatus, $status)) {
 
                         $isPartial = $this->_isPartialAmount($event, $order);
                         $amount = Method::fixAmount($event['data']['amount'], $event['data']['currency'], true);
                         $currency = $event['data']['currency'];
-
+                        
                         if($isPartial) {
 
                             $message = $this->trans("An amount of %currency% %amount% ", 
