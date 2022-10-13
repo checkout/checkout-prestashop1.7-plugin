@@ -61,15 +61,13 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
             $payment_id =  $event['data']['id'];
             $sql = 'SELECT `order_reference` FROM `'._DB_PREFIX_.'order_payment` WHERE `transaction_id`='.'"'.$payment_id.'"';
-            $order_result =  Db::getInstance()->getValue($sql);
-            $order_reference = $order_result[0]['order_reference'];
-
+            $order_reference =  Db::getInstance()->getValue($sql);
+            $this->module->logger->info('Channel Webhook -- New order reference from payment : ' .$order_reference);
+           
             // TODO - Check if the order object has id_shop and skip the following query
             $sql = 'SELECT `id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `reference`="'.$order_reference.'"';
             $order_result = Db::getInstance()->executeS($sql);
-            // $order_reference = $order_result[0]['reference'];
             $order_id_shop = $order_result[0]['id_shop'];
-
             $orders = Order::getByReference($order_reference);
             $list = $orders->getAll();
             $status = +Utilities::getOrderStatus($event['type'], $order_reference, $event['data']['action_id'], $order_id_shop);
