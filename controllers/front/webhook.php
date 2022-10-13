@@ -71,7 +71,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             if ($status) {
 
                 foreach ($list as $order) {
-
+                    $currentStatus = $order->getCurrentOrderState()->id;
                     if($event['type'] == 'payment_captured'){
                         $sql = 'SELECT * FROM '._DB_PREFIX_."checkoutcom_adminorder WHERE `transaction_id` = '".$event['data']['reference']."'"; 
                         $row = Db::getInstance()->getRow($sql);
@@ -87,8 +87,19 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                             Db::getInstance()->execute($sql);
                         }
                     }
+                    else if($event['type'] == 'payment_refunded'){
 
-                    $currentStatus = $order->getCurrentOrderState()->id;
+                        //Check if all the items in order have been refunded
+                        $isFullRefund = $this->_isFullRefund($order);
+                        if($isFullRefund){
+                            $status = \Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS');
+                        }
+                        else{
+                            $status = $currentStatus;
+                        }
+                        
+                    }
+
                     if($currentStatus !== $status && $this->preventAuthAfterCapture($currentStatus, $status)) {
 
                         $isPartial = $this->_isPartialAmount($event, $order);
@@ -101,10 +112,10 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                             ['%currency%' => $currency, '%amount%' => $amount], 
                             'Modules.Checkoutcom.Webhook.php');
 
-                            if($event['type'] == 'payment_refunded'){
-                                $message .= "has been partially refunded";
-                                $status = \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
-                            }
+                            // if($event['type'] == 'payment_refunded'){
+                            //     $message .= "has been partially refunded";
+                            //     $status = \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS');
+                            // }
 
                             if($event['type'] == 'payment_captured'){
                                 $message .= "has been partially captured";
@@ -138,6 +149,10 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             $allow = false;
         }
 
+        if($current === +\Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS') && $target === +\Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') ) {
+            $allow = false;
+        }
+
         return $allow;
     }
 
@@ -156,6 +171,30 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             return true;
         }
 
+        return false;
+    }
+
+
+     /**
+     * Check if all the items in the order are refunded (to mark the overall status of the order) 
+     * @param $order
+     * @return bool
+     */
+    private function _isFullRefund($order)
+    {
+        $refunded_products=0;
+        $sql = 'SELECT * FROM '._DB_PREFIX_."order_detail  WHERE `id_order` = '" .$order->id . "'"; 
+        $orderDetails = Db::getInstance()->executeS($sql);
+        $totalProducts = 0;
+        foreach($orderDetails as $orderdetail){
+
+            $refunded_products += $orderdetail['product_quantity_return']+ $orderdetail['product_quantity_refunded'];
+            $totalProducts += $orderdetail['product_quantity'];
+        }
+       
+        if($totalProducts === $refunded_products){
+            return true;
+        }
         return false;
     }
 }

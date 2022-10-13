@@ -33,6 +33,7 @@ use CheckoutCom\PrestaShop\Classes\CheckoutcomHelperForm;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
 use Checkout\CheckoutApi;
 use Checkout\Models\Payments\Capture;
+use Checkout\Models\Payments\Refund;
 
 class CheckoutCom extends PaymentModule
 {
@@ -107,7 +108,8 @@ class CheckoutCom extends PaymentModule
             $this->registerHook('displayBackOfficeHeader') &&
             $this->registerHook('displayAdminOrderMainBottom') &&
             $this->registerHook('displayAdminOrder') &&
-            $this->registerHook('actionOrderStatusPostUpdate');
+            $this->registerHook('actionOrderStatusPostUpdate') &&
+            $this->registerHook('actionProductCancel');
     }
 
     /**
@@ -423,6 +425,8 @@ class CheckoutCom extends PaymentModule
     }
 
 
+
+
     /**
      * used to create refunds on cko
      *
@@ -432,56 +436,206 @@ class CheckoutCom extends PaymentModule
      * @throws PrestaShopException
      */
     public function hookActionOrderSlipAdd($params)
-    {
+    {   
+        
+        $data = Tools::getValue('cancel_product',[]);
         $order_id = $params['order']->id;
         $order = new Order((int)$order_id);
         $order_payment = OrderPayment::getByOrderId($order_id);
         $payment_id = $order_payment[0]->transaction_id;
-
-        if(empty($payment_id)){
-            $this->context->controller->errors[] = $this->l('An error has occured. No cko payment id found');
-            return false;
+        $amount  = 0;
+        if (! $this->active || ($order->module != $this->name)) {
+            return;
         }
 
-        $currency = new CurrencyCore($params['order']->id_currency);
-        $currency_code = $currency->iso_code;
+        //Conditional block for ps >= 1.7.7
+        if(count($data) > 0){
 
-        $param = array(
-            'payment_id' => $payment_id,
-            'currency_code' => $currency_code,
-        );
+            //Check if the payment is valid
+            if(empty($payment_id)){
+                $this->context->controller->errors[] = $this->l('An error has occured. No cko payment id found');
+                return false;
+            }
+            $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );  
+            if(strlen($payment_id)>0)
+            {
+                $returnedQuantity = 0;
+                if(count($params['productList'])==0){
+                //Add code here if any extra handling is needed just for shipping refund
+                }
+                else{
+                    foreach($params['productList'] as $product){
+                        $amount+= $product['total_refunded_tax_incl'];
+                        $returnedQuantity += $product['quantity'];
+                    }
+                }
 
-        // Check if a partial refund is made
-        if (true === Tools::isSubmit('partialRefund')) {
+                //Don't process payment if voucher option is enabled
+                if(isset($data["voucher"]) &&  $data["voucher"]==1){
+                    $isFullRefund = $this->_isFullRefund($order, $returnedQuantity);
+                    
+                    //Change order state if all items are
+                    if($isFullRefund){
+                        $this->_updateOrderState($order);
+                    }
+                    return;
+                }       
+            
+                //Add shipping amount from param for partial refund
+                if(isset($data['shipping']) && $data['shipping']){
+                    $shippingRefunded = $this->_getShippingAmount($order_id);   
+                    $amount += $shippingRefunded;
+                }
 
-            $amount = $this->_getPartialRefundAmount($order);
+                //Calculate pending shipping cost from order slip for standard refund
+                else if(isset($data['shipping_amount']) && $data['shipping_amount']>0){
+                    $amount += $data['shipping_amount'];
+                }
 
-            if(!$amount){
-                $this->context->controller->errors[] = $this->l('An error has occured. Invalid refund amount');
+                //Deduct voucher from refund based on merchan't input
+                $amount -= $this->calculateDiscount($data,$order);
+            }       
+        }
+
+        // Conditional block for ps < 1.7.7
+        else{
+            
+            if(empty($payment_id)){
+                $this->context->controller->errors[] = $this->l('An error has occured. No cko payment id found');
                 return false;
             }
 
-            $param['amount'] = $amount;
-        } else {
-
-            $amount = $this->_getStandardRefundAmount($order);
-
-            if(!$amount) {
-                $this->context->controller->errors[] = $this->l('An error has occured. Invalid refund amount');
-                return false;
+            // Do nothing if it a voucher refund
+            if(Tools::getValue('generateDiscount', "off") === "on"){
+                return;
             }
 
-            $param['amount'] = $amount;
+            // Check if a partial refund is made
+            if (true === Tools::isSubmit('partialRefund')) {
+
+                $amount = $this->_getPartialRefundAmount($order);
+
+                if(!$amount){
+                    $this->context->controller->errors[] = $this->l('An error has occured. Invalid refund amount');
+                    return false;
+                }
+
+            } 
+             // Check if a standard refund is made
+            else {
+                $this->logger->info('Hook : Refund 1.7.5 standard refund');
+                $amount = $this->_getStandardRefundAmount($order);
+               
+                if(!$amount) {
+                    $this->context->controller->errors[] = $this->l('An error has occured. Invalid refund amount');
+                    return false;
+                }
+              
+            }
+            
         }
 
-        $refund = Method::makeRefund($param);
-
+        //Refund the amount using sdk.
+        $refund = $this->_refund($payment_id, $amount);
         if(!$refund){
             $this->context->controller->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
+            $this->logger->error('Refund failure : true');
+            // No refund, so get back refunded products quantities, and available products stock quantities.
+            $this->_rollbackOrder($order);
         } else {
             $this->context->controller->success[] = $this->l('Payment refunded successfully on checkout.com.');
         }
     }
+
+
+
+
+    /**
+     * Rollback order quantities 
+     * @param $order
+     * @return bool
+     */
+    private function _rollbackOrder($order){
+        $id_order_details = Tools::isSubmit('generateCreditSlip') ? Tools::getValue('cancelQuantity')
+                : Tools::getValue('partialRefundProductQuantity');
+            if (is_array($id_order_details) && ! empty($id_order_details)) {
+                // Prestashop versions < 1.7.7.
+                foreach ($id_order_details as $id_order_detail => $quantity) {
+                    // Update order detail.
+                    $order_detail = new OrderDetail($id_order_detail);
+                    $order_detail->product_quantity_refunded -= $quantity;
+                    $order_detail->update();
+
+                    // Update product available quantity.
+                    StockAvailable::updateQuantity($order_detail->product_id, $order_detail->product_attribute_id, -$quantity, $order->id_shop);
+                }
+            }
+
+            if (Tools::isSubmit('token')) {
+                $this->logger->error('PS < 1.7.7');
+                // Prestashop versions < 1.7.7.
+                Tools::redirectAdmin(AdminController::$currentIndex . '&id_order=' . $order->id . '&vieworder&token=' . Tools::getValue('token'));
+            } else {
+                $this->logger->error('PS > 1.7.7');
+                // Display warning to customer if any for Prestashop versions >= 1.7.7.
+                $this->get('session')->getFlashBag()->set('error', 'An error has occured while processing your refund on checkout.com.');
+                    
+                // Prestashop versions >= 1.7.7.
+                $url_admin_orders = $this->context->link->getAdminLink('AdminOrders');
+                $url_admin_order = str_replace('/?_token=', '/' . $order->id . '/view?_token=', $url_admin_orders);
+
+                Tools::redirectAdmin($url_admin_order);
+            }
+            return true;
+    }
+
+
+
+     /**
+     * Update order status to refunded
+     * @param $order
+     * @return bool
+     */
+    private function _updateOrderState($order){
+        $currentStatus = $order->getCurrentOrderState()->id;
+        $status = \Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS');
+        if($currentStatus !== $status){ 
+            $history = new OrderHistory();
+            $history->id_order = $order->id;
+            $history->changeIdOrderState($status, $order->id, true);
+            $this->logger->info('Hook : order status'. $status);
+            $history->addWithemail();
+        }
+        return true;
+    }
+
+
+
+    /**
+     * Refund via cko sdk
+     * @param $payment_id
+     * @param $amount
+     * @return bool
+     */
+    private function _refund($payment_id, $amount){
+        $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );  
+        try{
+            $amount = (int) round( $amount * 100,0);
+            $request = new Refund($payment_id,$amount);
+            $refund = $checkout->payments()->refund($request);
+            return $refund;
+        }
+        catch (Checkout\Library\Exceptions\CheckoutHttpException $ex) {
+
+            $this->logger->error('Refund error : '.$ex->getBody());
+            $this->context->controller->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
+            $this->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
+            return false;
+        }
+       return false;
+    }
+
+
 
     /**
      * Get standard refund amount
@@ -786,5 +940,69 @@ class CheckoutCom extends PaymentModule
             $sql .= "VALUES ('CART_" . $order->id_cart . "', ".$amountToCapture.", 0)";
             Db::getInstance()->execute($sql);
         }
+    }
+
+
+    /**
+     * Calculate the shipping amount refunded on the order using credit slip
+     * @param $order_id
+     * @return float
+     */
+    private function _getShippingAmount($order_id){
+        //calculate the already paid shipping
+        $sql = 'SELECT total_shipping_tax_incl as total_shipping_tax_incl FROM '._DB_PREFIX_."order_slip   WHERE `id_order` = '" .$order_id . "' order by id_order_slip desc limit 1"; 
+        $OrderSlips = Db::getInstance()->executeS($sql);
+        $shippingRefunded =0;
+        foreach($OrderSlips as $OrderSlip){
+            $shippingRefunded +=$OrderSlip['total_shipping_tax_incl'];
+        }
+
+        return $shippingRefunded;
+    }
+
+
+     /**
+     * Calculate discount/voucher amount used for the order
+     * @param $params
+     * @param $order
+     * @return float
+     */
+    public function calculateDiscount($params,$order)
+    {
+        //Calculate the discount on the items
+        $amount = 0;
+
+        if (false == empty($params['voucher_refund_type'])) {
+            if ($params['voucher_refund_type'] == 1) {
+                    return (float) $order->total_discounts_tax_incl;
+            }
+        }
+
+        return $amount;
+    }
+
+    /**
+     * Check if all the items in the order are refunded (to mark the overall status of the order) 
+     * @param $order
+     * @param $currentRefundedCount
+     * @return bool
+     */
+    private function _isFullRefund($order, $currentRefundedCount)
+    {
+        $refunded_products=$currentRefundedCount;
+        
+        $sql = 'SELECT * FROM '._DB_PREFIX_."order_detail  WHERE `id_order` = '" .$order->id . "'"; 
+        $orderDetails = Db::getInstance()->executeS($sql);
+        $totalProducts = 0;
+        foreach($orderDetails as $orderdetail){
+
+            $refunded_products += $orderdetail['product_quantity_return']+ $orderdetail['product_quantity_refunded'];
+            $totalProducts += $orderdetail['product_quantity'];
+        }
+      
+        if($totalProducts === $refunded_products){
+            return true;
+        }
+        return false;
     }
 }
