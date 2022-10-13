@@ -59,11 +59,15 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
         foreach ($this->events as $event) {
             $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
-            $sql = 'SELECT `reference`,`id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
+            $payment_id =  $event['data']['id'];
+            $sql = 'SELECT `order_reference` FROM `'._DB_PREFIX_.'order_payment` WHERE `transaction_id`='.'"'.$payment_id.'"';
+            $order_reference =  Db::getInstance()->getValue($sql);
+            $this->module->logger->info('Channel Webhook -- New order reference from payment : ' .$order_reference);
+           
+            // TODO - Check if the order object has id_shop and skip the following query
+            $sql = 'SELECT `id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `reference`="'.$order_reference.'"';
             $order_result = Db::getInstance()->executeS($sql);
-            $order_reference = $order_result[0]['reference'];
             $order_id_shop = $order_result[0]['id_shop'];
-
             $orders = Order::getByReference($order_reference);
             $list = $orders->getAll();
             $status = +Utilities::getOrderStatus($event['type'], $order_reference, $event['data']['action_id'], $order_id_shop);
@@ -86,6 +90,10 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                             $sql .= " WHERE `transaction_id`='".$event['data']['reference']."'";
                             Db::getInstance()->execute($sql);
                         }
+                       
+                        if ($this->isOrderBackOrder($order->id)) {
+                            $status = \Configuration::get('CHECKOUTCOM_CAPTURE_BACKORDER_STATUS');
+                        }
                     }
                     else if($event['type'] == 'payment_refunded'){
 
@@ -99,13 +107,13 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                         }
                         
                     }
-
+                   
                     if($currentStatus !== $status && $this->preventAuthAfterCapture($currentStatus, $status)) {
 
                         $isPartial = $this->_isPartialAmount($event, $order);
                         $amount = Method::fixAmount($event['data']['amount'], $event['data']['currency'], true);
                         $currency = $event['data']['currency'];
-
+                        
                         if($isPartial) {
 
                             $message = $this->trans("An amount of %currency% %amount% ", 
@@ -145,7 +153,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
     protected function preventAuthAfterCapture($current, $target) {
 
         $allow = true;
-        if($current === +\Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') && $target === +\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS') ) {
+        if(($current === +\Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') || $current === +\Configuration::get('CHECKOUTCOM_CAPTURE_BACKORDER_STATUS')) && $target === +\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS') ) {
             $allow = false;
         }
 
@@ -174,6 +182,28 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
         return false;
     }
 
+     /**
+     * Check if the order is a back order
+     * @param $orderId
+     * @return bool
+     */
+    private function isOrderBackOrder($orderId)
+    {
+        $order = new Order($orderId);
+        $orderDetails = $order->getOrderDetailList();
+        /** @var OrderDetail $detail */
+        foreach ($orderDetails as $detail) {
+            $orderDetail = new OrderDetail($detail['id_order_detail']);
+            if (
+                \Configuration::get('PS_STOCK_MANAGEMENT') &&
+                ($orderDetail->getStockState() || $orderDetail->product_quantity_in_stock <= 0)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
      /**
      * Check if all the items in the order are refunded (to mark the overall status of the order) 
