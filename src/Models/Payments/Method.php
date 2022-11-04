@@ -268,6 +268,7 @@ abstract class Method
      */
     public static function makeRefund(array $params)
     {
+       
         $cko_payment_id = $params['payment_id'];
 
         // Check if cko_payment_id is empty
@@ -288,12 +289,13 @@ abstract class Method
             if(isset($params['amount'])){
                 $ckoPayment->amount = static::fixAmount($params['amount'], $params['currency_code']);
             }
-
+           
             $response = CheckoutApiHandler::api()->payments()->refund($ckoPayment);
 
             if (!$response->isSuccessful()) {
                 //@todo return error message
             } else {
+               
                 return $response;
             }
         } catch (CheckoutHttpException $ex) {
