@@ -34,6 +34,7 @@ use CheckoutCom\PrestaShop\Classes\CheckoutcomPaymentOption;
 use Checkout\CheckoutApi;
 use Checkout\Models\Payments\Capture;
 use Checkout\Models\Payments\Refund;
+use CheckoutCom\PrestaShop\Models\Payments\Method;
 
 class CheckoutCom extends PaymentModule
 {
@@ -47,7 +48,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.3.2';
+        $this->version = '2.3.3';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -444,6 +445,9 @@ class CheckoutCom extends PaymentModule
         $order_payment = OrderPayment::getByOrderId($order_id);
         $payment_id = $order_payment[0]->transaction_id;
         $amount  = 0;
+        $currency =  new CurrencyCore($order->id_currency);
+        $currency_code = $currency->iso_code;
+       
         if (! $this->active || ($order->module != $this->name)) {
             return;
         }
@@ -456,7 +460,7 @@ class CheckoutCom extends PaymentModule
                 $this->context->controller->errors[] = $this->l('An error has occured. No cko payment id found');
                 return false;
             }
-            $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );  
+            // $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );  
             if(strlen($payment_id)>0)
             {
                 $returnedQuantity = 0;
@@ -536,9 +540,11 @@ class CheckoutCom extends PaymentModule
         }
 
         //Refund the amount using sdk.
-        $refund = $this->_refund($payment_id, $amount);
+        $refund = $this->_refund($payment_id, $amount, $currency_code);
         if(!$refund){
             $this->context->controller->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
+            $this->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
+
             $this->logger->error('Refund failure : true');
             // No refund, so get back refunded products quantities, and available products stock quantities.
             $this->_rollbackOrder($order);
@@ -617,22 +623,16 @@ class CheckoutCom extends PaymentModule
      * @param $amount
      * @return bool
      */
-    private function _refund($payment_id, $amount){
-        $checkout = new CheckoutApi( \Configuration::get('CHECKOUTCOM_SECRET_KEY') );  
-        try{
-            $amount = (int) round( $amount * 100,0);
-            $request = new Refund($payment_id,$amount);
-            $refund = $checkout->payments()->refund($request);
-            return $refund;
-        }
-        catch (Checkout\Library\Exceptions\CheckoutHttpException $ex) {
-
-            $this->logger->error('Refund error : '.$ex->getBody());
-            $this->context->controller->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
-            $this->errors[] = $this->l('An error has occured while processing your refund on checkout.com.');
-            return false;
-        }
-       return false;
+    private function _refund($payment_id, $amount, $currency_code){
+        
+        $param = array(
+            'payment_id' => $payment_id,
+            'currency_code' => $currency_code,
+            'amount' => $amount
+        );
+      
+        $refund = Method::makeRefund($param);
+        return $refund;   
     }
 
 
