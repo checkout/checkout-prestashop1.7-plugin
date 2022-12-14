@@ -48,7 +48,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.3.3';
+        $this->version = '2.3.4';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -200,7 +200,7 @@ class CheckoutCom extends PaymentModule
             'languages' => $this->context->controller->getLanguages(),
             'order_states' => OrderState::getOrderStates($this->context->language->id),
             'trigger_statuses' =>  $triggerStatus ? json_decode($triggerStatus, true) : [],
-            'webhook_url' => _PS_BASE_URL_SSL_.'/index.php?fc=module&module=checkoutcom&controller=webhook',
+            'webhook_url' => $this->context->shop->getBaseURL().'index.php?fc=module&module=checkoutcom&controller=webhook',
         ]);
     }
 
@@ -280,7 +280,7 @@ class CheckoutCom extends PaymentModule
                "actions" => [
                     [
                         "type" => "webhook", 
-                        "url" => _PS_BASE_URL_SSL_."/index.php?fc=module&module=checkoutcom&controller=webhook", 
+                        "url" => $this->context->shop->getBaseURL()."index.php?fc=module&module=checkoutcom&controller=webhook", 
                         "headers" => [
                             "Authorization" => $authorization_key
                         ], 
@@ -292,6 +292,11 @@ class CheckoutCom extends PaymentModule
             ];
 
             $url = 'https://api.sandbox.checkout.com/workflows';
+
+            if(Configuration::get('CHECKOUTCOM_LIVE_MODE')){
+                $url = 'https://api.checkout.com/workflows';
+            }
+            $this->logger->info('workflow api url:'.$url);
             $secret_key = Configuration::get('CHECKOUTCOM_SECRET_KEY');
 
             $this->curlCall($url, $data, $secret_key);
@@ -329,6 +334,7 @@ class CheckoutCom extends PaymentModule
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
+        $this->logger->info($result);
         curl_close($ch);
     }
 
