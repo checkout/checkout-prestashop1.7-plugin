@@ -52,6 +52,7 @@ class CheckoutcomApplepayModuleFrontController extends ModuleFrontController
         curl_setopt_array($curl, $curl_opt);
         $response = curl_exec($curl);
         $err = curl_error( $curl );
+        $this->module->logger->info($response);
         $this->module->logger->info($err);
         return $response;
     }
@@ -62,11 +63,15 @@ class CheckoutcomApplepayModuleFrontController extends ModuleFrontController
         $this->module->logger->info('Apple pay session url'. $url);
         header("Content-Type: application/json");
         if(filter_var($url, FILTER_VALIDATE_URL)){
-            echo $this->validate($url);
+            $resp = $this->validate($url);
+            if(!$resp){
+                die(Tools::jsonEncode(array('hasError' => true, 'code' => 401 )));
+            }
+            echo $resp;
+
         }else{
             echo json_encode([
-                'error'=>406,
-                'message'=>'URL parameter must be set and a valid Apple Pay session URL'
+                'error'=>404,
             ]);
         }
         die;
