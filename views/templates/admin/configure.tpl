@@ -29,6 +29,7 @@
 	<li><a href="#template_2" role="tab" data-toggle="tab">{l s='Card Payments' mod='checkoutcom'}</a></li>
 	<li><a href="#template_3" role="tab" data-toggle="tab">{l s='Alternative Payments' mod='checkoutcom'}</a></li>
 	<li><a href="#template_4" role="tab" data-toggle="tab">{l s='Google Pay' mod='checkoutcom'}</a></li>
+	<li><a href="#template_5" role="tab" data-toggle="tab">{l s='Apple Pay' mod='checkoutcom'}</a></li>
 	{* <li><a href="#template_5" role="tab" data-toggle="tab">{l s='Recurring Payments' mod='checkoutcom'}</a></li> *}
 </ul>
 
@@ -318,4 +319,5 @@
 			</div>
 		</form>
 	</div>
+	<div class="tab-pane" id="template_5">{$config_apple}</div>
 </div>

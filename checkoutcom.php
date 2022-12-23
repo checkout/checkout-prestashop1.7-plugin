@@ -292,7 +292,6 @@ class CheckoutCom extends PaymentModule
             ];
 
             $url = 'https://api.sandbox.checkout.com/workflows';
-
             if(Configuration::get('CHECKOUTCOM_LIVE_MODE')){
                 $url = 'https://api.checkout.com/workflows';
             }
@@ -391,8 +390,8 @@ class CheckoutCom extends PaymentModule
 
         $methods = array(
             CheckoutcomPaymentOption::getCard($this, $params),
-            // CheckoutcomPaymentOption::getApple($this, $params),
             CheckoutcomPaymentOption::getGoogle($this, $params),
+            CheckoutcomPaymentOption::getApple($this, $params),
         );
 
         $alternatives = CheckoutcomPaymentOption::getAlternatives($this, $params);
@@ -413,7 +412,9 @@ class CheckoutCom extends PaymentModule
             $this->context->controller->addJquery();
             $this->context->controller->addJS($this->_path . '/views/js/front.js');
             $this->context->controller->addJS($this->_path . '/views/js/cko.js');
+            $this->context->controller->addJS($this->_path . '/views/js/apple-pay-sdk.js');
             $this->context->controller->addCSS($this->_path . '/views/css/front.css');
+           
         }
 
     }
