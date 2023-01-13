@@ -31,7 +31,7 @@ class Apple extends Method
         }
 
         if ($token) {
-            $payment = static::makePayment(new TokenSource($token->getTokenId()));
+            $payment = static::makePayment(new TokenSource($token->getTokenId()), array(), true, $params['source']);
             $response = static::request($payment);
         }
         return $response;

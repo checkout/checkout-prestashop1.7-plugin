@@ -58,16 +58,26 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
     {
 
         foreach ($this->events as $event) {
+            if(!isset($event['data']) || !isset($event['data']['id'])){
+                die();
+            }
+            $this->module->logger->info('Channel Webhook -- event type : ' .$event['type']);
             $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
             $payment_id =  $event['data']['id'];
+           
+            $this->module->logger->info('Channel Webhook -- New payment : ' .$payment_id);
             $sql = 'SELECT `order_reference` FROM `'._DB_PREFIX_.'order_payment` WHERE `transaction_id`='.'"'.$payment_id.'"';
             $order_reference =  Db::getInstance()->getValue($sql);
+            $this->module->logger->info('Channel Webhook -- New sql : ' .$sql);
             $this->module->logger->info('Channel Webhook -- New order reference from payment : ' .$order_reference);
            
             // TODO - Check if the order object has id_shop and skip the following query
             $sql = 'SELECT `id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `reference`="'.$order_reference.'"';
-            $order_result = Db::getInstance()->executeS($sql);
-            $order_id_shop = $order_result[0]['id_shop'];
+            $this->module->logger->info('Channel Webhook -- New sql shop: ' .$sql);
+            $order_id_shop = Db::getInstance()->getValue($sql);
+            $this->module->logger->info('Channel Webhook -- shop: ' .$order_id_shop);
+            $this->module->logger->info('Channel Webhook -- actionid: ' .$event['data']['action_id']);
+            // $order_id_shop = $order_result[0][0];
             $orders = Order::getByReference($order_reference);
             $list = $orders->getAll();
             $status = +Utilities::getOrderStatus($event['type'], $order_reference, $event['data']['action_id'], $order_id_shop);
@@ -75,6 +85,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             if ($status) {
 
                 foreach ($list as $order) {
+                   
                     $currentStatus = $order->getCurrentOrderState()->id;
                     if($event['type'] == 'payment_captured'){
                         $sql = 'SELECT * FROM '._DB_PREFIX_."checkoutcom_adminorder WHERE `transaction_id` = '".$event['data']['reference']."'"; 
@@ -107,13 +118,16 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                         }
                         
                     }
-                   
-                    if($currentStatus !== $status && $this->preventAuthAfterCapture($currentStatus, $status)) {
 
+                    $this->module->logger->info('Channel Webhook -- current status: ' .$currentStatus);
+                    $this->module->logger->info('Channel Webhook --  status: ' . $status );
+
+                    if($currentStatus !== $status && $this->preventAuthAfterCapture($currentStatus, $status)) {
+                        $this->module->logger->info('Channel Webhook --  Valid state change: ');
                         $isPartial = $this->_isPartialAmount($event, $order);
                         $amount = Method::fixAmount($event['data']['amount'], $event['data']['currency'], true);
                         $currency = $event['data']['currency'];
-                        
+                        $this->module->logger->info('Channel Webhook --  Valid state change: ');
                         if($isPartial) {
 
                             $message = $this->trans("An amount of %currency% %amount% ", 
@@ -138,8 +152,15 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                         $history = new OrderHistory();
                         $history->id_order = $order->id;
                         $history->changeIdOrderState($status, $order->id, true);
-                        $history->addWithemail();
-                        $this->module->logger->info('Channel Webhook -- New order status : ' . $order->id);
+                        $this->module->logger->info('Channel Webhook -- New order status : ' . $status);
+                        // try{
+                        //     $history->addWithemail();
+                        // }
+                        // catch(Exception $e) {
+                        //     $this->module->logger->info('Channel Webhook -- Failed addWithemail : '.$e->getMessage());
+                        //  }
+                        // $this->module->logger->info('Channel Webhook -- Mail sent : ' . $order->id);
+                        
                     }
                 }
             }

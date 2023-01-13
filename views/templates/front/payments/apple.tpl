@@ -68,9 +68,18 @@
 		   var applePayButton = document.querySelector('.applePayButton');
 		   var applePayOptionForm = document.querySelector('.payment-option-checkoutcom-apple-form');
 			
+		   var terms = document.getElementById("conditions_to_approve[terms-and-conditions]");
+			terms.addEventListener('click', function(){
+				if(terms.checked){
+					applePayButton.classList.add('clickable');
+				}
+				else{
+					applePayButton.classList.remove('clickable');
+				}
+			});
+
 		   //Event listener when apple pay button is sclicked
 		   applePayButton.addEventListener('click', function(){
-			   var terms = document.getElementById("conditions_to_approve[terms-and-conditions]");
 			   if (terms.checked) {
 				   var paymentReq = {
 					   countryCode: applePayForm.dataset.merchant_country_iso,

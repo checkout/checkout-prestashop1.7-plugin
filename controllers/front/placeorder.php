@@ -64,9 +64,15 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
      */
     protected function paymentProcess(Customer $customer)
     {
+        $source_type = Tools::isSubmit('source')?Tools::getValue('source'):"card";
+        $this->module->logger->info('Channel Placeorder -- source type : ' . $source_type);
         $response = CheckoutcomPaymentHandler::execute(Tools::getAllValues());
         if ($response->isSuccessful()) {
             $this->module->logger->info('Channel Placeorder -- payment process : response isSuccessful');
+            $this->module->logger->info(
+                'Channel Placeorder -- Response :',
+                array('obj' => $response)
+        );
             // Flag Order
             if($response->isFlagged() && !Utilities::addMessageToOrder($this->trans('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.' , [], 'Modules.Checkoutcom.Placeorder.php'), $this->context->order)) {
 				$this->module->logger->error('Channel Placeorder -- Failed to add payment flag note to order');
@@ -107,12 +113,16 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
                 $this->module->logger->info('Channel Placeorder --  Create order for Customer id : ' . $cart->id_customer);
                 $this->module->logger->info('Channel Placeorder --  Create order for amount : ' .  $total);
 
+                $suffix = '-card';
+                if($source_type === 'apple'){
+                    $suffix = '-apay';
+                }
 
                 if ($this->module->validateOrder(
                                                     $cart->id,
                                                     _PS_OS_PAYMENT_,
                                                     $total,
-                                                    $this->module->displayName.'-card',
+                                                    $this->module->displayName.$suffix,
                                                     '',
                                                     array(),
                                                     (int) $cart->id_currency,

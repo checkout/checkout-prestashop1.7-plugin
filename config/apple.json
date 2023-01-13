@@ -32,7 +32,7 @@
       {
         "name":"CHECKOUTCOM_APPLE_MERCHANT_ID",
         "label":"Merchant ID",
-        "desc":"Provide your Apple Merchant ID.",
+        "desc":"Provide your Apple Merchant ID (eg: merchant.com.example.prestashop)",
         "type":"text",
         "default":"",
         "required":1,
@@ -41,7 +41,7 @@
       {
         "name":"CHECKOUTCOM_APPLE_KEY",
         "label":"Apple Pay Key",
-        "desc":"Provide Path to Apple Pay .key File",
+        "desc":"Provide Path to Apple Pay .key File (eg: /opt/applepay/certificate.key)",
         "type":"text",
         "default":"",
         "required":1,
@@ -51,7 +51,7 @@
       {
         "name":"CHECKOUTCOM_APPLE_CERTIFICATE",
         "label":"Apple Pay Certificate",
-        "desc":"Provide Path to Apple Pay .pem File",
+        "desc":"Provide Path to Apple Pay .pem File (eg: /opt/applepay/certificate.pem)",
         "type":"text",
         "default":"",
         "required":1,

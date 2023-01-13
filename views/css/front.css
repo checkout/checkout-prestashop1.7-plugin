@@ -717,3 +717,7 @@ label {
   border-radius: 4px;
   text-align: center;
 }
+
+.clickable {
+  cursor: pointer;
+}

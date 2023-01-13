@@ -53,11 +53,11 @@ abstract class Method
      *
      * @return Payment
      */
-    public static function makePayment(MethodSource $source, array $params = array(), bool $capture = true)
+    public static function makePayment(MethodSource $source, array $params = array(), bool $capture = true, $type = "card")
     {
         $module = \Module::getInstanceByName('checkoutcom');
         $module->logger->info(
-                'Channel Method -- make Payment for source :',
+                'Channel Method -- make Payment for source :'.$type,
                 array('obj' => $source)
         );
         $context = \Context::getContext();
@@ -76,12 +76,14 @@ abstract class Method
         $payment->success_url = $context->link->getModuleLink(  'checkoutcom',
                                                                 'confirmation',
                                                                 ['cart_id' => $context->cart->id,
-                                                                 'secure_key' => $context->customer->secure_key],
+                                                                 'secure_key' => $context->customer->secure_key,
+                                                                'source' => $type],
                                                                 true);
         $payment->failure_url = $context->link->getModuleLink(  'checkoutcom',
                                                                 'failure',
                                                                 ['cart_id' => $context->cart->id,
-                                                                 'secure_key' => $context->customer->secure_key],
+                                                                 'secure_key' => $context->customer->secure_key,
+                                                                 'source' => $type],
                                                                 true);
 
         static::addThreeDs($payment);
