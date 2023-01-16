@@ -48,7 +48,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.3.4';
+        $this->version = '2.3.5';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -700,7 +700,7 @@ class CheckoutCom extends PaymentModule
         if (Tools::isSubmit('shippingBack')) {
             $amount += $order->total_shipping;
         }
-
+        $amount = round( $amount, 2);
         return $amount;
     }
 
@@ -760,7 +760,7 @@ class CheckoutCom extends PaymentModule
                     $amount += $shipping_cost_amount;
                 }
             }
-
+            $amount = round( $amount, 2);
             return $amount;
         }
 
