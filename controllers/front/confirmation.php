@@ -34,6 +34,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
         $flagged = false;
         $transaction_id = '';
         $status = 'Pending';
+        $source_type = Tools::getValue('source');
 
         $cart = new Cart((int) $cart_id);
         $customer = new Customer((int) $cart->id_customer);
@@ -48,10 +49,16 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             }
 
             $response = $this->_verifySession($cko_session_id);
-
+            $this->module->logger->info(
+                'Channel Confirmation -- Response :',
+                array('obj' => $response)
+            );
             if ($response->isSuccessful() && !$response->isPending()) {
                 $suffix = '';
-                if ($response->source['type'] === 'card') {
+                if($source_type === 'apple'){
+                    $suffix = '-apay';
+                }
+                else if ($response->source['type'] === 'card') {
                     $suffix = '-card';
                 }
                 $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
@@ -121,6 +128,8 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $payments = $order->getOrderPaymentCollection();
             $payments[0]->transaction_id = $transaction_id;
             $payments[0]->update();
+
+            $this->module->logger->info('Channel Confirmation -- Order payment mapped:'.$payments[0]->transaction_id);
 
             /**
              * Load the order history, change the status and send email confirmation

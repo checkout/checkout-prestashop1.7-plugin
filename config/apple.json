@@ -1,0 +1,61 @@
+[
+    [
+      {
+        "name":"CHECKOUTCOM_APPLE_TITLE",
+        "label":"Payment Option Title",
+        "description":"",
+        "type":"text",
+        "icon":"",
+        "default":"Pay by Apple Pay with Checkout.com",
+        "required":1
+      },
+      {
+        "name":"CHECKOUTCOM_APPLE_ENABLED",
+        "label":"Enable Apple Pay",
+        "description":"",
+        "type":"bswitch",
+        "default":0,
+        "required":1,
+        "options":[
+          {
+            "id":"id_option",
+            "value":1,
+            "label":"Enabled"
+          },
+          {
+            "id":"id_option",
+            "value":0,
+            "label":"Disabled"
+          }
+        ]
+      },
+      {
+        "name":"CHECKOUTCOM_APPLE_MERCHANT_ID",
+        "label":"Merchant ID",
+        "desc":"Provide your Apple Merchant ID (eg: merchant.com.example.prestashop)",
+        "type":"text",
+        "default":"",
+        "required":1,
+        "col":2
+      },
+      {
+        "name":"CHECKOUTCOM_APPLE_KEY",
+        "label":"Apple Pay Key",
+        "desc":"Provide Path to Apple Pay .key File (eg: /opt/applepay/certificate.key)",
+        "type":"text",
+        "default":"",
+        "required":1,
+        "col":2
+      }
+    ,
+      {
+        "name":"CHECKOUTCOM_APPLE_CERTIFICATE",
+        "label":"Apple Pay Certificate",
+        "desc":"Provide Path to Apple Pay .pem File (eg: /opt/applepay/certificate.pem)",
+        "type":"text",
+        "default":"",
+        "required":1,
+        "col":2
+      }
+    ]
+  ]

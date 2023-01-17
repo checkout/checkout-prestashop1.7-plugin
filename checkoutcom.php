@@ -48,7 +48,7 @@ class CheckoutCom extends PaymentModule
     {
         $this->name = 'checkoutcom';
         $this->tab = 'payments_gateways';
-        $this->version = '2.3.4';
+        $this->version = '2.3.5';
         $this->author = 'Checkout.com';
         $this->need_instance = 1;
 
@@ -292,7 +292,6 @@ class CheckoutCom extends PaymentModule
             ];
 
             $url = 'https://api.sandbox.checkout.com/workflows';
-
             if(Configuration::get('CHECKOUTCOM_LIVE_MODE')){
                 $url = 'https://api.checkout.com/workflows';
             }
@@ -391,8 +390,8 @@ class CheckoutCom extends PaymentModule
 
         $methods = array(
             CheckoutcomPaymentOption::getCard($this, $params),
-            // CheckoutcomPaymentOption::getApple($this, $params),
             CheckoutcomPaymentOption::getGoogle($this, $params),
+            CheckoutcomPaymentOption::getApple($this, $params),
         );
 
         $alternatives = CheckoutcomPaymentOption::getAlternatives($this, $params);
@@ -413,7 +412,9 @@ class CheckoutCom extends PaymentModule
             $this->context->controller->addJquery();
             $this->context->controller->addJS($this->_path . '/views/js/front.js');
             $this->context->controller->addJS($this->_path . '/views/js/cko.js');
+            $this->context->controller->addJS($this->_path . '/views/js/apple-pay-sdk.js');
             $this->context->controller->addCSS($this->_path . '/views/css/front.css');
+           
         }
 
     }
@@ -699,7 +700,7 @@ class CheckoutCom extends PaymentModule
         if (Tools::isSubmit('shippingBack')) {
             $amount += $order->total_shipping;
         }
-
+        $amount = round( $amount, 2);
         return $amount;
     }
 
@@ -759,7 +760,7 @@ class CheckoutCom extends PaymentModule
                     $amount += $shipping_cost_amount;
                 }
             }
-
+            $amount = round( $amount, 2);
             return $amount;
         }
 
