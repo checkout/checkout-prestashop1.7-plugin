@@ -76,7 +76,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
 
             //Defensive code to handle missing payment mapping
             if(empty($order_reference)  && $event['type'] == "payment_captured"){
-                $this->module->logger->info('Channel Webhook -- order reference not found for payment. Attempting to find by cart : ' .$payment_id);
+                $this->module->logger->info('Channel Webhook -- order reference not found for payment. Attempting to find by cart : ' .$cart_id);
                 $sql = 'SELECT `id_order`,`reference`,`id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `id_cart`='.$cart_id;
                 $order_result = Db::getInstance()->executeS($sql);
                 $order_reference = $order_result[0]['reference'];
