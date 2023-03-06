@@ -721,3 +721,36 @@ label {
 .clickable {
   cursor: pointer;
 }
+#toolmsg {
+  font-size: 14px;;
+}
+
+#toolmsg  a{
+  border: 1px solid #333;
+  border-radius: 100%;
+  padding: 0px 7px;
+  font-size: 12px;
+  cursor: pointer;
+  line-height: 7px;
+  position: relative;
+}
+/* Tooltip text */
+#toolmsg a span {
+  visibility: hidden;
+    width: 300px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    font-size: 12px;
+    position: absolute;
+    z-index: 1;
+    line-height: 16px;
+    left: 22px;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+#toolmsg a:hover span {
+  visibility: visible;
+}
