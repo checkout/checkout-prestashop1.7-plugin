@@ -65,7 +65,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
             $payment_id =  $event['data']['id'];
             
-            //TODO - Remove this before pushing
+            
             // $payment_id = "pay_xxx";
 
             $this->module->logger->info('Channel Webhook -- New payment : ' .$payment_id);
@@ -93,7 +93,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                 $payments[0]->update();
             }
            
-            // TODO - Check if the order object has id_shop and skip the following query
+            
             $sql = 'SELECT `id_shop` FROM `'._DB_PREFIX_.'orders` WHERE `reference`="'.$order_reference.'"';
             $this->module->logger->info('Channel Webhook -- New sql shop: ' .$sql);
             $order_id_shop = Db::getInstance()->getValue($sql);
