@@ -523,7 +523,7 @@ iframe{width:100%}
  * Multi iframes
  */
 .card-number-frame iframe {
-  height: 38px !important;
+  min-height: 38px !important;
 }
 .expiry-date-frame iframe {
   height: 38px !important;
