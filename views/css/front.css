@@ -628,6 +628,7 @@ div + button {
   border: solid 1px #13395e;
   border-radius: 3px;
   box-shadow: 0 1px 3px 0 rgba(19, 57, 94, 0.2);
+  min-height: 40px;
 }
 
 .frame--activated.frame--focus {
