@@ -49,6 +49,15 @@ $(document).ready(function () {
 });
 
 function hideFrames(savecard) {
+  if ( document.getElementById("checkoutcom-card-frame") !== null ) {
+    var $frames = document.getElementById("checkoutcom-card-frame");
+  }else{
+    var $frames = document.getElementById("checkoutcom-multi-frame");
+  }
+  if($frames){
+    $frames.style="display:none";
+    
+  }
   $("#checkoutcom-card-frame").hide();
   $(".cvvVerification").hide();
 
@@ -58,7 +67,12 @@ function hideFrames(savecard) {
 }
 
 function showFrames(savecard) {
-  $("#checkoutcom-card-frame").show();
+
+  if ( document.getElementById("checkoutcom-card-frame") !== null ) {
+    var $frames = document.getElementById("checkoutcom-card-frame");
+  }else{
+    var $frames = document.getElementById("checkoutcom-multi-frame");
+  }
 
   if (savecard) {
     $(".save-card-check").show();

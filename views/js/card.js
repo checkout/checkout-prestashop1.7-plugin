@@ -77,6 +77,23 @@ function CheckoutcomFramesPay($form) {
     );
 
     /**
+     * Add card bin changed event
+     */
+
+    Frames.addEventHandler(Frames.Events.CARD_BIN_CHANGED, function ( event ) {
+
+        // Show hide co badged label.
+        if ( event?.isCoBadged ) {
+            document.getElementById('toolmsg').classList.add("show");
+            document.getElementById('toolmsg').style.removeProperty("display");
+        }
+        else{
+            document.getElementById('toolmsg').style="display:none";
+        }
+  
+    })
+
+    /**
      * Add card validation changed event.
      */
     Frames.addEventHandler(

@@ -723,7 +723,9 @@ label {
   cursor: pointer;
 }
 #toolmsg {
-  font-size: 14px;;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 5px;
 }
 
 #toolmsg  a{
@@ -749,6 +751,7 @@ label {
     z-index: 1;
     line-height: 16px;
     left: 22px;
+    padding:5px;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
