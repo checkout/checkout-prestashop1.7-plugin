@@ -13,7 +13,7 @@
  * @link      https://docs.checkout.com/
  */
 
-#checkoutcom_payment_button a {
+ #checkoutcom_payment_button a {
 	padding: 10px;
 	background-color: #FBFBFB;
 }
@@ -38,7 +38,9 @@
 
 #checkoutcom-card-form {
     padding-left: 40px;
+    position: relative;
 }
+
 
 .save-card-check {
     padding-top: 15px;
@@ -757,4 +759,8 @@ label {
 /* Show the tooltip text when you mouse over the tooltip container */
 #toolmsg a:hover span {
   visibility: visible;
+}
+#checkoutcom-card-frame #toolmsg{
+  position: absolute;
+    bottom: 20px;
 }

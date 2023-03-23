@@ -33,7 +33,7 @@ function CheckoutcomFramesPay($form) {
     var $source = document.getElementById('checkoutcom-card-source');
     var $imageDir = $frames.dataset.imagedir;
     var submitted = false; // Prevent multiple submit
-    $frames.insertAdjacentHTML('afterend',
+    $frames.insertAdjacentHTML('beforeend',
     '<div style="display:none" id="toolmsg">Select your preferred card brand <a class="" data-toggle="tooltip" data-placement="top" title="">i <span>Your card has two brands, and you can choose your preferred one for this payment. If you do not, then the merchant preferred brand will be selected</span></a></div>')
     /**
      * Customer phone length check
@@ -62,7 +62,8 @@ function CheckoutcomFramesPay($form) {
             },
             phone: customerPhone,
         },
-        schemeChoice:true
+        schemeChoice:true,
+        modes: [ Frames.modes.FEATURE_FLAG_SCHEME_CHOICE],
     });
 
     /**
