@@ -43,7 +43,7 @@
 
 
 .save-card-check {
-    padding-top: 15px;
+    padding-top: 25px;
 }
 
 .card-logo {
@@ -762,5 +762,5 @@ label {
 }
 #checkoutcom-card-frame #toolmsg{
   position: absolute;
-    bottom: 20px;
+    bottom: 30px;
 }
