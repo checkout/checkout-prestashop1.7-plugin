@@ -65,8 +65,6 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
             $cart_id = str_replace( 'CART_', '', $event['data']['reference'] );
             $payment_id =  $event['data']['id'];
             
-            
-            // $payment_id = "pay_xxx";
 
             $this->module->logger->info('Channel Webhook -- New payment : ' .$payment_id);
             $sql = 'SELECT `order_reference` FROM `'._DB_PREFIX_.'order_payment` WHERE `transaction_id`='.'"'.$payment_id.'"';
