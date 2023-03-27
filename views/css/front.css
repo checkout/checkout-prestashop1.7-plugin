@@ -13,7 +13,7 @@
  * @link      https://docs.checkout.com/
  */
 
-#checkoutcom_payment_button a {
+ #checkoutcom_payment_button a {
 	padding: 10px;
 	background-color: #FBFBFB;
 }
@@ -38,10 +38,12 @@
 
 #checkoutcom-card-form {
     padding-left: 40px;
+    position: relative;
 }
 
+
 .save-card-check {
-    padding-top: 15px;
+    padding-top: 25px;
 }
 
 .card-logo {
@@ -523,7 +525,7 @@ iframe{width:100%}
  * Multi iframes
  */
 .card-number-frame iframe {
-  height: 38px !important;
+  min-height: 38px !important;
 }
 .expiry-date-frame iframe {
   height: 38px !important;
@@ -628,6 +630,7 @@ div + button {
   border: solid 1px #13395e;
   border-radius: 3px;
   box-shadow: 0 1px 3px 0 rgba(19, 57, 94, 0.2);
+  min-height: 40px;
 }
 
 .frame--activated.frame--focus {
@@ -720,4 +723,44 @@ label {
 
 .clickable {
   cursor: pointer;
+}
+#toolmsg {
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+#toolmsg  a{
+  border: 1px solid #333;
+  border-radius: 100%;
+  padding: 0px 7px;
+  font-size: 12px;
+  cursor: pointer;
+  line-height: 7px;
+  position: relative;
+}
+/* Tooltip text */
+#toolmsg a span {
+  visibility: hidden;
+    width: 300px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    font-size: 12px;
+    position: absolute;
+    z-index: 1;
+    line-height: 16px;
+    left: 22px;
+    padding:5px;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+#toolmsg a:hover span {
+  visibility: visible;
+}
+#checkoutcom-card-frame #toolmsg{
+  position: absolute;
+    bottom: 30px;
 }
