@@ -16,6 +16,7 @@ use Checkout\Models\Payments\Method as MethodSource;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
 use Checkout\Models\Payments\Refund;
+use Checkout\Models\Address;
 
 abstract class Method
 {
@@ -70,7 +71,14 @@ abstract class Method
         $payment->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
         $payment->payment_type = 'Regular';
         $payment->reference = 'CART_' . $context->cart->id;
+        if ( 'giropay' === $source->type) {
+			$payment->description = $source->purpose;
 
+			unset( $source->purpose );
+		}
+        $billing = new \Address((int) $context->cart->id_address_invoice);
+        $country = \Country::getIsoById($billing->id_country);
+        $payment->shipping = (object) array("from_address_zip"=>$billing->postcode,'address'=>array("address_line1"=>$billing->address1,"city"=>$billing->city,"zip"=>$billing->postcode,"country"=>$country));
         // Set the payment specifications
         $payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
         $payment->success_url = $context->link->getModuleLink(  'checkoutcom',
