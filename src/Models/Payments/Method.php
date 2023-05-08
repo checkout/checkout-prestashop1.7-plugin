@@ -159,8 +159,8 @@ abstract class Method
                                                                  'source' => $type],
                                                                 true);
 
-            print_r($request);
-            exit;                                                    
+            // print_r($request);
+            // exit;                                                    
         try {
             $response = CheckoutApiHandler::api()->getPaymentsClient()->requestPayment($request);
            
