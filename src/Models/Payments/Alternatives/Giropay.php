@@ -2,7 +2,7 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Payments\GiropaySource;
+use Checkout\Payments\Request\Source\Apm\RequestGiropaySource;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 
 class Giropay extends Alternative
@@ -16,8 +16,9 @@ class Giropay extends Alternative
      */
     public static function pay(array $params)
     {
-        $source = new GiropaySource(\Configuration::get('PS_SHOP_NAME'), Utilities::getValueFromArray($params, 'bic'));
-        $payment = static::makePayment($source);
+        $source = new RequestGiropaySource();
+        $source->purpose = 'Giropay by Checkout.com';
+        $payment = static::makePaymentToken($source);
 
         return static::request($payment);
     }

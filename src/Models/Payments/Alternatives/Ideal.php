@@ -2,7 +2,7 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Payments\IdealSource;
+use Checkout\Payments\Request\Source\Apm\RequestIdealSource;
 
 class Ideal extends Alternative
 {
@@ -16,8 +16,12 @@ class Ideal extends Alternative
     public static function pay(array $params)
     {
         $bic = self::checkBic($params['bic']);
-        $source = new IdealSource($bic, /*\Configuration::get('PS_SHOP_NAME')*/ 'iDEAL Payment');
-        $payment = static::makePayment($source);
+        $source = new RequestIdealSource();
+        $source->type = 'ideal';
+        $source->description = 'Prestashop';
+        $source->bic =$bic;
+        //$bic, /*\Configuration::get('PS_SHOP_NAME')*/ 'iDEAL Payment');
+        $payment = static::makePaymentToken($source);
 
         return static::request($payment);
     }

@@ -2,9 +2,10 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments;
 
-use Checkout\Models\Tokens\ApplePay;
-use Checkout\Models\Tokens\ApplePayHeader;
-use Checkout\Models\Payments\TokenSource;
+
+use Checkout\Tokens\ApplePayTokenData;
+use Checkout\Tokens\ApplePayTokenRequest;
+use Checkout\Tokens\CardTokenRequest;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
 
@@ -22,16 +23,46 @@ class Apple extends Method
         $token = '';
         $payment = null;
         $data = json_decode($params['token'], true);
-        $header = new ApplePayHeader($data['header']['transactionId'], $data['header']['publicKeyHash'], $data['header']['ephemeralPublicKey']);
-        $applepay = new ApplePay($data['version'], $data['signature'], $data['data'], $header);
+        // $data['type'] = 'googlepay';
+        // $data = (object)$data;
+        $request = new CardTokenRequest();
+        $request->type = 'applepay';
+        $request->token_data = $data;
+        $transaction_id       = $data['header']['transactionId'];
+		$public_key_hash      = $data['header']['publicKeyHash'];
+		$ephemeral_public_key = $data['header']['ephemeralPublicKey'];
+		$version              = $data['version'];
+		$signature            = $data['signature'];
+		$data                 = $data['data'];
+        $header = [
+			'transactionId'      => $transaction_id,
+			'publicKeyHash'      => $public_key_hash,
+			'ephemeralPublicKey' => $ephemeral_public_key,
+		];
+
+        $apple_pay_token_data            = new ApplePayTokenData();
+        $apple_pay_token_data->data      = $data;
+        $apple_pay_token_data->header    = $header;
+        $apple_pay_token_data->signature = $signature;
+        $apple_pay_token_data->version   = $version;
+
+        $apple_pay_token_request             = new ApplePayTokenRequest();
+        $apple_pay_token_request->token_data = $apple_pay_token_data;
+
+			
+        // $header = new ApplePayHeader($data['header']['transactionId'], $data['header']['publicKeyHash'], $data['header']['ephemeralPublicKey']);
+        // $applepay = new ApplePay($data['version'], $data['signature'], $data['data'], $header);
         try {
-            $token = CheckoutApiHandler::api()->tokens()->request($applepay);
+            $token = CheckoutApiHandler::token()->getTokensClient()->requestWalletToken($apple_pay_token_request);
         } catch (CheckoutHttpException $ex) {
             \PrestaShopLogger::addLog($ex->getBody(), 3, $ex->getCode(), 'checkoutcom' , 0, true);
         }
 
         if ($token) {
-            $payment = static::makePayment(new TokenSource($token->getTokenId()), array(), true, $params['source']);
+            $source  = (object)[];
+            $source->type = 'token';
+            $source->token = $token['token'];
+            $payment = static::makePaymentToken($source);
             $response = static::request($payment);
         }
         return $response;

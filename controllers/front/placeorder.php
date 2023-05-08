@@ -67,19 +67,22 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         $source_type = Tools::isSubmit('source')?Tools::getValue('source'):"card";
         $this->module->logger->info('Channel Placeorder -- source type : ' . $source_type);
         $response = CheckoutcomPaymentHandler::execute(Tools::getAllValues());
-        if ($response->isSuccessful()) {
+        // echo "<pre>";
+        // print_r($response);
+        // exit;
+        if ($response['status']=='Pending' || $response['status']=='Authorized'  ) {
             $this->module->logger->info('Channel Placeorder -- payment process : response isSuccessful');
             $this->module->logger->info(
                 'Channel Placeorder -- Response :',
                 array('obj' => $response)
-        );
+                );
             // Flag Order
-            if($response->isFlagged() && !Utilities::addMessageToOrder($this->trans('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.' , [], 'Modules.Checkoutcom.Placeorder.php'), $this->context->order)) {
-				$this->module->logger->error('Channel Placeorder -- Failed to add payment flag note to order');
-                \PrestaShopLogger::addLog('Failed to add payment flag note to order.', 2, 0, 'CheckoutcomPlaceorderModuleFrontController' , $this->context->order->id, true);
-            }
+            // if($response->isFlagged() && !Utilities::addMessageToOrder($this->trans('⚠️ This order is flagged as a potential fraud. We have proceeded with the payment, but we recommend you do additional checks before shipping the order.' , [], 'Modules.Checkoutcom.Placeorder.php'), $this->context->order)) {
+			// 	$this->module->logger->error('Channel Placeorder -- Failed to add payment flag note to order');
+            //     \PrestaShopLogger::addLog('Failed to add payment flag note to order.', 2, 0, 'CheckoutcomPlaceorderModuleFrontController' , $this->context->order->id, true);
+            // }
 
-            $url = $response->getRedirection();
+            $url = isset($response['_links']['redirect']['href'])?$response['_links']['redirect']['href']:"";
             if ($url) {
                 //log redirect url
                 $this->module->logger->info('Channel Placeorder -- Redirection to : ' . $url);
@@ -145,11 +148,11 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
              * load order payment and set cko action id as order transaction id
              */
             $payments = $this->context->order->getOrderPaymentCollection();
-            $payments[0]->transaction_id = $response->id;
+            $payments[0]->transaction_id = $response['id'];
             $payments[0]->update();
 
             //log payment transaction id
-            $this->module->logger->info('Channel Placeorder --  payment transaction id : ' .  $response->id);
+            $this->module->logger->info('Channel Placeorder --  payment transaction id : ' .  $response['id']);
            
 
             // Reset order history
@@ -184,17 +187,18 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
      */
     protected function handleFail($response) {
 		
+
         $this->module->logger->error('Channel Placeorder -- HandleFail Payment for order not processed');
         \PrestaShopLogger::addLog('Payment for order not processed.', 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
 
-        if (isset($response->status) && $response->status === 'Declined' && $response->response_summary) {
-			$this->module->logger->error(sprintf('Channel Placeorder -- HandleFail An error has occured while processing your payment. Payment Declined : %s', $response->response_summary));
+        if (isset($response['status']) && $response['status'] === 'Declined' && $response['response_summary']) {
+			$this->module->logger->error(sprintf('Channel Placeorder -- HandleFail An error has occured while processing your payment. Payment Declined : %s', $response['response_summary']));
             $this->context->controller->errors[] = $this->trans('An error has occured while processing your payment. Payment Declined.', [], 'Modules.Checkoutcom.Placeorder.php');
         } else {
 
             // Set error message
-			$this->module->logger->error(sprintf('Channel Placeorder -- HandleFail response : %s', $response->message));
-            $this->context->controller->errors[] = $this->trans($response->message);
+			$this->module->logger->error(sprintf('Channel Placeorder -- HandleFail response : %s', $response['message']));
+            $this->context->controller->errors[] = $this->trans($response['message']);
           
             foreach ($response->errors as $error) {
                 $this->context->controller->errors[] = 'Error: ' . $error;

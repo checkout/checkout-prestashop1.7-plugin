@@ -14,7 +14,7 @@
  * @link      https://docs.checkout.com/
  */
 
-use Checkout\Models\Response;
+
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
@@ -53,12 +53,14 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 'Channel Confirmation -- Response :',
                 array('obj' => $response)
             );
-            if ($response->isSuccessful() && !$response->isPending()) {
+            // print_r($response);
+            // exit;
+            if ( (isset($response['approved']) && $response['approved']==true) || (isset($response['source']['type']) &&  $response['source']['type']=="sofort" && $response['status']=="Pending") ) {
                 $suffix = '';
                 if($source_type === 'apple'){
                     $suffix = '-apay';
                 }
-                else if ($response->source['type'] === 'card') {
+                else if ($response['source']['type'] === 'card') {
                     $suffix = '-card';
                 }
                 $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
@@ -83,12 +85,14 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                     // Redirect to cartcontext
                     $this->redirectWithNotifications('index.php?controller=order&step=1&key=' . $customer->secure_key . '&id_cart=' . $cart->id);
                 }
+                if(isset($response['risk'])){
+                    $flagged = $response['risk']['flagged'];
+                    $threeDS = isset($response['3ds']['enrolled'])?$response['3ds']['enrolled']:"";
+                }
+                
 
-                $flagged = $response->isFlagged();
-                $threeDS = $response->getValue(array('threeDs', 'enrolled')) === 'Y';
-
-                $transaction_id = $response->id;
-                $status = $response->status;
+                $transaction_id = $response['id'];
+                $status = $response['status'];
 
                 $context = \Context::getContext();
 
@@ -168,11 +172,12 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
 
     private function _verifySession($session_id)
     {
-        $response = new Response();
+       // $response = new Response();
 
         try {
             // Get payment response
-            $response = CheckoutApiHandler::api()->payments()->details($session_id);
+           
+            $response = CheckoutApiHandler::api()->getPaymentsClient()->getPaymentDetails($session_id);
         } catch (CheckoutHttpException $ex) {
             $response->http_code = $ex->getCode();
             $response->message = $ex->getMessage();

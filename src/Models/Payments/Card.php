@@ -4,10 +4,10 @@ namespace CheckoutCom\PrestaShop\Models\Payments;
 
 use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
-use Checkout\Models\Payments\TokenSource;
+use Checkout\Payments\Request\Source\RequestTokenSource;
 use Checkout\Models\Payments\Payment;
 use Checkout\Models\Payments\ThreeDs;
-use Checkout\Models\Payments\IdSource;
+use Checkout\Payments\Request\Source\RequestIdSource;
 
 class Card extends Method
 {
@@ -28,19 +28,30 @@ class Card extends Method
 
             $sourceId = CheckoutcomCustomerCard::getSourceId($entityId, $customerId);
 
-            $source = new IdSource($sourceId);
+            $source  = (object)[];
+            $source->type = 'id';
+            $source->id = $sourceId;
 
             if(isset($params['cko-cvv']) && !empty($params['cko-cvv'])){
                 $source->cvv = $params['cko-cvv'];
             }
 
+
         } else {
-            $source = new TokenSource($params['token']);
+            $source  = (object)[];
+            $source->type = 'token';
+            $source->token = $params['token'];
+            //new RequestTokenSource($params['token']);
         }
+       
 
         $capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
-        $payment = static::makePayment($source, [], $capture);
-        static::addMada($payment, Utilities::getValueFromArray($params, 'bin', 0));
+        if($params['source'] == 'id'){
+        $payment = static::makePaymentToken($source, [], $capture);
+        }else{
+            $payment = static::makePaymentToken($source, [], $capture);
+        }
+        //static::addMada($payment, Utilities::getValueFromArray($params, 'bin', 0));
         return static::request($payment);
     }
 

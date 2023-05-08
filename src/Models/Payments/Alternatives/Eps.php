@@ -2,7 +2,7 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Payments\EpsSource;
+use Checkout\Payments\Request\Source\Apm\RequestEpsSource;
 
 class Eps extends Alternative
 {
@@ -15,8 +15,10 @@ class Eps extends Alternative
      */
     public static function pay(array $params)
     {
-        $source = new EpsSource(\Configuration::get('PS_SHOP_NAME'));
-        $payment = static::makePayment($source);
+        $source = new RequestEpsSource();
+        $source->type = 'eps';
+        $source->purpose = \Configuration::get('PS_SHOP_NAME');
+        $payment = static::makePaymentToken($source);
         return static::request($payment);
     }
 }

@@ -7,7 +7,11 @@ use CheckoutCom\PrestaShop\Models\Config;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;
 use CheckoutCom\PrestaShop\Models\Payments\Method;
-use Checkout\Models\Payments\IdealSource;
+use Checkout\Payments\Request\Source\Apm\RequestIdealSource;
+use Checkout\Apm\Ideal\IdealClient;
+use Checkout\CheckoutConfiguration;
+use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
+
 
 //use PrestaShop\PrestaShop\Adapter\Debug\DebugMode;
 
@@ -112,9 +116,14 @@ class CheckoutcomPaymentOption extends PaymentOption
                 if ( $field['key'] === 'ideal' ) {
                     // iDeal : get iDeal banks
                     $bic = '';
-                    $source = new IdealSource($bic, 'iDEAL payment');
-                    $banks = Method::getBanks($source);
-                    $issuers = $banks->countries[0]['issuers'];
+                    // $configuration = new CheckoutConfiguration();
+                    // $IdealClient = new IdealClient(CheckoutApiHandler::api(),$configuration);
+                    // $source->type = 'ideal';
+                    // $source->description = 'Prestashop';
+                    // $source->bic =$bic;
+                    $ideal_banks = CheckoutApiHandler::api()->getIdealClient()->getIssuers();
+                    $country = $ideal_banks['countries'];
+                    $issuers = $country[0]['issuers'];
                     $context->smarty->assign('idealBanks', $issuers);
                 }
 

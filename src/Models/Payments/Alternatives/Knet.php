@@ -2,7 +2,7 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Payments\KnetSource;
+use Checkout\Payments\Request\Source\Apm\RequestKnetSource;
 
 class Knet extends Alternative
 {
@@ -32,8 +32,10 @@ class Knet extends Alternative
     {
         $context = \Context::getContext();
         $language = substr($context->language->iso_code, 0, 2) !== Knet::LOCALE_AR ? Knet::LOCALE_EN : Knet::LOCALE_AR;
-        $source = new KnetSource($language);
-        $payment = static::makePayment($source);
+        $source = new RequestKnetSource();
+        $source->language = $language;
+        $source->type ='knet';
+        $payment = static::makePaymentToken($source);
 
         return static::request($payment);
     }

@@ -2,7 +2,7 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Payments\SofortSource;
+use Checkout\Payments\Request\Source\Apm\RequestSofortSource;
 
 class Sofort extends Alternative
 {
@@ -15,8 +15,9 @@ class Sofort extends Alternative
      */
     public static function pay(array $params)
     {
-        $source = new SofortSource();
-        $payment = static::makePayment($source);
+        $source = new RequestSofortSource();
+        $source->type = 'sofort';
+        $payment = static::makePaymentToken($source);
 
         return static::request($payment);
     }

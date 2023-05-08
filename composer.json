@@ -4,7 +4,7 @@
   "version": "2.3.1",
   "type": "prestashop-module",
   "require": {
-    "checkout/checkout-sdk-php": "^1.0"
+    "checkout/checkout-sdk-php": "^3.0"
   },
   "require-dev": {
     "prestashop/php-coding-standards": "dev-master"

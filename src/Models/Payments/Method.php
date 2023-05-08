@@ -3,19 +3,20 @@
 namespace CheckoutCom\PrestaShop\Models\Payments;
 
 use Checkout\CheckoutApi;
-use Checkout\Models\Customer;
+use Checkout\Common\CustomerRequest;
 use Checkout\Models\Response;
-use Checkout\Models\Payments\Payment;
+use Checkout\Payments\Request\PaymentRequest;
 use Checkout\Models\Payments\ThreeDs;
-use Checkout\Models\Payments\IdSource;
-use Checkout\Models\Payments\Metadata;
+use Checkout\Metadata\Card\Source\CardMetadataRequestSource;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use Checkout\Models\Payments\BillingDescriptor;
-use Checkout\Models\Payments\Method as MethodSource;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
-use Checkout\Models\Payments\Refund;
+use Checkout\Payments\RefundRequest;
+use Checkout\Payments\Request\Source\RequestIdSource as IdSource; 
+use Checkout\Payments\Request\Source\RequestTokenSource as TokenSource;
+use Checkout\Payments\Previous\PaymentRequest as PreviousPaymentRequest;
 
 abstract class Method
 {
@@ -37,7 +38,7 @@ abstract class Method
      */
     public static function pay(array $params)
     {
-        $response = new Response();
+        $response = (object)[];
         $response->http_code = 400;
         $response->errors = array(Utilities::getValueFromArray($params, 'source', 'Payment method') . ' in development.');
         $response->message = $response->errors[0];
@@ -53,45 +54,139 @@ abstract class Method
      *
      * @return Payment
      */
-    public static function makePayment(MethodSource $source, array $params = array(), bool $capture = true, $type = "card")
+    public static function makePaymentId($source, array $params = array(), bool $capture = true, $type = "card")
     {
         $module = \Module::getInstanceByName('checkoutcom');
+       
         $module->logger->info(
                 'Channel Method -- make Payment for source :'.$type,
                 array('obj' => $source)
         );
         $context = \Context::getContext();
         $total = $context->cart->getOrderTotal();
-        $payment = new Payment($source, $context->currency->iso_code);
+        //$payment = new Payment($source, $context->currency->iso_code);
+        $request = static::get_payment_request();
+        $request->source =$source;
+        $request->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
+        $request->reference ='CART_' . $context->cart->id;
+        $request->amount = static::fixAmount($total, $context->currency->iso_code);
+        $request->currency = $context->currency->iso_code;
+        $request->customer = static::getCustomer($context, $params);
+        //$request->sender = $paymentIndividualSender;
 
-        $payment->amount = static::fixAmount($total, $context->currency->iso_code);
-        $payment->metadata = static::getMetadata($context);
-        $payment->customer = static::getCustomer($context, $params);
-        $payment->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
-        $payment->payment_type = 'Regular';
-        $payment->reference = 'CART_' . $context->cart->id;
+       // $payment->amount = static::fixAmount($total, $context->currency->iso_code);
+        //$request->metadata = static::getMetadata($context);
+       // $payment->customer = static::getCustomer($context, $params);
+        $request->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
+        $request->payment_type = 'Regular';
+       // $payment->reference = 'CART_' . $context->cart->id;
 
         // Set the payment specifications
-        $payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
-        $payment->success_url = $context->link->getModuleLink(  'checkoutcom',
+        //$payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
+        $request->success_url = $context->link->getModuleLink(  'checkoutcom',
                                                                 'confirmation',
                                                                 ['cart_id' => $context->cart->id,
                                                                  'secure_key' => $context->customer->secure_key,
                                                                 'source' => $type],
                                                                 true);
-        $payment->failure_url = $context->link->getModuleLink(  'checkoutcom',
+        $request->failure_url = $context->link->getModuleLink(  'checkoutcom',
+                                                                'failure',
+                                                                ['cart_id' => $context->cart->id,
+                                                                 'secure_key' => $context->customer->secure_key,
+                                                                 'source' => $type],
+                                                                true);
+        try {
+            $response = CheckoutApiHandler::api()->getPaymentsClient()->requestPayment($request);
+            static::addThreeDs($response);
+            static::addDynamicDescriptor($response);
+            static::addCaptureOn($response);
+
+        return $response;
+        } catch (CheckoutApiException $e) {
+            // API error
+            $error_details = $e->error_details;
+            $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;
+        } catch (CheckoutAuthorizationException $e) {
+            // Bad Invalid authorization
+        }
+        
+    }
+
+    public static function makePaymentToken($source, array $params = array(), bool $capture = true, $type = "card")
+    {
+        $module = \Module::getInstanceByName('checkoutcom');
+       
+        $module->logger->info(
+                'Channel Method -- make Payment for source :'.$type,
+                array('obj' => $source)
+        );
+        $context = \Context::getContext();
+        $total = $context->cart->getOrderTotal();
+        //$payment = new Payment($source, $context->currency->iso_code);
+        $request = static::get_payment_request();
+        $request->items = static::getProducts($context);
+        $request->source =$source;
+        $request->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
+        $request->reference ='CART_' . $context->cart->id;
+        $request->amount = static::fixAmount($total, $context->currency->iso_code);
+        $request->currency = $context->currency->iso_code;
+        $request->customer = static::getCustomer($context, $params);
+        $billing = new \Address((int) $context->cart->id_address_invoice);
+        // print_r($billing);
+        // exit;
+        $request->shipping = (object) array("from_address_zip"=>$billing->postcode,'address'=>array("address_line1"=>$billing->address1,"city"=>$billing->city,"zip"=>$billing->postcode,"country"=>\Country::getIsoById($billing->id_country)));
+        //$request->sender = $paymentIndividualSender;
+
+       // $payment->amount = static::fixAmount($total, $context->currency->iso_code);
+        //$request->metadata = static::getMetadata($context);
+       // $payment->customer = static::getCustomer($context, $params);
+        $request->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
+        $request->payment_type = 'Regular';
+       // $payment->reference = 'CART_' . $context->cart->id;
+
+        // Set the payment specifications
+        //$payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
+        $request->success_url = $context->link->getModuleLink(  'checkoutcom',
+                                                                'confirmation',
+                                                                ['cart_id' => $context->cart->id,
+                                                                 'secure_key' => $context->customer->secure_key,
+                                                                'source' => $type],
+                                                                true);
+        $request->failure_url = $context->link->getModuleLink(  'checkoutcom',
                                                                 'failure',
                                                                 ['cart_id' => $context->cart->id,
                                                                  'secure_key' => $context->customer->secure_key,
                                                                  'source' => $type],
                                                                 true);
 
-        static::addThreeDs($payment);
-        static::addDynamicDescriptor($payment);
-        static::addCaptureOn($payment);
+            print_r($request);
+            exit;                                                    
+        try {
+            $response = CheckoutApiHandler::api()->getPaymentsClient()->requestPayment($request);
+           
+           // static::addThreeDs($response);
+           // static::addDynamicDescriptor($response);
+            //static::addCaptureOn($response);
 
-        return $payment;
+        return $response;
+        } catch (CheckoutApiException $e) {
+            // API error
+            $error_details = $e->error_details;
+            $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;
+        } catch (CheckoutAuthorizationException $e) {
+            // Bad Invalid authorization
+        }
+        
     }
+
+    public static function get_payment_request() {
+		if ( \Configuration::get('CHECKOUTCOM_SERVICE') == 0) {
+            return new PaymentRequest();
+			
+		} else {
+			return new PreviousPaymentRequest();
+		}
+	}
 
     /**
      * Turn amount into integer according to currency.
@@ -135,7 +230,7 @@ abstract class Method
      */
     protected static function getMetadata(\Context $context)
     {
-        $metadata = new Metadata();
+        $metadata = new CardMetadataRequestSource();
 
         $module = \Module::getInstanceByName('checkoutcom');
         
@@ -157,7 +252,7 @@ abstract class Method
      */
     protected static function getCustomer(\Context $context, array $params)
     {
-        $customer = new Customer();
+        $customer = new CustomerRequest();
         $customer->email = $context->customer->email;
         $customer->name = $context->customer->firstname . ' ' . $context->customer->lastname;
 
@@ -171,16 +266,16 @@ abstract class Method
      *
      * @return <null|Response>
      */
-    protected static function request(Payment $payment)
+    protected static function request($payment)
     {
-        $response = new Response();
+        //$response = new Response();
         $module = \Module::getInstanceByName('checkoutcom');
         $module->logger->info(
                 'Channel Method -- Request Payment :',
                 array('obj' => $payment)
         );
         try {
-            $response = CheckoutApiHandler::api()->payments()->request($payment);
+            $response = $payment;
         } catch (CheckoutHttpException $ex) {
             $response->http_code = $ex->getCode();
             $response->message = $ex->getMessage();
@@ -280,21 +375,26 @@ abstract class Method
 
         try {
             // Check if payment is already voided or captured on checkout.com hub
-            $details = CheckoutApiHandler::api()->payments()->details($cko_payment_id);
-
-            if ($details->status == 'Refunded') {
+            $details = CheckoutApiHandler::api()->getPaymentsClient()->getPaymentDetails($cko_payment_id);
+            // print_r($details);
+            // exit;
+            if ($details['status'] == 'Refunded') {
                 return false;
             }
 
-            $ckoPayment = new Refund($cko_payment_id);
+            $request = new RefundRequest();
+            $request->reference = "reference";
+            
+
+            //$ckoPayment = new Refund($cko_payment_id);
 
             if(isset($params['amount'])){
-                $ckoPayment->amount = static::fixAmount($params['amount'], $params['currency_code']);
+                $request->amount = static::fixAmount($params['amount'], $params['currency_code']);
             }
-           
-            $response = CheckoutApiHandler::api()->payments()->refund($ckoPayment);
+            
+            $response = CheckoutApiHandler::api()->getPaymentsClient()->refundPayment($cko_payment_id, $request);
 
-            if (!$response->isSuccessful()) {
+            if (!isset($response['action_id'])) {
                 //@todo return error message
             } else {
                
@@ -315,4 +415,50 @@ abstract class Method
         $response = CheckoutApiHandler::api()->payments()->banks($source);
         return $response;
     }
+
+    public static function getProducts(\Context $context)
+    {
+        $products = array();
+        foreach ($context->cart->getProducts() as $item) {
+            $product =  (object)[];
+            $product->name = $item['name'];
+            $product->quantity = (int) $item['cart_quantity'];
+            $product->unit_price = (int) ('' . ($item['price_wt'] * 100));
+            $product->tax_rate = (int) ('' . ($item['rate'] * 100));
+            $product->total_amount = (int) ('' . ($item['total_wt'] * 100));
+            $product->total_tax_amount = (int) ('' . (($item['total_wt'] - $item['total']) * 100));
+
+            $products[] = $product;
+        }
+
+        $shipping = static::getShipping($context);
+        if($shipping) {
+            $products []= $shipping;
+        }
+        return $products;
+    }
+
+    public static function getShipping(\Context $context)
+    {
+        $product = null;
+        if($context->cart->id_carrier) {
+
+            $carrier = new \Carrier($context->cart->id_carrier, $context->cart->id_lang);
+           
+            $product = (object)[];
+            $product->name = $carrier->name;
+            $product->quantity = 1;
+            $product->tax_rate = (int) $carrier->getTaxesRate(new \Address((int) $context->cart->id_address_delivery)) * 100;
+            $product->unit_price = static::fixAmount($context->cart->getOrderTotal(true, \Cart::ONLY_SHIPPING));
+            $product->total_amount = $product->unit_price;
+            $product->total_tax_amount = $product->unit_price - static::fixAmount($context->cart->getOrderTotal(false, \Cart::ONLY_SHIPPING));
+            $product->type = 'shipping_fee';
+            if($product->unit_price==0){
+                $product = null;
+            }
+        }
+
+        return $product;
+    }
+
 }

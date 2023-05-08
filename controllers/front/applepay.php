@@ -14,7 +14,7 @@
  * @link      https://docs.checkout.com/
  */
 
-use Checkout\Models\Response;
+//use Checkout\Models\Response;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use CheckoutCom\PrestaShop\Classes\CheckoutcomCustomerCard;

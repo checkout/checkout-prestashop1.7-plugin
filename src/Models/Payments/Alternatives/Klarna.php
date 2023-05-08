@@ -2,10 +2,10 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Product;
 use CheckoutCom\PrestaShop\Helpers\Debug;
-use Checkout\Models\Payments\KlarnaSource;
-use Checkout\Models\Address as KlarnaAddress;
+use Checkout\Payments\Request\Source\Apm\RequestKlarnaSource;
+use Checkout\Common\Address;
+use Checkout\Common\Product;
 
 class Klarna extends Alternative
 {
@@ -25,14 +25,23 @@ class Klarna extends Alternative
         $total = (int) ('' . $context->cart->getOrderTotal(true, \Cart::BOTH) * 100);
         $tax = (int) ('' . ($total - $context->cart->getOrderTotal(false, \Cart::BOTH) * 100));
 
-        $source = new KlarnaSource($params['authorization_token'],
-                                $address->country,
-                                $context->language->locale,
-                                $address,
-                                $tax,
-                                static::getProducts($context));
-
-        $payment = static::makePayment($source);
+        $source = new RequestKlarnaSource();
+        $source->account_holder = (object)[];
+        $source->account_holder->billing_address = $address;
+        $source->account_holder->first_name = $address->given_name;
+        $source->account_holder->last_name = $address->family_name;
+        $source->account_holder->email = $address->email;
+        $source->account_holder->phone = (object)[];
+        $source->account_holder->phone->country_code = $address->country;
+        $source->account_holder->phone->number = $address->phone;
+        $source->authorization_token = $params['authorization_token'];
+        $source->purchase_country    = $address->country;
+        $source->locale              = strtolower($address->country).'-'.$address->country;
+        $source->tax_amount          = $tax;
+        $source->products            = static::getProducts($context);
+        $source->billing_address     =  $address;
+        
+        $payment = static::makePaymentToken($source);
 
         return static::request($payment);
     }
@@ -77,7 +86,7 @@ class Klarna extends Alternative
     {
         $billing = new \Address((int) $context->cart->id_address_invoice);
 
-        $address = new KlarnaAddress();
+        $address = new \Address();
         $address->given_name = $billing->firstname;
         $address->family_name = $billing->lastname;
         $address->email = $context->customer->email;
@@ -85,9 +94,10 @@ class Klarna extends Alternative
         $address->street_address = $billing->address1;
         $address->street_address2 = $billing->address2;
         $address->postal_code = $billing->postcode;
+        $address->zip = $billing->postcode?$billing->postcode:'12344';
         $address->city = $billing->city;
         $address->region = \State::getNameById($billing->id_state);
-        $address->phone = $billing->phone_mobile;
+        $address->phone = $billing->phone_mobile?$billing->phone_mobile:'123456';
         $address->country = \Country::getIsoById($billing->id_country);
 
         return $address;

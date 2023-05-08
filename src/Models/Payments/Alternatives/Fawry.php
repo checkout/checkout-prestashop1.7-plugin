@@ -2,8 +2,8 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Payments\FawrySource;
-use Checkout\Models\Product;
+use Checkout\Payments\Request\Source\Apm\RequestFawrySource;
+
 
 class Fawry extends Alternative
 {
@@ -19,12 +19,13 @@ class Fawry extends Alternative
        $context = \Context::getContext();
        $billing = new \Address((int) $context->cart->id_address_invoice);
 
-        $source = new FawrySource(  $context->customer->email,
-                                    $billing->phone,
-                                    \Configuration::get('PS_SHOP_NAME'),
-                                    Fawry::getProducts($context));
-
-        $payment = static::makePayment($source);
+        $source = new RequestFawrySource();
+        $source->type='fawry';
+        $source->customer_mobile= $billing->phone;
+        $source->customer_email = $context->customer->email;
+        $source->products  = Fawry::getProducts($context);
+        $source->description = \Configuration::get('PS_SHOP_NAME');
+        $payment = static::makePaymentToken($source);
 
         return static::request($payment);
     }
@@ -47,7 +48,7 @@ class Fawry extends Alternative
         $discount = static::fixAmount($context->cart->getOrderTotal(true, \Cart::ONLY_DISCOUNTS));
         $totalProductPrice = $productPrice - $discount;
         
-        $product = new Product();
+        $product = (object)[];
         $product->product_id = $context->cart->id;
         $product->quantity = 1;
         $product->price = $totalProductPrice;
@@ -73,7 +74,7 @@ class Fawry extends Alternative
             $carrier = new \Carrier($context->cart->id_carrier, $context->cart->id_lang);
             $description = $carrier->name . ' Fee';
         }
-        $product = new Product();
+        $product = (object)[];
         $product->product_id = 0;
         $product->quantity = 1;
         $product->price = static::fixAmount($context->cart->getOrderTotal(true, \Cart::ONLY_SHIPPING));//static::fixAmount($context->order->total_shipping);

@@ -2,7 +2,7 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Payments\MultibancoSource;
+use Checkout\Payments\Request\Source\Apm\RequestMultiBancoSource;
 
 class Multibanco extends Alternative
 {
@@ -18,8 +18,12 @@ class Multibanco extends Alternative
 		$payment_country = $_POST['payment_country'];
 		$account_holder_name = $_POST['account_holder_name'];
 
-		$source = new MultibancoSource($payment_country, $account_holder_name);
-		$payment = static::makePayment($source);
+		$source = new RequestMultiBancoSource();
+		$source->type = 'multibanco';
+		$source->payment_country = $payment_country;
+		$source->account_holder_name = $account_holder_name;
+		
+		$payment = static::makePaymentToken($source);
 
 		return static::request($payment);
 	}

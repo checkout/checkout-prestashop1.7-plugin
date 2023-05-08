@@ -2,8 +2,8 @@
 
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
-use Checkout\Models\Customer;
-use Checkout\Models\Payments\IdSource;
+use Checkout\Common\CustomerRequest;
+use Checkout\Payments\Request\Source\RequestIdSource as IdSource;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 
 class Sepa extends Alternative
@@ -22,8 +22,10 @@ class Sepa extends Alternative
 
     	$id = Utilities::getValueFromArray($params, 'id', false);
     	if($id) {
-	        $source = new IdSource($params['id']);
-	        $payment = static::makePayment($source, $params);
+            $source  = (object)[];
+            $source->type = 'id';
+            $source->id = $id;
+	        $payment = static::makePaymentToken($source, $params);
 	        $response = static::request($payment);
     	}
 
@@ -41,7 +43,7 @@ class Sepa extends Alternative
      */
     protected static function getCustomer(\Context $context, array $params)
     {
-    	$customer = new Customer();
+    	$customer = new CustomerRequest();
     	$id = Utilities::getValueFromArray($params, 'customer_id', false);
     	if($id) {
 	        $customer->id = $id;

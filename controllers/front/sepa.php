@@ -1,14 +1,23 @@
 <?php
 
-use Checkout\Models\Response;
-use Checkout\Models\Sources\Sepa;
-use Checkout\Models\Sources\SepaData;
-use Checkout\Models\Sources\SepaAddress;
+use Checkout\Sources\Previous\SepaSourceRequest;
+use Checkout\Sources\Previous\SourceData;
+use Checkout\Sources\Previous\SourcesClient;
+use Checkout\Common\CustomerRequest;
+use Checkout\Common\Address as SepaAddress;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Models\Config;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
+use Checkout\CheckoutConfiguration;
+use Monolog\Logger;
+use Checkout\CheckoutStaticKeysSdkBuilder;
+use Checkout\Environment;
+use Checkout\StaticKeysSdkCredentials;
+use Checkout\ApiClient;
+use Checkout\Previous\CheckoutApi;
+use Checkout\AuthorizationType;
 
 class CheckoutcomSepaModuleFrontController extends ModuleFrontController
 {
@@ -71,8 +80,8 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController
      */
     protected function getAddresses()
     {
-        $billing = new Address((int) $this->context->cart->id_address_invoice);
-        $country = Country::getIsoById($billing->id_country);
+        $billing = new \Address((int) $this->context->cart->id_address_invoice);
+        $country = \Country::getIsoById($billing->id_country);
 
         $customer = array(
             'customer_country' => $country,
@@ -107,16 +116,33 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController
     protected function getMandate($iban, $bic, &$address)
     {
         $mandate = array();
-        $sAddress = new SepaAddress($address['customer_address1'], $address['customer_city'], $address['customer_postcode'], $address['customer_country']);
-        $data = new SepaData($address['customer_firstname'], $address['customer_lastname'], $iban, $bic, $address['shop_name'], 'single');
-        $source = new Sepa($sAddress, $data);
+        $sAddress = new SepaAddress();
+        $sAddress->address_line1 = $address['customer_address1'];
+        $sAddress->city = $address['customer_city'];
+        $sAddress->zip =  $address['customer_postcode'];
+        $sAddress->country =  $address['customer_country'];
+        $data = new SourceData();
+        $data->first_name = $address['customer_firstname'];
+        $data->last_name =  $address['customer_lastname'];
+        $data->account_iban=  $iban;
+        $data->bic = $bic;
+        $data->billing_descriptor=  $address['shop_name'];
+        $data->mandate_type = 'single';
+        $source = new SepaSourceRequest();
+       /// $source->type = 'sepa';
+        $source->billing_address = $sAddress;
+        $customer_request        = new CustomerRequest();
+		$customer_request->email = $this->context->customer->email;
+		$customer_request->name  = $address['customer_firstname'] . ' ' .$address['customer_lastname'];
+        $source->source_data= $data;
+        $source->customer        = $customer_request;
         $details = $this->requestSource($source);
 
-        if ($details->isSuccessful()) {
+        if ($details['response_code']==10000) {
             $mandate = array(
-                'customer_id' => $details->getValue(array('customer', 'id')),
-                'mandate_reference' => $details->getValue(array('response_data', 'mandate_reference')),
-                'mandate_src' => $details->getId(),
+                'customer_id' => $details['customer']['id'],
+                'mandate_reference' => $details['response_data']['mandate_reference'],
+                'mandate_src' => $details['id'],
             );
         }
 
@@ -130,18 +156,31 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController
      *
      * @return Response
      */
-    protected function requestSource(Sepa $sepa)
+    protected function requestSource($sepa)
     {
 
-        $response = new Response();
+                //$response = new Response();
+        $sdk = new  CheckoutStaticKeysSdkBuilder();
+        $response =[];
 
-        try {
-            $response = CheckoutApiHandler::api()->sources()->add($sepa);
-        } catch (CheckoutHttpException $ex) {
-            $response->http_code = $ex->getCode();
-            $response->message = $ex->getMessage();
-            $response->errors = $ex->getErrors();
-            \PrestaShopLogger::addLog($ex->getBody(), 3, $ex->getCode(), 'CheckoutcomSepaModuleFrontController' , 0, true);
+        if(\Configuration::get('CHECKOUTCOM_SERVICE') != 0){
+            // $credentials = new StaticKeysSdkCredentials(\Configuration::get('CHECKOUTCOM_SECRET_KEY'),\Configuration::get('CHECKOUTCOM_PUBLIC_KEY'));
+            // $sdk->secretKey(\Configuration::get('CHECKOUTCOM_SECRET_KEY'));
+            // $sdk->publicKey(\Configuration::get('CHECKOUTCOM_PUBLIC_KEY'));  
+            // $configuration = new CheckoutConfiguration($credentials,Environment::sandbox(), $sdk->httpClientBuilder,$sdk->logger); 
+            // $api = new ApiClient($configuration);   
+            // $checkoutapi = new CheckoutApi($api,$configuration);
+            try {
+            // $sourceclient = new SourcesClient($api,$configuration);
+                $response = CheckoutApiHandler::api()->getSourcesClient()->createSepaSource( $sepa );
+                // print_r($response);
+                // exit;
+            } catch (CheckoutHttpException $ex) {
+                $response->http_code = $ex->getCode();
+                $response->message = $ex->getMessage();
+                $response->errors = $ex->getErrors();
+                \PrestaShopLogger::addLog($ex->getBody(), 3, $ex->getCode(), 'CheckoutcomSepaModuleFrontController' , 0, true);
+            }
         }
 
         return $response;
