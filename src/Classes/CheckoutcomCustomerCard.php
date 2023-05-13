@@ -15,7 +15,7 @@ class CheckoutcomCustomerCard
      */
     public static function saveCard($response, $customerId)
     {
-        $source   = $response->source;
+        $source   = $response['source'];
         $sourceId = $source['id'];
         $last4    = $source['last4'];
         $scheme   = $source['scheme'];

@@ -116,11 +116,6 @@ class CheckoutcomPaymentOption extends PaymentOption
                 if ( $field['key'] === 'ideal' ) {
                     // iDeal : get iDeal banks
                     $bic = '';
-                    // $configuration = new CheckoutConfiguration();
-                    // $IdealClient = new IdealClient(CheckoutApiHandler::api(),$configuration);
-                    // $source->type = 'ideal';
-                    // $source->description = 'Prestashop';
-                    // $source->bic =$bic;
                     $ideal_banks = CheckoutApiHandler::api()->getIdealClient()->getIssuers();
                     $country = $ideal_banks['countries'];
                     $issuers = $country[0]['issuers'];
@@ -191,10 +186,6 @@ class CheckoutcomPaymentOption extends PaymentOption
         if (!Config::get('CHECKOUTCOM_APPLE_ENABLED')) {
             return;
         }
-        //get default shop country id
-        //$id_country = Tools::getCountry();
-        //get country object
-        //$country = new Country($id_country);
         // Load Context
         $context = \Context::getContext();
 

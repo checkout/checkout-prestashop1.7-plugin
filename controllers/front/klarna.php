@@ -1,7 +1,7 @@
 <?php
 
 use Checkout\Models\Response;
-use Checkout\Payments\Request\Source\Apm\RequestKlarnaSource;
+use Checkout\Apm\Previous\Klarna\CreditSessionRequest;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
 use CheckoutCom\PrestaShop\Models\Payments\Alternatives\Klarna as KlarnaModel;
@@ -36,22 +36,21 @@ class CheckoutcomKlarnaModuleFrontController extends ModuleFrontController
         $total = (int) ('' . KlarnaModel::fixAmount($this->context->cart->getOrderTotal(true, Cart::BOTH)));
         $tax = (int) ('' . ($total - KlarnaModel::fixAmount($this->context->cart->getOrderTotal(false, Cart::BOTH))));
         $country = Country::getIsoById($billing->id_country);
-        $method                      = new RequestKlarnaSource();
+        $method                      = new CreditSessionRequest();
           //  $method->authorization_token = self::$post['cko-klarna-token'];
-            $method->purchase_country    = $this->context->currency->iso_code;
+            $method->purchase_country    = Country::getIsoById($billing->id_country);
             $method->locale              = strtolower($country).'-'.$country;
             $method->tax_amount          = $tax;
             $method->products            = KlarnaModel::getProducts($this->context);
             $method->billing_address     = $billing;
-      
+            $method->amount = $total;
+            $method->currency = $this->context->currency->iso_code;
+
 
         $result = $this->requestSource($method);
-        // echo "<pre>";
-        // print_r($result);
-        // exit;
-        if ($result['response_code']==10000) {
+        if (isset($result['session_id'])) {
 
-            if(!$result->payment_method_categories) {
+            if(!$result['payment_method_categories']) {
                 \PrestaShopLogger::addLog('Klarna `payment_method_categories` not available for ' . $this->context->currency->iso_code . '-' . $country . ' pair.', 2, 0, 'CheckoutcomKlarnaModuleFrontController' , 0, false);
                 die(json_encode($response));
             }
@@ -62,7 +61,7 @@ class CheckoutcomKlarnaModuleFrontController extends ModuleFrontController
                 'payment_method_categories' => $result['payment_method_categories'],
                 'order_amount' => $total,
                 'order_tax_amount' => $tax,
-                'order_lines' => $klarna->products,
+                'order_lines' => $method->products,
                 'id_address_invoice' => $this->context->cart->id_address_invoice,
             );
         }

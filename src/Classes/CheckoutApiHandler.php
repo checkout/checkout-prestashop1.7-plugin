@@ -28,9 +28,7 @@ class CheckoutApiHandler
             ->publicKey(\Configuration::get('CHECKOUTCOM_PUBLIC_KEY_NAS')) // optional, only required for operations related with tokens
             ->secretKey(\Configuration::get('CHECKOUTCOM_SECRET_KEY_NAS'))
             ->environment(Environment::sandbox()) // or production()
-            //->logger($logger) //optional, for a custom Logger
-           // ->httpClientBuilder($client) // optional, for a custom HTTP client
-            ->build();
+             ->build();
            
         }
         else{
@@ -40,9 +38,7 @@ class CheckoutApiHandler
             ->environment(Environment::sandbox()) // or production()
             ->publicKey(\Configuration::get('CHECKOUTCOM_PUBLIC_KEY_ABC')) // optional, only required for operations related with tokens
             ->secretKey(\Configuration::get('CHECKOUTCOM_SECRET_KEY_ABC'))
-            //->logger($logger) //optional, for a custom Logger
-         //   ->httpClientBuilder($client) // optional, for a custom HTTP client
-            ->build();
+             ->build();
            
         }
         
@@ -57,8 +53,6 @@ class CheckoutApiHandler
             ->publicKey(\Configuration::get('CHECKOUTCOM_PUBLIC_KEY_NAS')) // optional, only required for operations related with tokens
             ->secretKey(\Configuration::get('CHECKOUTCOM_SECRET_KEY_NAS'))
             ->environment(Environment::sandbox()) // or production()
-            //->logger($logger) //optional, for a custom Logger
-           // ->httpClientBuilder($client) // optional, for a custom HTTP client
             ->build();
            
         }
@@ -69,8 +63,6 @@ class CheckoutApiHandler
             ->environment(Environment::sandbox()) // or production()
             ->publicKey(\Configuration::get('CHECKOUTCOM_PUBLIC_KEY_ABC')) // optional, only required for operations related with tokens
             ->secretKey(\Configuration::get('CHECKOUTCOM_SECRET_KEY_ABC'))
-            //->logger($logger) //optional, for a custom Logger
-         //   ->httpClientBuilder($client) // optional, for a custom HTTP client
             ->build();
            
         }

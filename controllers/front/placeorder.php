@@ -67,9 +67,6 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
         $source_type = Tools::isSubmit('source')?Tools::getValue('source'):"card";
         $this->module->logger->info('Channel Placeorder -- source type : ' . $source_type);
         $response = CheckoutcomPaymentHandler::execute(Tools::getAllValues());
-        // echo "<pre>";
-        // print_r($response);
-        // exit;
         if ($response['status']=='Pending' || $response['status']=='Authorized'  ) {
             $this->module->logger->info('Channel Placeorder -- payment process : response isSuccessful');
             $this->module->logger->info(
@@ -187,7 +184,8 @@ class CheckoutcomPlaceorderModuleFrontController extends ModuleFrontController
      */
     protected function handleFail($response) {
 		
-
+        print_r($response);
+        exit;
         $this->module->logger->error('Channel Placeorder -- HandleFail Payment for order not processed');
         \PrestaShopLogger::addLog('Payment for order not processed.', 3, 0, 'checkoutcom' , $this->module->currentOrder, true);
 

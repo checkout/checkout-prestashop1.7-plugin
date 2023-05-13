@@ -23,8 +23,6 @@ class Apple extends Method
         $token = '';
         $payment = null;
         $data = json_decode($params['token'], true);
-        // $data['type'] = 'googlepay';
-        // $data = (object)$data;
         $request = new CardTokenRequest();
         $request->type = 'applepay';
         $request->token_data = $data;
@@ -50,8 +48,6 @@ class Apple extends Method
         $apple_pay_token_request->token_data = $apple_pay_token_data;
 
 			
-        // $header = new ApplePayHeader($data['header']['transactionId'], $data['header']['publicKeyHash'], $data['header']['ephemeralPublicKey']);
-        // $applepay = new ApplePay($data['version'], $data['signature'], $data['data'], $header);
         try {
             $token = CheckoutApiHandler::token()->getTokensClient()->requestWalletToken($apple_pay_token_request);
         } catch (CheckoutHttpException $ex) {

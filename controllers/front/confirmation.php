@@ -53,8 +53,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 'Channel Confirmation -- Response :',
                 array('obj' => $response)
             );
-            // print_r($response);
-            // exit;
+           
             if ( (isset($response['approved']) && $response['approved']==true) || (isset($response['source']['type']) &&  $response['source']['type']=="sofort" && $response['status']=="Pending") ) {
                 $suffix = '';
                 if($source_type === 'apple'){

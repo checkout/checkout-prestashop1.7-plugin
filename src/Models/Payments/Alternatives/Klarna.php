@@ -3,7 +3,7 @@
 namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
 use CheckoutCom\PrestaShop\Helpers\Debug;
-use Checkout\Payments\Request\Source\Apm\RequestKlarnaSource;
+use Checkout\Payments\Previous\Source\Apm\RequestKlarnaSource;
 use Checkout\Common\Address;
 use Checkout\Common\Product;
 
@@ -24,8 +24,7 @@ class Klarna extends Alternative
         // Float workaround
         $total = (int) ('' . $context->cart->getOrderTotal(true, \Cart::BOTH) * 100);
         $tax = (int) ('' . ($total - $context->cart->getOrderTotal(false, \Cart::BOTH) * 100));
-
-        $source = new RequestKlarnaSource();
+         $source = new RequestKlarnaSource();
         $source->account_holder = (object)[];
         $source->account_holder->billing_address = $address;
         $source->account_holder->first_name = $address->given_name;

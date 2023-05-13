@@ -41,6 +41,7 @@
          */
         load: function(data, methods) {
 console.log(data);
+console.log(methods);
             var self = this;
             var country_iso = prestashop.customer.addresses[data.id_address_invoice].country_iso;
             try {

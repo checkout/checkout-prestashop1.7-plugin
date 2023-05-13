@@ -164,17 +164,9 @@ class CheckoutcomSepaModuleFrontController extends ModuleFrontController
         $response =[];
 
         if(\Configuration::get('CHECKOUTCOM_SERVICE') != 0){
-            // $credentials = new StaticKeysSdkCredentials(\Configuration::get('CHECKOUTCOM_SECRET_KEY'),\Configuration::get('CHECKOUTCOM_PUBLIC_KEY'));
-            // $sdk->secretKey(\Configuration::get('CHECKOUTCOM_SECRET_KEY'));
-            // $sdk->publicKey(\Configuration::get('CHECKOUTCOM_PUBLIC_KEY'));  
-            // $configuration = new CheckoutConfiguration($credentials,Environment::sandbox(), $sdk->httpClientBuilder,$sdk->logger); 
-            // $api = new ApiClient($configuration);   
-            // $checkoutapi = new CheckoutApi($api,$configuration);
-            try {
-            // $sourceclient = new SourcesClient($api,$configuration);
+             try {
                 $response = CheckoutApiHandler::api()->getSourcesClient()->createSepaSource( $sepa );
-                // print_r($response);
-                // exit;
+               
             } catch (CheckoutHttpException $ex) {
                 $response->http_code = $ex->getCode();
                 $response->message = $ex->getMessage();

@@ -4,6 +4,7 @@ namespace CheckoutCom\PrestaShop\Models\Payments\Alternatives;
 
 use Checkout\Payments\Request\Source\Apm\RequestPayPalSource;
 
+
 class Paypal extends Alternative
 {
     /**
@@ -18,7 +19,7 @@ class Paypal extends Alternative
         $invoice_number = 'CKO_' . $_POST['cart_id'];
 
         $source = new RequestPayPalSource();
-        $source->type = 'paypal';
+        //$source->type = 'paypal';
         $source->plan = [ 'type' => 'MERCHANT_INITIATED_BILLING' ];
         $payment = static::makePaymentToken($source);
 

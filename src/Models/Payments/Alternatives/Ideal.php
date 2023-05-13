@@ -20,7 +20,6 @@ class Ideal extends Alternative
         $source->type = 'ideal';
         $source->description = 'Prestashop';
         $source->bic =$bic;
-        //$bic, /*\Configuration::get('PS_SHOP_NAME')*/ 'iDEAL Payment');
         $payment = static::makePaymentToken($source);
 
         return static::request($payment);

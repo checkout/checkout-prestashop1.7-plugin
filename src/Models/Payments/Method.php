@@ -6,11 +6,11 @@ use Checkout\CheckoutApi;
 use Checkout\Common\CustomerRequest;
 use Checkout\Models\Response;
 use Checkout\Payments\Request\PaymentRequest;
-use Checkout\Models\Payments\ThreeDs;
+use Checkout\Payments\ThreeDsRequest;
 use Checkout\Metadata\Card\Source\CardMetadataRequestSource;
 use CheckoutCom\PrestaShop\Helpers\Debug;
 use CheckoutCom\PrestaShop\Helpers\Utilities;
-use Checkout\Models\Payments\BillingDescriptor;
+use Checkout\Payments\BillingDescriptor;
 use CheckoutCom\PrestaShop\Classes\CheckoutApiHandler;
 use Checkout\Library\Exceptions\CheckoutHttpException;
 use Checkout\Payments\RefundRequest;
@@ -64,7 +64,6 @@ abstract class Method
         );
         $context = \Context::getContext();
         $total = $context->cart->getOrderTotal();
-        //$payment = new Payment($source, $context->currency->iso_code);
         $request = static::get_payment_request();
         $request->source =$source;
         $request->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
@@ -72,17 +71,8 @@ abstract class Method
         $request->amount = static::fixAmount($total, $context->currency->iso_code);
         $request->currency = $context->currency->iso_code;
         $request->customer = static::getCustomer($context, $params);
-        //$request->sender = $paymentIndividualSender;
-
-       // $payment->amount = static::fixAmount($total, $context->currency->iso_code);
-        //$request->metadata = static::getMetadata($context);
-       // $payment->customer = static::getCustomer($context, $params);
         $request->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
         $request->payment_type = 'Regular';
-       // $payment->reference = 'CART_' . $context->cart->id;
-
-        // Set the payment specifications
-        //$payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
         $request->success_url = $context->link->getModuleLink(  'checkoutcom',
                                                                 'confirmation',
                                                                 ['cart_id' => $context->cart->id,
@@ -96,10 +86,11 @@ abstract class Method
                                                                  'source' => $type],
                                                                 true);
         try {
+            $request=  static::addThreeDs($request);
+            $request = static::addDynamicDescriptor($request);
+            $request = static::addCaptureOn($request);
             $response = CheckoutApiHandler::api()->getPaymentsClient()->requestPayment($request);
-            static::addThreeDs($response);
-            static::addDynamicDescriptor($response);
-            static::addCaptureOn($response);
+            
 
         return $response;
         } catch (CheckoutApiException $e) {
@@ -122,7 +113,6 @@ abstract class Method
         );
         $context = \Context::getContext();
         $total = $context->cart->getOrderTotal();
-        //$payment = new Payment($source, $context->currency->iso_code);
         $request = static::get_payment_request();
         $request->items = static::getProducts($context);
         $request->source =$source;
@@ -132,20 +122,9 @@ abstract class Method
         $request->currency = $context->currency->iso_code;
         $request->customer = static::getCustomer($context, $params);
         $billing = new \Address((int) $context->cart->id_address_invoice);
-        // print_r($billing);
-        // exit;
         $request->shipping = (object) array("from_address_zip"=>$billing->postcode,'address'=>array("address_line1"=>$billing->address1,"city"=>$billing->city,"zip"=>$billing->postcode,"country"=>\Country::getIsoById($billing->id_country)));
-        //$request->sender = $paymentIndividualSender;
-
-       // $payment->amount = static::fixAmount($total, $context->currency->iso_code);
-        //$request->metadata = static::getMetadata($context);
-       // $payment->customer = static::getCustomer($context, $params);
         $request->description = \Configuration::get('PS_SHOP_NAME') . ' Order';
         $request->payment_type = 'Regular';
-       // $payment->reference = 'CART_' . $context->cart->id;
-
-        // Set the payment specifications
-        //$payment->capture = (bool) \Configuration::get('CHECKOUTCOM_PAYMENT_ACTION');
         $request->success_url = $context->link->getModuleLink(  'checkoutcom',
                                                                 'confirmation',
                                                                 ['cart_id' => $context->cart->id,
@@ -159,16 +138,15 @@ abstract class Method
                                                                  'source' => $type],
                                                                 true);
 
-            // print_r($request);
-            // exit;                                                    
+                                                               
         try {
+            $request=   static::addThreeDs($request);
+            $request =   static::addDynamicDescriptor($request);
+            $request =  static::addCaptureOn($request);
+
             $response = CheckoutApiHandler::api()->getPaymentsClient()->requestPayment($request);
            
-           // static::addThreeDs($response);
-           // static::addDynamicDescriptor($response);
-            //static::addCaptureOn($response);
-
-        return $response;
+            return $response;
         } catch (CheckoutApiException $e) {
             // API error
             $error_details = $e->error_details;
@@ -314,7 +292,7 @@ abstract class Method
      *
      * @param \Checkout\Models\Payments\Payment $payment The payment
      */
-    public static function addCaptureOn(Payment $payment)
+    public static function addCaptureOn($payment)
     {
         $time = (float) \Configuration::get('CHECKOUTCOM_CAPTURE_TIME');
         $event = (float) \Configuration::get('CHECKOUTCOM_PAYMENT_EVENT');
@@ -323,6 +301,7 @@ abstract class Method
             $payment->capture = true;
             $payment->capture_on = Utilities::formatDate(time() + ($time >= 0.0027 ? $time : 0.0027) * 3600);
         }
+        return $payment;
     }
 
     /**
@@ -330,7 +309,7 @@ abstract class Method
      *
      * @param \Checkout\Models\Payments\Payment $payment The payment
      */
-    public static function addDynamicDescriptor(Payment $payment)
+    public static function addDynamicDescriptor($payment)
     {
         if (\Configuration::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_ENABLE')) {
             $payment->billing_descriptor = new BillingDescriptor(
@@ -338,6 +317,7 @@ abstract class Method
                 \Configuration::get('CHECKOUTCOM_DYNAMIC_DESCRIPTOR_CITY')
             );
         }
+        return $payment;
     }
 
     /**
@@ -345,11 +325,11 @@ abstract class Method
      *
      * @param \Checkout\Models\Payments\Payment $payment The payment
      */
-    public static function addThreeDs(Payment $payment)
+    public static function addThreeDs($payment)
     {
         // Security
         $payment->payment_ip = \Tools::getRemoteAddr();
-        $payment->threeDs = new ThreeDs((bool) \Configuration::get('CHECKOUTCOM_CARD_USE_3DS'));
+        $payment->threeDs = new ThreeDsRequest((bool) \Configuration::get('CHECKOUTCOM_CARD_USE_3DS'));
 
         if ($payment->threeDs->enabled) {
             $payment->threeDs->attempt_n3d = (bool) \Configuration::get('CHECKOUTCOM_CARD_USE_3DS_ATTEMPT_N3D');
@@ -357,6 +337,7 @@ abstract class Method
 
         $threeDs = '3ds';
         $payment->$threeDs = $payment->threeDs;
+        return $payment;
     }
 
     /**
@@ -376,8 +357,6 @@ abstract class Method
         try {
             // Check if payment is already voided or captured on checkout.com hub
             $details = CheckoutApiHandler::api()->getPaymentsClient()->getPaymentDetails($cko_payment_id);
-            // print_r($details);
-            // exit;
             if ($details['status'] == 'Refunded') {
                 return false;
             }
@@ -385,9 +364,6 @@ abstract class Method
             $request = new RefundRequest();
             $request->reference = "reference";
             
-
-            //$ckoPayment = new Refund($cko_payment_id);
-
             if(isset($params['amount'])){
                 $request->amount = static::fixAmount($params['amount'], $params['currency_code']);
             }

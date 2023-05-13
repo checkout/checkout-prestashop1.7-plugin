@@ -41,7 +41,6 @@ class Card extends Method
             $source  = (object)[];
             $source->type = 'token';
             $source->token = $params['token'];
-            //new RequestTokenSource($params['token']);
         }
        
 
@@ -51,7 +50,7 @@ class Card extends Method
         }else{
             $payment = static::makePaymentToken($source, [], $capture);
         }
-        //static::addMada($payment, Utilities::getValueFromArray($params, 'bin', 0));
+       // static::addMada($payment, Utilities::getValueFromArray($params, 'bin', 0));
         return static::request($payment);
     }
 
