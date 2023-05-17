@@ -77,6 +77,23 @@ function CheckoutcomFramesPay($form) {
         }
     );
 
+    Frames.addEventHandler(
+        Frames.Events.FRAME_ACTIVATED,
+        function (event) {
+            if($('.checkoutcom-saved-card').length > 0){
+                $('.checkoutcom-saved-card').change(function() {
+                    if($('.checkoutcom-saved-card').is(':checked')){
+                            alert("checked");
+                            $source.value = 'id';
+                    }
+                });
+            }
+        }
+    );
+    
+
+    
+
     /**
      * Add card bin changed event
      */
