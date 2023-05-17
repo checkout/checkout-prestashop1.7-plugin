@@ -64,6 +64,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 }
                 $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
                 $paid = (float) Method::fixAmount($response -> amount, $response -> currency, true);
+
                 $this->module->logger->info(
                     'Channel Confirmation -- Total :',
                     array('obj' => $total)
@@ -149,6 +150,7 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $this->module->logger->info('Channel Confirmation -- Order payment state:'.$order->getCurrentOrderState()->id );
             $this->module->logger->info('Channel Confirmation -- Order payment error state:'._PS_OS_ERROR_ );
 
+            //Added check to make sure history is not deleted when validation marks the order as error
             if((int)$order->getCurrentOrderState()->id !== (int)_PS_OS_ERROR_){
                 $orderStatus = $status === 'Captured' ? \Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') : \Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS');
 
@@ -171,7 +173,8 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
                 Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int) $cart->id . '&id_module=' . $module_id . '&id_order=' . $order_id . '&key=' . $secure_key);
             }
             else{
-            
+                //Add warning message on mismatching amounts
+
                 Utilities::addMessageToOrder($this->trans('⚠️ Total amount paid does not match the cart total. We recommend you do additional checks before shipping the order.', [], 'Modules.Checkoutcom.Confirmation.php'), $order);
                 $this->context->controller->errors[] = $this->trans('Only '.$response -> currency.' '.$paid.' has been paid towards the order. Please contact support.', [], 'Shop.Notifications.Error');
                 $this->redirectWithNotifications(__PS_BASE_URI__ . 'index.php?controller=order-confirmation&id_cart=' . (int) $cart->id . '&id_module=' . $module_id . '&id_order=' . $order_id . '&key=' . $secure_key);
@@ -204,7 +207,6 @@ class CheckoutcomConfirmationModuleFrontController extends ModuleFrontController
             $response->message = $ex->getMessage();
             $response->errors = $ex->getErrors();
         }
-
         return $response;
     }
 
