@@ -172,6 +172,7 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
                         $history = new OrderHistory();
                         $history->id_order = $order->id;
                         $history->changeIdOrderState($status, $order->id, true);
+                        $history->add();
                         $this->module->logger->info('Channel Webhook -- New order status : ' . $status);
                         // try{
                         //     $history->addWithemail();
@@ -199,6 +200,10 @@ class CheckoutcomWebhookModuleFrontController extends ModuleFrontController
         }
 
         if($current === +\Configuration::get('CHECKOUTCOM_REFUND_ORDER_STATUS') && $target === +\Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') ) {
+            $allow = false;
+        }
+
+        if((int)$current === (int)_PS_OS_ERROR_ && ($target === +\Configuration::get('CHECKOUTCOM_CAPTURE_ORDER_STATUS') || $target === +\Configuration::get('CHECKOUTCOM_AUTH_ORDER_STATUS') || $target === +\Configuration::get('CHECKOUTCOM_CAPTURE_BACKORDER_STATUS')) ) {
             $allow = false;
         }
 
