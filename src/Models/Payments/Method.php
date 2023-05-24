@@ -83,7 +83,7 @@ abstract class Method
                 'Channel Method -- delivery address :',
                 array('obj' =>  $billing)
         );
-        if($context->cart->id_address_invoice){
+        if($context->cart->id_address_delivery){
              $billing = new \Address((int) $context->cart->id_address_delivery);
               $module->logger->info(
                 'Channel Method -- shipping address :',
