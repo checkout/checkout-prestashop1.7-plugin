@@ -76,7 +76,20 @@ abstract class Method
 
 			unset( $source->purpose );
 		}
+        
         $billing = new \Address((int) $context->cart->id_address_invoice);
+         $module->logger->info(
+                'Channel Method -- delivery address :',
+                array('obj' =>  $billing)
+        );
+        if($context->cart->id_address_invoice){
+             $billing = new \Address((int) $context->cart->id_address_delivery);
+              $module->logger->info(
+                'Channel Method -- shipping address :',
+                array('obj' =>  $billing)
+              );
+        }
+       
         $country = \Country::getIsoById($billing->id_country);
         $payment->shipping = (object) array("from_address_zip"=>$billing->postcode,'address'=>array("address_line1"=>$billing->address1,"city"=>$billing->city,"zip"=>$billing->postcode,"country"=>$country));
         // Set the payment specifications
