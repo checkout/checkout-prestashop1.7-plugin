@@ -135,7 +135,7 @@ abstract class Method
         }
 
         if($reverse) {
-            $price = \Tools::ps_round($amount / $multiplier);
+            $price = \Tools::ps_round($amount / $multiplier, 2);
         } else {
             $price = (int) ('' . ($amount * $multiplier)); //@todo: Waiting on SDK precision fix. (#41)
         }
