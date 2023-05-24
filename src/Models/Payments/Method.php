@@ -72,7 +72,8 @@ abstract class Method
         $payment->payment_type = 'Regular';
         $payment->reference = 'CART_' . $context->cart->id;
         if ( 'giropay' === $source->type) {
-			$payment->description = $source->purpose;
+            if($source->purpose)
+			    $payment->description = $source->purpose;
 
 			unset( $source->purpose );
 		}
